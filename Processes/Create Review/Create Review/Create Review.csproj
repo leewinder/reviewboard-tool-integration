@@ -110,6 +110,7 @@
     </Compile>
     <Compile Include="Targets\TortoiseSvn.cs" />
     <Compile Include="Utilities\Svn.cs" />
+    <Compile Include="Utilities\Version.cs" />
     <EmbeddedResource Include="Dialogs\Authentication.resx">
       <DependentUpon>Authentication.cs</DependentUpon>
     </EmbeddedResource>
