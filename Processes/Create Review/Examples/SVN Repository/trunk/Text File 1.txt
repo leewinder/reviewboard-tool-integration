@@ -1,0 +1,8 @@
+Test 1
+Another line
+
+BLAH
+
+ANOTHER CHANGE
+
+New line added for diff in Text File 1

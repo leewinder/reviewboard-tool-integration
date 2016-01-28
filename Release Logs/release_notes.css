@@ -1,0 +1,24 @@
+body {
+	color: black;
+	font-family: verdana;
+	
+	font-size: 70%;
+}
+
+majortitle {
+	font-size: 200%;
+	font-weight: bold;
+}
+
+subtitle {
+}
+
+version {
+    font-size: 120%;
+	font-weight: bold;
+}
+
+major {
+    color:red;
+	font-weight: bold;
+}

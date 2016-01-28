@@ -1,0 +1,10 @@
+Test 1
+Another line
+
+BLAH
+
+ANOTHER CHANGE
+
+THIRD CHANGE
+
+New line added for diff in Sub File 2

@@ -1,0 +1,22 @@
+Dialogs/Create Review/Create Review/obj/
+Dialogs/Create Review/Create Review/bin/
+_Release/
+Dialogs/RBProc/RBProc/bin/
+Dialogs/RBProc/RBProc/obj/Debug/DesignTimeResolveAssemblyReferences.cache
+Dialogs/RBProc/RBProc/obj/
+Dialogs/RBProc/RBProc/RBProc.csproj.user
+Dialogs/bin/
+Dialogs/Create Review/.vs/Create Review/v14/.suo
+Dialogs/RBProc/.vs/RBProc/v14/.suo
+Dialogs/Create Review/packages/
+Processes/Create Review/packages/
+Processes/Create Review/Create Review/obj/
+Processes/RBProc/.vs/RBProc/v14/.suo
+Processes/RBProc/RBProc/obj/
+Processes/bin/
+Processes/Create Review/.vs/Create Review/v14/.suo
+*.TMP
+*.suo
+Processes/About/About/obj/
+Processes/About/About/bin/
+*.user
