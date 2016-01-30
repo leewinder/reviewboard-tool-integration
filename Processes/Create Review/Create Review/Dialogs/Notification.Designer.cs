@@ -40,7 +40,7 @@
             // button_Close
             // 
             this.button_Close.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Close.Location = new System.Drawing.Point(366, 131);
+            this.button_Close.Location = new System.Drawing.Point(366, 97);
             this.button_Close.Name = "button_Close";
             this.button_Close.Size = new System.Drawing.Size(89, 32);
             this.button_Close.TabIndex = 0;
@@ -51,17 +51,17 @@
             // pictureBox_Tick
             // 
             this.pictureBox_Tick.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("pictureBox_Tick.BackgroundImage")));
-            this.pictureBox_Tick.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.pictureBox_Tick.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.pictureBox_Tick.Location = new System.Drawing.Point(5, 5);
             this.pictureBox_Tick.Name = "pictureBox_Tick";
-            this.pictureBox_Tick.Size = new System.Drawing.Size(100, 100);
+            this.pictureBox_Tick.Size = new System.Drawing.Size(122, 122);
             this.pictureBox_Tick.TabIndex = 1;
             this.pictureBox_Tick.TabStop = false;
             // 
             // pictureBox_Cross
             // 
             this.pictureBox_Cross.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("pictureBox_Cross.BackgroundImage")));
-            this.pictureBox_Cross.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.pictureBox_Cross.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.pictureBox_Cross.Location = new System.Drawing.Point(5, 5);
             this.pictureBox_Cross.Name = "pictureBox_Cross";
             this.pictureBox_Cross.Size = new System.Drawing.Size(122, 122);
@@ -75,14 +75,15 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label_Description.Location = new System.Drawing.Point(133, 5);
             this.label_Description.Name = "label_Description";
-            this.label_Description.Size = new System.Drawing.Size(322, 122);
+            this.label_Description.Size = new System.Drawing.Size(322, 88);
             this.label_Description.TabIndex = 3;
+            this.label_Description.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // Notification
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(458, 166);
+            this.ClientSize = new System.Drawing.Size(458, 132);
             this.Controls.Add(this.label_Description);
             this.Controls.Add(this.pictureBox_Cross);
             this.Controls.Add(this.pictureBox_Tick);
