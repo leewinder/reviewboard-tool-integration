@@ -257,6 +257,9 @@ namespace Create_Review
             if (reviewUrl.ToLower().Contains(server.ToLower()) == false)
                 reviewError = output.StdOut;
 
+            // Lose the temp files if we have them
+            CleanUpTemporaryFiles(descriptionFile, testingFile);
+
             // Return the results
             return new ReviewRequestResult(reviewUrl, reviewError, reviewProperties);
         }
@@ -333,6 +336,30 @@ namespace Create_Review
             File.WriteAllText(result, textToUse);
 
             return result;
+        }
+
+        //
+        // Deletes the temporary files we created for the review
+        //
+        private static void CleanUpTemporaryFiles(string descriptionFile, string testingFile)
+        {
+            try
+            {
+                File.Delete(descriptionFile);
+            }
+            catch (Exception)
+            {
+                // Fail silently
+            }
+
+            try
+            {
+                File.Delete(testingFile);
+            }
+            catch (Exception)
+            {
+                // Fail silently
+            }
         }
     }
 }

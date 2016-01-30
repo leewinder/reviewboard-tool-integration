@@ -17,6 +17,9 @@ namespace Create_Review
         {
             string logFile = GenerateLogMessage(properties, reviewUrl);
             OpenTortoiseSVN(properties.Contents.Files, properties.Path, logFile);
+
+            // Clean up
+            CleanUpTemporaryFiles(logFile);
         }
 
         // Private Properties
@@ -113,6 +116,21 @@ namespace Create_Review
 
             // Send the tag back
             return jiraTag;
+        }
+
+        //
+        // Deletes the temporary files we created for the review
+        //
+        private static void CleanUpTemporaryFiles(string logFile)
+        {
+            try
+            {
+                File.Delete(logFile);
+            }
+            catch (Exception)
+            {
+                // Fail silently
+            }
         }
     }
 }
