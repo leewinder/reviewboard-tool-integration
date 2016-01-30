@@ -1,11 +1,17 @@
 @echo off
 
-rem Clean the server info
-set REVIEWBOARD_SERVER=
-set /p REVIEWBOARD_SERVER="Set Reviewboard Server (Blank for default): "
+rem Pull in the properties
+set REVIEWBOARD_SERVER=%1
+set JIRA_SERVER=%2
 
-set JIRA_SERVER=
+rem We need to have both or we ask for both
+if not [%REVIEWBOARD_SERVER%] == [] if not [%JIRA_SERVER%] == [] goto server_address_aquired
+
+rem Request our servers
+set /p REVIEWBOARD_SERVER="Set Reviewboard Server (Blank for default): "
 set /p JIRA_SERVER="Set Jira Server (Blank for default): "
+
+:server_address_aquired
 
 rem Get the expected server
 set DEFAULT_RB_SERVER=http://localhost/reviewboard
