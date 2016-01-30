@@ -27,5 +27,8 @@ set THIS_FILE=%~dp0..\Installer\data\open_browser.bat
 set THIS_FILE=%~dp0..\Installer\install.bat
 "%FART_EXE%" -i -q "%THIS_FILE%" "%DEFAULT_RB_SERVER%" "%REVIEWBOARD_SERVER%"
 
+set THIS_FILE=%~dp0..\Release Logs\release_notes.html
+"%FART_EXE%" -i -q "%THIS_FILE%" "__VERSION__NUMBER__" "%VERSION_NUMBER%"
+
 rem Build the installer
 "%~dp0.\Templates\Package Installer.bat" %VERSION_NUMBER%
