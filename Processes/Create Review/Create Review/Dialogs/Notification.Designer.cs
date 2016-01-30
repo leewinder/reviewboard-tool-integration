@@ -39,7 +39,8 @@
             // 
             // button_Close
             // 
-            this.button_Close.Location = new System.Drawing.Point(364, 130);
+            this.button_Close.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Close.Location = new System.Drawing.Point(366, 131);
             this.button_Close.Name = "button_Close";
             this.button_Close.Size = new System.Drawing.Size(89, 32);
             this.button_Close.TabIndex = 0;
@@ -69,17 +70,19 @@
             // 
             // label_Description
             // 
+            this.label_Description.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label_Description.Location = new System.Drawing.Point(133, 5);
             this.label_Description.Name = "label_Description";
-            this.label_Description.Size = new System.Drawing.Size(320, 122);
+            this.label_Description.Size = new System.Drawing.Size(322, 122);
             this.label_Description.TabIndex = 3;
-            this.label_Description.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // Notification
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(458, 165);
+            this.ClientSize = new System.Drawing.Size(458, 166);
             this.Controls.Add(this.label_Description);
             this.Controls.Add(this.pictureBox_Cross);
             this.Controls.Add(this.pictureBox_Tick);
