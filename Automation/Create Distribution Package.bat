@@ -1,10 +1,17 @@
 @echo off
 
+rem Pull in the properties
+set VERSION_NUMBER=%1
+set REVIEWBOARD_SERVER=%2
+
+rem We need to have both or we ask for both
+if not [%REVIEWBOARD_SERVER%] == [] if not [%JIRA_SERVER%] == [] goto properties_aquired
+
 rem Get our build information
 set /p VERSION_NUMBER="Specify Version Number: "
-
-set REVIEWBOARD_SERVER=
 set /p REVIEWBOARD_SERVER="Set Reviewboard Server (Blank for default): "
+
+:properties_aquired
 
 rem Get the expected server
 set DEFAULT_RB_SERVER=http://localhost/reviewboard
