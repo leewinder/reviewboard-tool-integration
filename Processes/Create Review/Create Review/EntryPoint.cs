@@ -32,7 +32,7 @@ namespace Create_Review
                 return;
 
             // Run the dialog
-            Application.Run(new CreateReview(requestContent));
+            Application.Run(new CreateReview(args[0], requestContent));
         }
     }
 }

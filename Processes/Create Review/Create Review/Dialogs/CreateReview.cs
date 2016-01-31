@@ -12,12 +12,13 @@ namespace Create_Review
         //
         // Constructor
         //
-        public CreateReview(Utilities.Review.Content reviewSource)
+        public CreateReview(string originalRequest, Utilities.Review.Content reviewSource)
         {
             // Save our properties
             m_reviewSource = reviewSource;
             m_requestDirectory = ExtractSourceDirectory(m_reviewSource.Patch);
-            
+            m_originalRequest = originalRequest;
+
             InitializeComponent();
 
             InitialiseDialofElements();
@@ -65,8 +66,10 @@ namespace Create_Review
         };
 
         // Private properties
-        private readonly Utilities.Review.Content      m_reviewSource;
+        private readonly Utilities.Review.Content   m_reviewSource;
         private readonly string                     m_requestDirectory;
+
+        private readonly string                     m_originalRequest;
 
         private Reviewboard.ReviewGroup[]           m_reviewGroups = new Reviewboard.ReviewGroup[0];
 
@@ -348,19 +351,8 @@ namespace Create_Review
         //
         private void OnReviewFinished(FinishReason finishReason)
         {
-            // If this is a collection of source file, do we want to lose the review artifacts
-            if (m_reviewSource.Source == Utilities.Review.Source.Files)
-            {
-                try
-                {
-                    if (checkBox_KeepArtifacts.Checked == false)
-                        File.Delete(m_reviewSource.Patch);
-                }
-                catch (Exception)
-                {
-                    // Not worried if we can't do this
-                }
-            }
+            // Keep the patch file, delete the original if we created it
+            Utilities.Storage.Keep(m_reviewSource.Patch, "Changes.patch", m_reviewSource.Source == Utilities.Review.Source.Files);
 
             // Go back to the final state
             if (finishReason == FinishReason.Success)
@@ -397,6 +389,11 @@ namespace Create_Review
 
             // Update our state
             UpdateCreateReviewDialogState(State.PostReview);
+
+            // Do we need to keep our artifacts?
+            if (checkBox_KeepArtifacts.Checked == true)
+                Utilities.Storage.KeepAssets();
+            Utilities.Storage.Keep(m_originalRequest, "Original File List.txt", false);
 
             // Build up the list of review groups
             List<string> selectedReviewGroups = new List<string>();

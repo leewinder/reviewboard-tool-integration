@@ -123,14 +123,7 @@ namespace Create_Review
         //
         private static void CleanUpTemporaryFiles(string logFile)
         {
-            try
-            {
-                File.Delete(logFile);
-            }
-            catch (Exception)
-            {
-                // Fail silently
-            }
+            Utilities.Storage.Keep(logFile, "SVN Log File.txt", true);
         }
     }
 }

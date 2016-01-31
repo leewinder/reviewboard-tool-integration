@@ -343,23 +343,8 @@ namespace Create_Review
         //
         private static void CleanUpTemporaryFiles(string descriptionFile, string testingFile)
         {
-            try
-            {
-                File.Delete(descriptionFile);
-            }
-            catch (Exception)
-            {
-                // Fail silently
-            }
-
-            try
-            {
-                File.Delete(testingFile);
-            }
-            catch (Exception)
-            {
-                // Fail silently
-            }
+            Utilities.Storage.Keep(descriptionFile, "Review Description.txt", true);
+            Utilities.Storage.Keep(testingFile, "Review Testing.txt", true);
         }
     }
 }

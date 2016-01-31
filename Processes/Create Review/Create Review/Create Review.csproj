@@ -92,6 +92,7 @@
     <Compile Include="Utilities\Identifiers.cs" />
     <Compile Include="Utilities\Paths.cs" />
     <Compile Include="Utilities\Review.cs" />
+    <Compile Include="Utilities\Storage.cs" />
     <Compile Include="Utilities\StringCipher.cs" />
     <Compile Include="EntryPoint.cs" />
     <Compile Include="Dialogs\Notification.cs">
