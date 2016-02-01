@@ -82,6 +82,7 @@ namespace RBProc.Requests
         {
             {@"create_new_review", @"Create Review.exe"},
             {@"open_about_dialog", @"About.exe"},
+            {@"open_rb_portal", @"open_browser.bat"},
         };
 
         // Time check properties
