@@ -293,7 +293,7 @@ namespace Create_Review.Utilities
                 StringBuilder errorMessage = new StringBuilder("Unable to include the following files for review\n");
                 foreach (string thisError in rejectedFiles)
                 {
-                    string stringToShow = TruncateLongPath(thisError);
+                    string stringToShow = Utilities.Paths.TruncateLongPath(thisError);
                     errorMessage.Append("- " + stringToShow + "\n");
                 }
 
@@ -376,26 +376,5 @@ namespace Create_Review.Utilities
             // It is not a patch file
             return false;
         }
-
-        //
-        // Truncates the path length if needs
-        //
-        private static string TruncateLongPath(string path)
-        {
-            int expectedStringLength = 60;
-
-            // If the path is longer than expected, truncate it
-            string stringToShow = path;
-            if (stringToShow.Length > expectedStringLength)
-            {
-                // The string is to long, so trim the beginning
-                string stringToReplace = stringToShow.Substring(0, stringToShow.Length - expectedStringLength);
-                stringToShow = stringToShow.Replace(stringToReplace, "... ");
-            }
-
-            // Return the string as it is now
-            return stringToShow;
-        }
-
     };
 }
