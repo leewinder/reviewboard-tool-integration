@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Create_Review
+namespace Create_Review.Utilities
 {
     // Source taken from StackOverflow
     // http://stackoverflow.com/a/10177020

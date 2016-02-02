@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Management;
 
-namespace Create_Review
+namespace Create_Review.Utilities
 {
     // 
     // Generates unique identifiers for the PC the app is running on
