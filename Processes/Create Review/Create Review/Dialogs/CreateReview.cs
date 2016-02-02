@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Text;
 using System.Windows.Forms;
 
 namespace Create_Review
@@ -30,6 +31,13 @@ namespace Create_Review
             {
                 Authentication auth = new Authentication(m_requestDirectory);
                 auth.ShowDialog(this);
+            }
+
+            // If this is a patch review, disable the list files option
+            if (reviewSource.Source == Utilities.Review.Source.Patch)
+            {
+                filesForReviewToolStripMenuItem.Enabled = false;
+                filesForReviewToolStripMenuItem.ToolTipText = "Unable to view the individual files of a review\nwhen reviewing a manually created patch file";
             }
         }
 
@@ -507,6 +515,25 @@ namespace Create_Review
         {
             // If we're closing, make sure we've cleaned up
             OnReviewFinished(FinishReason.Closing);
+        }
+
+        private void reviewDiffToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start(m_reviewSource.Patch);
+        }
+
+        private void filesForReviewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Truncate the files and keep track of them
+            StringBuilder filesToReview = new StringBuilder("The following files and folder have been included in this review\n\n");
+            for (int i = 0; i < m_reviewSource.Files.Length; ++i)
+            {
+                string truncatedFile = Utilities.Paths.TruncateLongPath(m_reviewSource.Files[i]);
+                filesToReview.Append("- " + truncatedFile + '\n');
+            }
+
+            // Just show the list
+            Notification.Show(this, "Files in Review", filesToReview.ToString(), Notification.FormIcon.Info);
         }
     }
 }

@@ -11,6 +11,7 @@ namespace Create_Review
         {
             Tick,
             Cross,
+            Info,
         }
 
         //
@@ -38,6 +39,7 @@ namespace Create_Review
 
             pictureBox_Cross.Visible = (icon == FormIcon.Cross);
             pictureBox_Tick.Visible = (icon == FormIcon.Tick);
+            pictureBox_Info.Visible = (icon == FormIcon.Info);
         }
 
         //
