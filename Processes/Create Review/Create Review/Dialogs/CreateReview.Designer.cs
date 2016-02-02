@@ -291,15 +291,15 @@
             // reviewDiffToolStripMenuItem
             // 
             this.reviewDiffToolStripMenuItem.Name = "reviewDiffToolStripMenuItem";
-            this.reviewDiffToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.reviewDiffToolStripMenuItem.Text = "Review Diff";
+            this.reviewDiffToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.reviewDiffToolStripMenuItem.Text = "Show Review Diff";
             this.reviewDiffToolStripMenuItem.Click += new System.EventHandler(this.reviewDiffToolStripMenuItem_Click);
             // 
             // filesForReviewToolStripMenuItem
             // 
             this.filesForReviewToolStripMenuItem.Name = "filesForReviewToolStripMenuItem";
-            this.filesForReviewToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.filesForReviewToolStripMenuItem.Text = "Files In Review";
+            this.filesForReviewToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.filesForReviewToolStripMenuItem.Text = "Show Files In Review";
             this.filesForReviewToolStripMenuItem.Click += new System.EventHandler(this.filesForReviewToolStripMenuItem_Click);
             // 
             // pictureBox_RefreshingGroups

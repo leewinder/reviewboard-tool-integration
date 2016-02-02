@@ -512,7 +512,7 @@ namespace Create_Review
 
         private void reviewDiffToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            System.Diagnostics.Process.Start(m_reviewSource.Patch);
         }
 
         private void filesForReviewToolStripMenuItem_Click(object sender, EventArgs e)
