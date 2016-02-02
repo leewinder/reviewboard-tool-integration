@@ -32,6 +32,13 @@ namespace Create_Review
                 Authentication auth = new Authentication(m_requestDirectory);
                 auth.ShowDialog(this);
             }
+
+            // If this is a patch review, disable the list files option
+            if (reviewSource.Source == Utilities.Review.Source.Patch)
+            {
+                filesForReviewToolStripMenuItem.Enabled = false;
+                filesForReviewToolStripMenuItem.ToolTipText = "Unable to view the individual files of a review\nwhen reviewing a manually created patch file";
+            }
         }
 
         // State of the dialog
