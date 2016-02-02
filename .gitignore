@@ -20,4 +20,4 @@ Processes/Create Review/.vs/Create Review/v14/.suo
 Processes/About/About/obj/
 Processes/About/About/bin/
 *.user
-Automation/UniqueBuild.local.bat
+*.local.bat

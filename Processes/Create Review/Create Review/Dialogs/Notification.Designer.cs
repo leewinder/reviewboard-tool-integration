@@ -33,8 +33,10 @@
             this.pictureBox_Tick = new System.Windows.Forms.PictureBox();
             this.pictureBox_Cross = new System.Windows.Forms.PictureBox();
             this.label_Description = new System.Windows.Forms.Label();
+            this.pictureBox_Info = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Tick)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Cross)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Info)).BeginInit();
             this.SuspendLayout();
             // 
             // button_Close
@@ -79,11 +81,22 @@
             this.label_Description.TabIndex = 3;
             this.label_Description.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // pictureBox_Info
+            // 
+            this.pictureBox_Info.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("pictureBox_Info.BackgroundImage")));
+            this.pictureBox_Info.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.pictureBox_Info.Location = new System.Drawing.Point(5, 5);
+            this.pictureBox_Info.Name = "pictureBox_Info";
+            this.pictureBox_Info.Size = new System.Drawing.Size(122, 122);
+            this.pictureBox_Info.TabIndex = 4;
+            this.pictureBox_Info.TabStop = false;
+            // 
             // Notification
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(458, 132);
+            this.Controls.Add(this.pictureBox_Info);
             this.Controls.Add(this.label_Description);
             this.Controls.Add(this.pictureBox_Cross);
             this.Controls.Add(this.pictureBox_Tick);
@@ -98,6 +111,7 @@
             this.Text = "Notification";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Tick)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Cross)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Info)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -108,5 +122,6 @@
         private System.Windows.Forms.PictureBox pictureBox_Tick;
         private System.Windows.Forms.PictureBox pictureBox_Cross;
         private System.Windows.Forms.Label label_Description;
+        private System.Windows.Forms.PictureBox pictureBox_Info;
     }
 }

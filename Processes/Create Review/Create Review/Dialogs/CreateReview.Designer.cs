@@ -52,6 +52,9 @@
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reviewboardAuthenticationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reviewDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filesForReviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pictureBox_RefreshingGroups = new System.Windows.Forms.PictureBox();
             this.pictureBox_RaisingReview = new System.Windows.Forms.PictureBox();
             this.groupBox_Options = new System.Windows.Forms.GroupBox();
@@ -253,7 +256,8 @@
             // 
             this.menuStrip.BackColor = System.Drawing.SystemColors.ControlLight;
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.editToolStripMenuItem});
+            this.editToolStripMenuItem,
+            this.viewToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(348, 24);
@@ -274,6 +278,29 @@
             this.reviewboardAuthenticationToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
             this.reviewboardAuthenticationToolStripMenuItem.Text = "Reviewboard Authentication";
             this.reviewboardAuthenticationToolStripMenuItem.Click += new System.EventHandler(this.reviewboardAuthenticationToolStripMenuItem_Click);
+            // 
+            // viewToolStripMenuItem
+            // 
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.reviewDiffToolStripMenuItem,
+            this.filesForReviewToolStripMenuItem});
+            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.viewToolStripMenuItem.Text = "View";
+            // 
+            // reviewDiffToolStripMenuItem
+            // 
+            this.reviewDiffToolStripMenuItem.Name = "reviewDiffToolStripMenuItem";
+            this.reviewDiffToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.reviewDiffToolStripMenuItem.Text = "Show Review Diff";
+            this.reviewDiffToolStripMenuItem.Click += new System.EventHandler(this.reviewDiffToolStripMenuItem_Click);
+            // 
+            // filesForReviewToolStripMenuItem
+            // 
+            this.filesForReviewToolStripMenuItem.Name = "filesForReviewToolStripMenuItem";
+            this.filesForReviewToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.filesForReviewToolStripMenuItem.Text = "Show Files In Review";
+            this.filesForReviewToolStripMenuItem.Click += new System.EventHandler(this.filesForReviewToolStripMenuItem_Click);
             // 
             // pictureBox_RefreshingGroups
             // 
@@ -379,6 +406,9 @@
         private System.Windows.Forms.ComboBox comboBox_ReviewLevel;
         private System.Windows.Forms.CheckBox checkBox_CopiesAsAdds;
         private System.Windows.Forms.CheckBox checkBox_KeepArtifacts;
+        private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem reviewDiffToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem filesForReviewToolStripMenuItem;
     }
 }
 

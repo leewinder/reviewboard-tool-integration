@@ -51,7 +51,7 @@ namespace Create_Review
                 Success = success;
                 Message = message;
 
-                Password = StringCipher.Encrypt(password, Identifiers.UUID);
+                Password = Utilities.StringCipher.Encrypt(password, Utilities.Identifiers.UUID);
             }
         }
 
@@ -102,14 +102,14 @@ namespace Create_Review
 
             // Update the password if we need to decrypt it
             if (decryptPassword == true)
-                password = StringCipher.Decrypt(password, Identifiers.UUID);
+                password = Utilities.StringCipher.Decrypt(password, Utilities.Identifiers.UUID);
 
             // Attempt to authenticate with the server
             string commandOptions = string.Format(@"login --server {0} --username {1} --password {2}", server, username, password);
             string rbtPath = GetRbtPath();
 
             // Run the process
-            Process.Output output = Process.Start(string.Empty, rbtPath, commandOptions);
+            Utilities.Process.Output output = Utilities.Process.Start(string.Empty, rbtPath, commandOptions);
             string errorFlag = "ERROR: ";
             string criticalFlag = "CRITICAL: ";
 
@@ -135,14 +135,14 @@ namespace Create_Review
         public static ReviewGroup[] GetReviewGroups(string workingDirectory, string server, string username, string password)
         {
             // Get the password
-            password = StringCipher.Decrypt(password, Identifiers.UUID);
+            password = Utilities.StringCipher.Decrypt(password, Utilities.Identifiers.UUID);
 
             // Build up the command
             string commandOptions = string.Format(@"api-get --server {0} --username {1} --password {2} /groups/", server, username, password);
             string rbtPath = GetRbtPath();
 
             // Run the process
-            Process.Output output = Process.Start(workingDirectory, rbtPath, commandOptions);
+            Utilities.Process.Output output = Utilities.Process.Start(workingDirectory, rbtPath, commandOptions);
 
             // Throw to return the error
             if (string.IsNullOrWhiteSpace(output.StdErr) == false)
@@ -193,7 +193,7 @@ namespace Create_Review
             }
 
             // Get the password
-            password = StringCipher.Decrypt(password, Identifiers.UUID);
+            password = Utilities.StringCipher.Decrypt(password, Utilities.Identifiers.UUID);
 
             // Read out the description and testing into a temp file
             string descriptionFile = GetFileWithContents(reviewProperties.Description, reviewProperties.Summary);
@@ -239,7 +239,7 @@ namespace Create_Review
             string rbtPath = GetRbtPath();
 
             // Run the process
-            Process.Output output = Process.Start(workingDirectory, rbtPath, commandOptions);
+            Utilities.Process.Output output = Utilities.Process.Start(workingDirectory, rbtPath, commandOptions);
 
             // Throw to return the error
             if (string.IsNullOrWhiteSpace(output.StdErr) == false)
@@ -276,7 +276,7 @@ namespace Create_Review
                 return s_rbtPath;
 
             // Get the path
-            Process.Output output = Process.Start(string.Empty, "where", "rbt");
+            Utilities.Process.Output output = Utilities.Process.Start(string.Empty, "where", "rbt");
 
             // Break up the paths given
             string[] pathsReturned = output.StdOut.Split(new string[] { "\r\n" }, StringSplitOptions.None);
@@ -301,7 +301,7 @@ namespace Create_Review
         private static string GetSvnBranch(string workingDirectory)
         {
             // Generate the info
-            Process.Output infoOutput = Process.Start(workingDirectory, "svn", "info");
+            Utilities.Process.Output infoOutput = Utilities.Process.Start(workingDirectory, "svn", "info");
             if (string.IsNullOrWhiteSpace(infoOutput.StdOut) == true)
                 return null;
 

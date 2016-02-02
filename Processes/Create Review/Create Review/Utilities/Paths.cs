@@ -52,5 +52,25 @@ namespace Create_Review.Utilities
             // If we get here it's not valid
             return Type.None;
         }
+
+        //
+        // Truncates the path length if needs
+        //
+        public static string TruncateLongPath(string path)
+        {
+            int expectedStringLength = 50;
+
+            // If the path is longer than expected, truncate it
+            string stringToShow = path;
+            if (stringToShow.Length > expectedStringLength)
+            {
+                // The string is to long, so trim the beginning
+                string stringToReplace = stringToShow.Substring(0, stringToShow.Length - expectedStringLength);
+                stringToShow = stringToShow.Replace(stringToReplace, "[...] ");
+            }
+
+            // Return the string as it is now
+            return stringToShow;
+        }
     }
 }
