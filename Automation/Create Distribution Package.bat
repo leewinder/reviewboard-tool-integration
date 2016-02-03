@@ -21,7 +21,7 @@ rem Update the files with the server we are interested in using
 set FART_EXE=%~dp0..\External\Fart\fart.exe
 
 rem Update the reviewboard server
-set THIS_FILE=%~dp0..\Installer\data\open_browser.bat
+set THIS_FILE=%~dp0..\Installer\bin\open_browser.bat
 "%FART_EXE%" -i -q "%THIS_FILE%" "%DEFAULT_RB_SERVER%" "%REVIEWBOARD_SERVER%"
 
 set THIS_FILE=%~dp0..\Installer\install.bat
