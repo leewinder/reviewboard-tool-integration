@@ -249,7 +249,8 @@
             this.checkBox_KeepArtifacts.Size = new System.Drawing.Size(131, 17);
             this.checkBox_KeepArtifacts.TabIndex = 3;
             this.checkBox_KeepArtifacts.Text = "Keep Review Artifacts";
-            this.toolTipDefault.SetToolTip(this.checkBox_KeepArtifacts, "Posts the Review using the --svn-show-copies-as-adds=y option");
+            this.toolTipDefault.SetToolTip(this.checkBox_KeepArtifacts, "Copies the review artifacts into \'...\\Documents\\Reviewboard\r\n Integration Tools\\R" +
+        "eviews\' when the review is complete");
             this.checkBox_KeepArtifacts.UseVisualStyleBackColor = true;
             // 
             // menuStrip

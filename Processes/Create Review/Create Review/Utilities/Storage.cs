@@ -36,21 +36,23 @@ namespace Create_Review.Utilities
         public static bool Keep(string file, string newName, bool removeOriginal)
         {
             // Only if we're set up
-            if (string.IsNullOrEmpty(storageFolder) == true)
-                return false;
+            if (string.IsNullOrEmpty(storageFolder) == false)
+            {
+                // Get the final name
+                string newNameToUse = newName;
+                if (string.IsNullOrEmpty(newName) == false)
+                    newNameToUse = newName;
 
-            // Get the final name
-            string newNameToUse = newName;
-            if (string.IsNullOrEmpty(newName) == false)
-                newNameToUse = newName;
+                // Copy the folder over
+                try { File.Copy(file, storageFolder + newNameToUse, true); } catch (Exception) { }
+            }
 
-            // Copy the folder over
-            try { File.Copy(file, storageFolder + newNameToUse, true); } catch (Exception) {}
+            // Remove the original if we need to
             if (removeOriginal == true)
                 try { File.Delete(file); } catch (Exception) { }
 
-            // Done
-            return true;
+            // Done, return if we saved or not
+            return string.IsNullOrEmpty(storageFolder) == false;
         }
 
         // Folder used to store the assets
