@@ -14,7 +14,7 @@ namespace Authentication
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Dialogs.SimpleAuthentication(RB_Tools.Shared.Server.Names.Url[(int)RB_Tools.Shared.Server.Names.Type.Reviewboard], Reviewboard.Authenticate));
+            Application.Run(new Dialogs.CredentialOptions());
         }
     }
 }

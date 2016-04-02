@@ -29,38 +29,40 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CredentialOptions));
-            this.button1 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
+            this.button_ReviewboardAuthentication = new System.Windows.Forms.Button();
+            this.button_ClearAllAuthentication = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // button1
+            // button_ReviewboardAuthentication
             // 
-            this.button1.Location = new System.Drawing.Point(12, 21);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(260, 36);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "Reviewboard Authentication";
-            this.button1.UseVisualStyleBackColor = true;
+            this.button_ReviewboardAuthentication.Location = new System.Drawing.Point(12, 21);
+            this.button_ReviewboardAuthentication.Name = "button_ReviewboardAuthentication";
+            this.button_ReviewboardAuthentication.Size = new System.Drawing.Size(260, 36);
+            this.button_ReviewboardAuthentication.TabIndex = 0;
+            this.button_ReviewboardAuthentication.Text = "Reviewboard Authentication";
+            this.button_ReviewboardAuthentication.UseVisualStyleBackColor = true;
+            this.button_ReviewboardAuthentication.Click += new System.EventHandler(this.button_ReviewboardAuthentication_Click);
             // 
-            // button3
+            // button_ClearAllAuthentication
             // 
-            this.button3.Location = new System.Drawing.Point(12, 93);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(260, 36);
-            this.button3.TabIndex = 2;
-            this.button3.Text = "Clear All Authentication Data";
-            this.button3.UseVisualStyleBackColor = true;
+            this.button_ClearAllAuthentication.Location = new System.Drawing.Point(12, 93);
+            this.button_ClearAllAuthentication.Name = "button_ClearAllAuthentication";
+            this.button_ClearAllAuthentication.Size = new System.Drawing.Size(260, 36);
+            this.button_ClearAllAuthentication.TabIndex = 2;
+            this.button_ClearAllAuthentication.Text = "Clear All Authentication Data";
+            this.button_ClearAllAuthentication.UseVisualStyleBackColor = true;
+            this.button_ClearAllAuthentication.Click += new System.EventHandler(this.button_ClearAllAuthentication_Click);
             // 
-            // Authentication
+            // CredentialOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 139);
-            this.Controls.Add(this.button3);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.button_ClearAllAuthentication);
+            this.Controls.Add(this.button_ReviewboardAuthentication);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "Authentication";
+            this.Name = "CredentialOptions";
             this.Text = "Authentication";
             this.ResumeLayout(false);
 
@@ -68,8 +70,8 @@
 
         #endregion
 
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button button_ReviewboardAuthentication;
+        private System.Windows.Forms.Button button_ClearAllAuthentication;
     }
 }
 

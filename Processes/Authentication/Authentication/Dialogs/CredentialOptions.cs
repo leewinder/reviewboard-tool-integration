@@ -1,4 +1,6 @@
-﻿using System;
+﻿using RB_Tools.Shared.Authentication.Credentials;
+using RB_Tools.Shared.Authentication.Targets;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,6 +17,26 @@ namespace Authentication.Dialogs
         public CredentialOptions()
         {
             InitializeComponent();
+        }
+
+        //
+        // Authorise reviewboard
+        //
+        private void button_ReviewboardAuthentication_Click(object sender, EventArgs e)
+        {
+            // Kick off the RB authentation
+            SimpleAuthentication authDialog = new SimpleAuthentication(RB_Tools.Shared.Server.Names.Url[(int)RB_Tools.Shared.Server.Names.Type.Reviewboard], Reviewboard.Authenticate);
+            authDialog.ShowDialog();
+        }
+
+        //
+        // Clear everything
+        //
+        private void button_ClearAllAuthentication_Click(object sender, EventArgs e)
+        {
+            string[] serverList = RB_Tools.Shared.Server.Names.Url;
+            foreach (string thisServer in serverList)
+                Credentials.Clear(thisServer);
         }
     }
 }
