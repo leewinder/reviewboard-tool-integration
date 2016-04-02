@@ -38,7 +38,6 @@ namespace Authentication.Dialogs
         }
 
         // Private properties
-        private bool                    m_passwordDecryptionRequired = false;
         private RequestAuthentication   m_requestAuthentication = null;
 
         //
@@ -85,11 +84,6 @@ namespace Authentication.Dialogs
             textBox_User.Text = (credentials == null ? string.Empty : simpleCredentials.User);
             textBox_Password.Text = (credentials == null ? string.Empty : simpleCredentials.Password);
 
-            // If we have a password in the box, then we have something we'll need to decrypt 
-            // as it will have come out of the settings
-            if (string.IsNullOrWhiteSpace(textBox_Password.Text) == false)
-                m_passwordDecryptionRequired = true;
-
             // Set the buttons state
             UpdateAuthenticateButton();
         }
@@ -101,9 +95,6 @@ namespace Authentication.Dialogs
         {
             // Set the buttons state
             UpdateAuthenticateButton();
-
-            // As we've manually changed the text, it no longer needs to be decrypted
-            m_passwordDecryptionRequired = false;
         }
 
         //
@@ -113,9 +104,6 @@ namespace Authentication.Dialogs
         {
             // Set the buttons state
             UpdateAuthenticateButton();
-
-            // As we've manually changed the text, it no longer needs to be decrypted
-            m_passwordDecryptionRequired = false;
         }
 
         //
@@ -140,10 +128,6 @@ namespace Authentication.Dialogs
             string user = textBox_User.Text;
             string password = textBox_Password.Text;
 
-            // Do we need to decrypt the password
-            if (m_passwordDecryptionRequired == true)
-                password = Cipher.Decrypt(password, Identifiers.UUID);
-
             // Build up the background work
             BackgroundWorker authThread = new BackgroundWorker();
 
@@ -151,8 +135,22 @@ namespace Authentication.Dialogs
             authThread.DoWork += (object objectSender, DoWorkEventArgs args) =>
             {
                 // Request authentication and save the results
-                args.Result = m_requestAuthentication(server, user, password);
+                Result authResult = m_requestAuthentication(server, user, password);
+                if (authResult.Success == true)
+                {
+                    // Save the values out
+                    Credentials.Create(server, user, password);
+                    MessageBox.Show(authResult.Message, @"Authentication Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show(authResult.Message, @"Authentication Failed", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+
+                // Save the results
+                args.Result = authResult;
             };
+
             // Called when the thread is complete
             authThread.RunWorkerCompleted += (object objectSender, RunWorkerCompletedEventArgs args) =>
             {
@@ -164,20 +162,9 @@ namespace Authentication.Dialogs
                 }
                 else
                 {
-                    // Show the result
-                    Result authResult = args.Result as Result;
-                    if (authResult.Success == true)
-                    {
-                        MessageBox.Show(authResult.Message, @"Authentication Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                        // Save the values out and we're done
-                        Credentials.Create(server, user, password);
+                    Result results = args.Result as Result;
+                    if (results.Success == true)
                         this.Close();
-                    }
-                    else
-                    {
-                        MessageBox.Show(authResult.Message, @"Authentication Failed", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    }
                 }
 
                 // Set the button state back
