@@ -8,6 +8,7 @@ using System.Windows.Forms;
 
 using RB_Tools.Shared.Server;
 using RB_Tools.Shared.Authentication.Credentials;
+using RB_Tools.Shared.Utilities;
 
 namespace Create_Review
 {
@@ -16,7 +17,7 @@ namespace Create_Review
         //
         // Constructor
         //
-        public CreateReview(string originalRequest, Utilities.Review.Content reviewSource)
+        public CreateReview(string originalRequest, Review.Review.Content reviewSource)
         {
             // Save our properties
             m_reviewSource = reviewSource;
@@ -30,7 +31,7 @@ namespace Create_Review
             UpdateCreateReviewDialogState(State.Idle);
             
             // If this is a patch review, disable the list files option
-            if (reviewSource.Source == Utilities.Review.Source.Patch)
+            if (reviewSource.Source == Review.Review.Source.Patch)
             {
                 filesForReviewToolStripMenuItem.Enabled = false;
                 filesForReviewToolStripMenuItem.ToolTipText = "Unable to view the individual files of a review\nwhen reviewing a manually created patch file";
@@ -58,11 +59,11 @@ namespace Create_Review
         // Review Request Properties
         private class ReviewRequestProperties
         {
-            public readonly Utilities.Review.Properties ReviewProperties;
+            public readonly Review.Review.Properties ReviewProperties;
             public readonly string                      WorkingCopy;
 
             // Constructor
-            public ReviewRequestProperties(Utilities.Review.Properties reviewProperties, string workingCopy)
+            public ReviewRequestProperties(Review.Review.Properties reviewProperties, string workingCopy)
             {
                 ReviewProperties = reviewProperties;
                 WorkingCopy = workingCopy;
@@ -70,7 +71,7 @@ namespace Create_Review
         };
 
         // Private properties
-        private readonly Utilities.Review.Content   m_reviewSource;
+        private readonly Review.Review.Content   m_reviewSource;
         private readonly string                     m_requestDirectory;
 
         private readonly string                     m_originalRequest;
@@ -83,7 +84,7 @@ namespace Create_Review
         private void InitialiseDialofElements()
         {
             // Set the first option by default
-            comboBox_ReviewLevel.SelectedIndex = (int)Utilities.Review.Level.FullReview;
+            comboBox_ReviewLevel.SelectedIndex = (int)Review.Review.Level.FullReview;
         }
 
         //
@@ -209,7 +210,7 @@ namespace Create_Review
             }
 
             // If this is a patch file, we always have to raise a review and can't delete it
-            if (m_reviewSource.Source == Utilities.Review.Source.Patch)
+            if (m_reviewSource.Source == Review.Review.Source.Patch)
             {
                 requestTypeDropdown = false;
                 requestSelectArtifacts = false;
@@ -241,7 +242,7 @@ namespace Create_Review
         //
         // Runs the review request
         //
-        private void TriggerReviewRequest(Utilities.Review.Properties reviewProperties)
+        private void TriggerReviewRequest(Review.Review.Properties reviewProperties)
         {
             // Build up the background work
             BackgroundWorker updateThread = new BackgroundWorker();
@@ -299,7 +300,7 @@ namespace Create_Review
                             System.Diagnostics.Process.Start(requestResult.Url);
 
                         // If it's just a patch file, we don't need to do anything else
-                        if (m_reviewSource.Source == Utilities.Review.Source.Patch)
+                        if (m_reviewSource.Source == Review.Review.Source.Patch)
                         {
                             OnReviewFinished(FinishReason.Success);
                         }
@@ -363,7 +364,7 @@ namespace Create_Review
         private void OnReviewFinished(FinishReason finishReason)
         {
             // Keep the patch file, delete the original if we created it
-            Utilities.Storage.Keep(m_reviewSource.Patch, "Changes.patch", m_reviewSource.Source == Utilities.Review.Source.Files);
+            Utilities.Storage.Keep(m_reviewSource.Patch, "Changes.patch", m_reviewSource.Source == Review.Review.Source.Files);
 
             // Go back to the final state
             if (finishReason == FinishReason.Success)
@@ -413,7 +414,7 @@ namespace Create_Review
             }
 
             // Build up the properties of this review
-            Utilities.Review.Properties reviewProperties = new Utilities.Review.Properties(
+            Review.Review.Properties reviewProperties = new Review.Review.Properties(
                 m_requestDirectory,
 
                 m_reviewSource,
@@ -428,7 +429,7 @@ namespace Create_Review
 
                 selectedReviewGroups,
 
-                (Utilities.Review.Level)comboBox_ReviewLevel.SelectedIndex,
+                (Review.Review.Level)comboBox_ReviewLevel.SelectedIndex,
                 checkBox_CopiesAsAdds.Checked
             );
 
@@ -530,7 +531,7 @@ namespace Create_Review
             StringBuilder filesToReview = new StringBuilder("The following files and folder have been included in this review\n\n");
             for (int i = 0; i < m_reviewSource.Files.Length; ++i)
             {
-                string truncatedFile = Utilities.Paths.TruncateLongPath(m_reviewSource.Files[i]);
+                string truncatedFile = Paths.TruncateLongPath(m_reviewSource.Files[i]);
                 filesToReview.Append("- " + truncatedFile + '\n');
             }
 

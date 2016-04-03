@@ -6,39 +6,22 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using System.IO;
+using RB_Tools.Shared.Utilities;
 
 namespace Create_Review
 {
     class Reviewboard
     {
-        // Returns the results of an authentication request
-        public class AuthenticationResult
-        {
-            public readonly bool    Success;
-            public readonly string  Message;
-
-            public readonly string  Password;
-
-            // Constructor
-            public AuthenticationResult(bool success, string message, string password)
-            {
-                Success = success;
-                Message = message;
-
-                Password = Utilities.StringCipher.Encrypt(password, Utilities.Identifiers.UUID);
-            }
-        }
-
         // Returns the result of a review request
         public class ReviewRequestResult
         {
             public readonly string                      Url;
             public readonly string                      Error;
 
-            public readonly Utilities.Review.Properties Properties;
+            public readonly Review.Review.Properties    Properties;
 
             // Constructor
-            public ReviewRequestResult(string reviewUrl, string reviewError, Utilities.Review.Properties reviewRequest)
+            public ReviewRequestResult(string reviewUrl, string reviewError, Review.Review.Properties reviewRequest)
             {
                 Url = reviewUrl;
                 Error = reviewError;
@@ -61,59 +44,16 @@ namespace Create_Review
         }
 
         //
-        // Authenticates reviewboard
-        //
-        public static AuthenticationResult Authenticate(string server, string username, string password, bool decryptPassword)
-        {
-            // Check we have the properties we need
-            bool validServer = string.IsNullOrWhiteSpace(server) == false;
-            bool validUser = string.IsNullOrWhiteSpace(username) == false;
-            bool validPassword = string.IsNullOrWhiteSpace(password) == false;
-
-            // If it's not valid, throw and we're done
-            if (validServer == false || validUser == false || validPassword == false)
-                throw new System.ArgumentException("Invalid server, username or password requested");
-
-            // Update the password if we need to decrypt it
-            if (decryptPassword == true)
-                password = Utilities.StringCipher.Decrypt(password, Utilities.Identifiers.UUID);
-
-            // Attempt to authenticate with the server
-            string commandOptions = string.Format(@"login --server {0} --username {1} --password {2}", server, username, password);
-            string rbtPath = GetRbtPath();
-
-            // Run the process
-            Utilities.Process.Output output = Utilities.Process.Start(string.Empty, rbtPath, commandOptions);
-            string errorFlag = "ERROR: ";
-            string criticalFlag = "CRITICAL: ";
-
-            // Annoyingly, rbt seems to only post to stderr
-            bool succeeded = string.IsNullOrWhiteSpace(output.StdErr) == true;
-            if (succeeded == false)
-                succeeded = (output.StdErr.StartsWith(errorFlag) == false && output.StdErr.StartsWith(criticalFlag) == false);
-
-            // How did we do?
-            string messageToShow = output.StdErr;
-            if (succeeded == true)
-            {
-                messageToShow = @"Successfully authenticated against the Reviewboard server";
-            }
-
-            // Return the result
-            return new AuthenticationResult(succeeded, messageToShow.Trim(), password);
-        }
-
-        //
         // Returns a list of review groups from the given server
         //
         public static ReviewGroup[] GetReviewGroups(string workingDirectory, string server, string username, string password)
         {
             // Build up the command
             string commandOptions = string.Format(@"api-get --server {0} --username {1} --password {2} /groups/", server, username, password);
-            string rbtPath = GetRbtPath();
+            string rbtPath = RB_Tools.Shared.Targets.Reviewboard.Path();
 
             // Run the process
-            Utilities.Process.Output output = Utilities.Process.Start(workingDirectory, rbtPath, commandOptions);
+            Process.Output output = Process.Start(workingDirectory, rbtPath, commandOptions);
 
             // Throw to return the error
             if (string.IsNullOrWhiteSpace(output.StdErr) == false)
@@ -154,10 +94,10 @@ namespace Create_Review
         //
         // Raises a new review
         //
-        public static ReviewRequestResult RequestReview(string workingDirectory, string server, string username, string password, Utilities.Review.Properties reviewProperties)
+        public static ReviewRequestResult RequestReview(string workingDirectory, string server, string username, string password, Review.Review.Properties reviewProperties)
         {
             // We may not need to generate a review
-            if (reviewProperties.ReviewLevel != Utilities.Review.Level.FullReview)
+            if (reviewProperties.ReviewLevel != Review.Review.Level.FullReview)
             {
                 // No review needed so exit
                 return new ReviewRequestResult(string.Empty, string.Empty, reviewProperties);
@@ -191,7 +131,7 @@ namespace Create_Review
             }
 
             // Get the name of the branch we're on
-            string branchUrl = GetSvnBranch(workingDirectory);
+            string branchUrl = Utilities.Svn.GetBranch(workingDirectory);
             if (string.IsNullOrWhiteSpace(branchUrl) == false)
                 commandProperties += string.Format("--branch \"{0}\" ", branchUrl);
 
@@ -204,10 +144,10 @@ namespace Create_Review
 
             // Build up the command
             string commandOptions = string.Format(@"post {0}", commandProperties);
-            string rbtPath = GetRbtPath();
+            string rbtPath = RB_Tools.Shared.Targets.Reviewboard.Path();
 
             // Run the process
-            Utilities.Process.Output output = Utilities.Process.Start(workingDirectory, rbtPath, commandOptions);
+            Process.Output output = Process.Start(workingDirectory, rbtPath, commandOptions);
 
             // Throw to return the error
             if (string.IsNullOrWhiteSpace(output.StdErr) == false)
@@ -230,63 +170,6 @@ namespace Create_Review
 
             // Return the results
             return new ReviewRequestResult(reviewUrl, reviewError, reviewProperties);
-        }
-
-        // Private properties
-        private static string s_rbtPath = null;
-
-        //
-        // Since Process.Start needs a full path, find where rbt.cmd is installed
-        //
-        private static string GetRbtPath()
-        {
-            if (string.IsNullOrWhiteSpace(s_rbtPath) == false)
-                return s_rbtPath;
-
-            // Get the path
-            Utilities.Process.Output output = Utilities.Process.Start(string.Empty, "where", "rbt");
-
-            // Break up the paths given
-            string[] pathsReturned = output.StdOut.Split(new string[] { "\r\n" }, StringSplitOptions.None);
-            foreach(string thisPath in pathsReturned)
-            {
-                if (thisPath.ToLower().Contains("rbt.cmd") == true)
-                    s_rbtPath = thisPath;
-
-            }
-
-            // Can't find it
-            if (string.IsNullOrWhiteSpace(s_rbtPath) == true)
-                throw new System.ArgumentNullException("Unable to find the rbt.cmd path");
-
-            // Done
-            return s_rbtPath;
-        }
-
-        //
-        // Returns the current branch of SVN
-        //
-        private static string GetSvnBranch(string workingDirectory)
-        {
-            // Generate the info
-            Utilities.Process.Output infoOutput = Utilities.Process.Start(workingDirectory, "svn", "info");
-            if (string.IsNullOrWhiteSpace(infoOutput.StdOut) == true)
-                return null;
-
-            // Find the URL
-            string[] output = infoOutput.StdOut.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-            foreach(string thisLine in output)
-            {
-                string trimmedLine = thisLine.Trim();
-                if (trimmedLine.StartsWith("URL: ") == true)
-                {
-                    string url = trimmedLine.Replace("URL: ", "");
-                    return url;
-                }
-            }
-
-            // Got here so it's not here
-            return null;
         }
 
         //

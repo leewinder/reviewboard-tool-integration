@@ -5,8 +5,10 @@ using System;
 using System.Linq;
 using System.Windows.Forms;
 using System.Text;
+using RB_Tools.Shared.Utilities;
+using Create_Review.Utilities;
 
-namespace Create_Review.Utilities
+namespace Create_Review.Review
 {
     // Declares the properties defined in the review request
     public class Review
@@ -293,7 +295,7 @@ namespace Create_Review.Utilities
                 StringBuilder errorMessage = new StringBuilder("Unable to include the following files for review\n");
                 foreach (string thisError in rejectedFiles)
                 {
-                    string stringToShow = Utilities.Paths.TruncateLongPath(thisError);
+                    string stringToShow = Paths.TruncateLongPath(thisError);
                     errorMessage.Append("- " + stringToShow + "\n");
                 }
 

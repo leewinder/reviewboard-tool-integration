@@ -6,9 +6,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Create_Review.Utilities
+namespace RB_Tools.Shared.Utilities
 {
-    class Version
+    public class Version
     {
         // Properties
         public static readonly string VersionNumber;

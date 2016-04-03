@@ -90,18 +90,13 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>ReviewGroups.settings</DependentUpon>
     </Compile>
-    <Compile Include="Utilities\Identifiers.cs" />
-    <Compile Include="Utilities\Paths.cs" />
-    <Compile Include="Utilities\Review.cs" />
+    <Compile Include="Review\Review.cs" />
     <Compile Include="Utilities\Storage.cs" />
-    <Compile Include="Utilities\StringCipher.cs" />
     <Compile Include="EntryPoint.cs" />
-    <Compile Include="Utilities\Process.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Targets\Reviewboard.cs" />
     <Compile Include="Targets\TortoiseSvn.cs" />
     <Compile Include="Utilities\Svn.cs" />
-    <Compile Include="Utilities\Version.cs" />
     <EmbeddedResource Include="Dialogs\CreateReview.resx">
       <DependentUpon>CreateReview.cs</DependentUpon>
     </EmbeddedResource>

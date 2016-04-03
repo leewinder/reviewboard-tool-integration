@@ -27,7 +27,7 @@ namespace Create_Review
             
             // Build up the content we've been asked to review
             // If we don't have any, we've already complained
-            Utilities.Review.Content requestContent = Utilities.Review.ExtractContent(args[0], args.Length < 2 ? null : args[1]);
+            Review.Review.Content requestContent = Review.Review.ExtractContent(args[0], args.Length < 2 ? null : args[1]);
             if (requestContent == null)
                 return;
 
