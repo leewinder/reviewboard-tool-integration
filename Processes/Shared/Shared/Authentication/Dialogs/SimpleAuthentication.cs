@@ -105,7 +105,7 @@ namespace RB_Tools.Shared.Authentication.Dialogs
                 if (args.Error != null)
                 {
                     string message = string.Format("Exception thrown when trying to load the existing credentials for {0}\n\nException: {1}\n\nDescription: {2}", server, args.Error.GetType().Name, args.Error.Message);
-                    MessageBox.Show(message, @"Unable to authenticate", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    MessageBox.Show(this, message, @"Unable to authenticate", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
                 else
                 {
@@ -171,11 +171,11 @@ namespace RB_Tools.Shared.Authentication.Dialogs
                 {
                     // Save the values out
                     Credentials.Credentials.Create(server, user, password);
-                    MessageBox.Show(authResult.Message, @"Authentication Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(this, authResult.Message, @"Authentication Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
-                    MessageBox.Show(authResult.Message, @"Authentication Failed", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    MessageBox.Show(this, authResult.Message, @"Authentication Failed", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
 
                 // Save the results
@@ -189,7 +189,7 @@ namespace RB_Tools.Shared.Authentication.Dialogs
                 if (args.Error != null)
                 {
                     string message = string.Format("Exception thrown when trying to authenticate with {0}\n\nException: {1}\n\nDescription: {2}", server, args.Error.GetType().Name, args.Error.Message);
-                    MessageBox.Show(message, @"Unable to authenticate", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    MessageBox.Show(this, message, @"Unable to authenticate", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
                 else
                 {

@@ -276,7 +276,7 @@ namespace Create_Review
                 if (args.Error != null)
                 {
                     string body = string.Format("Exception thrown when trying to raise a new review\n\nException: {0}\n\nDescription: {1}", args.Error.GetType().Name, args.Error.Message);
-                    Notification.Show(this, @"Unable to raise review", body, Notification.FormIcon.Cross);
+                    MessageBox.Show(this, body, @"Unable to raise review", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                     OnReviewFinished(FinishReason.Error);
                 }
@@ -289,7 +289,7 @@ namespace Create_Review
                     if (string.IsNullOrWhiteSpace(requestResult.Error) == false)
                     {
                         // Raise the error and we're done
-                        Notification.Show(this, @"Unable to raise review", requestResult.Error, Notification.FormIcon.Cross);
+                        MessageBox.Show(this, requestResult.Error, @"Unable to raise review", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         OnReviewFinished(FinishReason.Error);
                     }
                     else
@@ -341,7 +341,7 @@ namespace Create_Review
                 if (args.Error != null)
                 {
                     string body = string.Format("Exception thrown when trying to commit to SVN\n\nException: {0}\n\nDescription: {1}", args.Error.GetType().Name, args.Error.Message);
-                    Notification.Show(this, @"Unable to commit", body, Notification.FormIcon.Cross);
+                    MessageBox.Show(this, body, @"Unable to commit", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                     // Done
                     OnReviewFinished(FinishReason.Error);
@@ -377,17 +377,18 @@ namespace Create_Review
             // We need a sumary before we raise the review
             if (string.IsNullOrWhiteSpace(textBox_Summary.Text) == true)
             {
-                Notification.Show(this, "Unable to post review", "You need to provide a summary before you can post a review", Notification.FormIcon.Cross);
+                MessageBox.Show(this, "You need to provide a summary before you can post a review", "Unable to post review", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             string reviewboardServer = Names.Url[(int)Names.Type.Reviewboard];
             if (Credentials.Available(reviewboardServer) == false)
             {
-                Notification.Show(this, "Unable to generate review", "You must be authenticated with the Reviewboard server before generating a review.\n\nThe Authentication Request dialog will now open.", Notification.FormIcon.Cross);
+                DialogResult dialogResult = MessageBox.Show(this, "You must be authenticated with the Reviewboard server before generating a review.\n\nDo you want to authenticate now?", "Authentication Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (dialogResult == DialogResult.Yes)
+                    RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
 
-                // Now open the authentication dialog, if we're still not authenticated, give up
-                RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
+                // Check if we're still unauthenticated
                 if (Credentials.Available(reviewboardServer) == false)
                     return;
             }
@@ -447,13 +448,17 @@ namespace Create_Review
             string reviewboardServer = Names.Url[(int)Names.Type.Reviewboard];
             if (Credentials.Available(reviewboardServer) == false)
             {
-                Notification.Show(this, "Unable to refresh groups", "You must be authenticated with the Reviewboard server before refreshing the review groups.\n\nThe Authentication Request dialog will now open.", Notification.FormIcon.Cross);
-
-                // Now open the authentication dialog, if we're still not authenticated, give up
-                RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
+                DialogResult dialogResult = MessageBox.Show(this, "You must be authenticated with the Reviewboard server before refreshing the review groups.\n\nDo you want to authenticate now?", "Authentication Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (dialogResult == DialogResult.Yes)
+                    RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
+                
+                // Check if we're still unauthenticated
                 if (Credentials.Available(reviewboardServer) == false)
                     return;
             }
+
+            // Turn off the buttons and lock the settings
+            UpdateCreateReviewDialogState(State.RefreshGroups);
 
             // Lose everything in the box
             checkedListBox_ReviewGroups.Items.Clear();
@@ -462,9 +467,6 @@ namespace Create_Review
             Settings.ReviewGroups.Default.Reset();
             Settings.ReviewGroups.Default.Save();
 
-            // Turn off the buttons and lock the settings
-            UpdateCreateReviewDialogState(State.RefreshGroups);
-            
             // Build up the background work
             BackgroundWorker updateThread = new BackgroundWorker();
 
@@ -489,7 +491,7 @@ namespace Create_Review
                 if (args.Error != null)
                 {
                     string body = string.Format("Exception thrown when trying to retrive the review groups\n\nException: {0}\n\nDescription: {1}", args.Error.GetType().Name, args.Error.Message);
-                    Notification.Show(this, @"Unable to update group list", body, Notification.FormIcon.Cross);
+                    MessageBox.Show(this, body, @"Unable to update group list", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else
                 {
@@ -533,7 +535,7 @@ namespace Create_Review
             }
 
             // Just show the list
-            Notification.Show(this, "Files in Review", filesToReview.ToString(), Notification.FormIcon.Info);
+            MessageBox.Show(this, filesToReview.ToString(), "Files in Review", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }
