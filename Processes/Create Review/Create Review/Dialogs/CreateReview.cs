@@ -93,16 +93,16 @@ namespace Create_Review
         private void InitialiseReviewGroups()
         {
             // If we have nothing, bail
-            if (string.IsNullOrWhiteSpace(Settings.ReviewGroups.Default.Groups) == true)
+            if (string.IsNullOrWhiteSpace(Settings.Settings.Default.Groups) == true)
                 return;
 
             // Read in what we've selected
             int[] selectedGroups = null;
-            if (string.IsNullOrWhiteSpace(Settings.ReviewGroups.Default.Selected) == false)
-                selectedGroups = JsonConvert.DeserializeObject<int[]>(Settings.ReviewGroups.Default.Selected);
+            if (string.IsNullOrWhiteSpace(Settings.Settings.Default.Selected) == false)
+                selectedGroups = JsonConvert.DeserializeObject<int[]>(Settings.Settings.Default.Selected);
 
             // Update the selection box
-            m_reviewGroups = JsonConvert.DeserializeObject<Reviewboard.ReviewGroup[]>(Settings.ReviewGroups.Default.Groups);
+            m_reviewGroups = JsonConvert.DeserializeObject<Reviewboard.ReviewGroup[]>(Settings.Settings.Default.Groups);
             UpdateSelectedReviewGroups(selectedGroups);
         }
 
@@ -156,8 +156,8 @@ namespace Create_Review
                 selectedIndexJson = JsonConvert.SerializeObject(selectedIndices.ToArray());
 
             // Save the data out
-            Settings.ReviewGroups.Default.Selected = selectedIndexJson;
-            Settings.ReviewGroups.Default.Save();
+            Settings.Settings.Default.Selected = selectedIndexJson;
+            Settings.Settings.Default.Save();
         }
 
         //
@@ -465,8 +465,8 @@ namespace Create_Review
             checkedListBox_ReviewGroups.Items.Clear();
             m_reviewGroups = new Reviewboard.ReviewGroup[0];
 
-            Settings.ReviewGroups.Default.Reset();
-            Settings.ReviewGroups.Default.Save();
+            Settings.Settings.Default.Reset();
+            Settings.Settings.Default.Save();
 
             // Build up the background work
             BackgroundWorker updateThread = new BackgroundWorker();
@@ -502,8 +502,8 @@ namespace Create_Review
 
                     // Save the groups we have returned
                     string groupsJson = JsonConvert.SerializeObject(m_reviewGroups);
-                    Settings.ReviewGroups.Default.Groups = groupsJson;
-                    Settings.ReviewGroups.Default.Save();
+                    Settings.Settings.Default.Groups = groupsJson;
+                    Settings.Settings.Default.Save();
                 }
 
                 // Set the button state back
