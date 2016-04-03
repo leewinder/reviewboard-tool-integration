@@ -17,12 +17,17 @@ mkdir "%BIN_FOLDER%"
 rem Process executables
 set PROCESS_BUILD_FOLDER=%~dp0..\..\Processes\bin\Release
 
+rem Copy over the applications
 xcopy "%PROCESS_BUILD_FOLDER%\Create Review.exe" "%BIN_FOLDER%" /Q /I >nul 2>&1
-xcopy "%PROCESS_BUILD_FOLDER%\Newtonsoft.Json.dll" "%BIN_FOLDER%" /Q /I >nul 2>&1
-
 xcopy "%PROCESS_BUILD_FOLDER%\RBProc.exe" "%BIN_FOLDER%" /Q /I >nul 2>&1
 xcopy "%PROCESS_BUILD_FOLDER%\About.exe" "%BIN_FOLDER%" /Q /I >nul 2>&1
- 
+xcopy "%PROCESS_BUILD_FOLDER%\Authentication.exe" "%BIN_FOLDER%" /Q /I >nul 2>&1
+xcopy "%PROCESS_BUILD_FOLDER%\Review Stats.exe" "%BIN_FOLDER%" /Q /I >nul 2>&1
+
+rem Shared libraries
+xcopy "%PROCESS_BUILD_FOLDER%\RB_Tools.Shared.dll" "%BIN_FOLDER%" /Q /I >nul 2>&1
+xcopy "%PROCESS_BUILD_FOLDER%\Newtonsoft.Json.dll" "%BIN_FOLDER%" /Q /I >nul 2>&1
+
 rem Copy over the install properties
 set INSTALLER_FILES_FOLDER=%~dp0..\..\Installer
 xcopy "%INSTALLER_FILES_FOLDER%" "%INSTALLER_TEMP%" /E /Q /I >nul 2>&1
