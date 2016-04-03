@@ -39,11 +39,11 @@
     </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Ingg.Stats_Runner.Shared, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" Condition="'$(Configuration)' == 'Debug'">
+    <Reference Include="RB_Tools.Shared.dll, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" Condition="'$(Configuration)' == 'Debug'">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\Debug\RB_Tools.Shared.dll</HintPath>
     </Reference>
-    <Reference Include="Ingg.Stats_Runner.Shared, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" Condition="'$(Configuration)' == 'Release'">
+    <Reference Include="RB_Tools.Shared.dll, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" Condition="'$(Configuration)' == 'Release'">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\Release\RB_Tools.Shared.dll</HintPath>
     </Reference>
