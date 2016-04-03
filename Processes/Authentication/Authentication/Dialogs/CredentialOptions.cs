@@ -24,8 +24,12 @@ namespace Authentication.Dialogs
         //
         private void button_ReviewboardAuthentication_Click(object sender, EventArgs e)
         {
+            // Get our data
+            string serverUrl = RB_Tools.Shared.Server.Names.Url[(int)RB_Tools.Shared.Server.Names.Type.Reviewboard];
+            string serverName = RB_Tools.Shared.Server.Names.Type.Reviewboard.ToString();
+
             // Kick off the RB authentation
-            SimpleAuthentication authDialog = new SimpleAuthentication(RB_Tools.Shared.Server.Names.Url[(int)RB_Tools.Shared.Server.Names.Type.Reviewboard], Reviewboard.Authenticate);
+            SimpleAuthentication authDialog = new SimpleAuthentication(serverName, serverUrl, Reviewboard.Authenticate);
             authDialog.ShowDialog();
         }
 

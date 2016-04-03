@@ -15,7 +15,7 @@ namespace RB_Tools.Shared.Server
             Jira,
         }
 
-        // Server Names
+        // Server Urls
         public static readonly string[] Url =
         {
             @"http://localhost/reviewboard",

@@ -21,7 +21,7 @@ namespace Authentication.Dialogs
         //
         // Constructor
         //
-        public SimpleAuthentication(string server, RequestAuthentication requestAuthentication)
+        public SimpleAuthentication(string serverName, string server, RequestAuthentication requestAuthentication)
         {
             InitializeComponent();
 
@@ -30,11 +30,11 @@ namespace Authentication.Dialogs
 
             // Set up our default state
             textBox_Server.Text = server;
-            UpdateAuthenticateDialogState(true);
+            this.Text = serverName + @" Authentication";
+            UpdateAuthenticateDialogState(false);
 
-            // Load our credentials
-            Credentials existingCredentials = Credentials.Create(server);
-            UpdateFieldProperties(existingCredentials);
+            // We need to populate the initial content
+            PopulateExistingCredentials(server);
         }
 
         // Private properties
@@ -86,6 +86,44 @@ namespace Authentication.Dialogs
 
             // Set the buttons state
             UpdateAuthenticateButton();
+        }
+
+        //
+        // Populates any existing credentials
+        //
+        private void PopulateExistingCredentials(string server)
+        {
+            // Load our credentials, since this can take a while do it on another thread
+            BackgroundWorker authThread = new BackgroundWorker();
+
+            // Called when we need to trigger the authentication
+            authThread.DoWork += (object objectSender, DoWorkEventArgs args) =>
+            {
+                args.Result = Credentials.Create(server);
+            };
+
+            authThread.RunWorkerCompleted += (object objectSender, RunWorkerCompletedEventArgs args) =>
+            {
+                // Set up the default state before we try to load the credentials
+                UpdateAuthenticateDialogState(true);
+
+                // Try and load in the credentials
+                Credentials credentials = null;
+                if (args.Error != null)
+                {
+                    string message = string.Format("Exception thrown when trying to load the existing credentials for {0}\n\nException: {1}\n\nDescription: {2}", server, args.Error.GetType().Name, args.Error.Message);
+                    MessageBox.Show(message, @"Unable to authenticate", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+                else
+                {
+                    credentials = args.Result as Credentials;
+                }
+
+                // Load our credentials
+                UpdateFieldProperties(credentials);
+            };
+            // Kick off the request
+            authThread.RunWorkerAsync();
         }
 
         //

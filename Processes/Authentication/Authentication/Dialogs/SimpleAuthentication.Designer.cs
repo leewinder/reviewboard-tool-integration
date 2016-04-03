@@ -144,6 +144,7 @@
             this.MinimizeBox = false;
             this.Name = "SimpleAuthentication";
             this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Simple Authentication";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Authenticating)).EndInit();
             this.ResumeLayout(false);
