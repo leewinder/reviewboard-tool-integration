@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RB_Tools.Shared.Authentication.Targets
 {
@@ -10,9 +6,27 @@ namespace RB_Tools.Shared.Authentication.Targets
     public class Reviewboard
     {
         //
+        // Starts authenticating against the Reviewboard server
+        //
+        public static Credentials.Credentials Authenticate()
+        {
+            // Get our data
+            string serverUrl = Server.Names.Url[(int)Server.Names.Type.Reviewboard];
+            string serverName = Server.Names.Type.Reviewboard.ToString();
+
+            // Kick off the RB authentation
+            Dialogs.SimpleAuthentication authDialog = new Dialogs.SimpleAuthentication(serverName, serverUrl, Reviewboard.Authenticate);
+            authDialog.ShowDialog();
+
+            // Load in our credentials object
+            Credentials.Credentials rbCredentials = Credentials.Credentials.Create(serverUrl);
+            return rbCredentials;
+
+        }
+        //
         // Authenticates against the given RB server
         //
-        public static Result Authenticate(string server, string username, string password)
+        private static Result Authenticate(string server, string username, string password)
         {
             // Check we have the properties we need
             bool validServer = string.IsNullOrWhiteSpace(server) == false;
@@ -21,7 +35,7 @@ namespace RB_Tools.Shared.Authentication.Targets
 
             // If it's not valid, throw and we're done
             if (validServer == false || validUser == false || validPassword == false)
-                throw new System.ArgumentException("Invalid server, username or password requested");
+                throw new ArgumentException("Invalid server, username or password requested");
 
             // Attempt to authenticate with the server
             string commandOptions = string.Format(@"login --server {0} --username {1} --password {2}", server, username, password);

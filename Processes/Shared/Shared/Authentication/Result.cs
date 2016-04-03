@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace RB_Tools.Shared.Authentication
 {
     // The results of an authentication request
-    public class Result
+    class Result
     {
         public bool     Success { get; private set; }
         public string   Message { get; private set; }

@@ -1,4 +1,8 @@
-﻿namespace Authentication.Dialogs
+﻿using System;
+using System.ComponentModel;
+using System.Windows.Forms;
+
+namespace RB_Tools.Shared.Authentication.Dialogs
 {
     partial class SimpleAuthentication
     {

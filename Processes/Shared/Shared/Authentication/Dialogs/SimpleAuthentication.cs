@@ -1,19 +1,12 @@
-﻿using RB_Tools.Shared.Authentication;
-using RB_Tools.Shared.Authentication.Credentials;
-using RB_Tools.Shared.Utilities;
+﻿using RB_Tools.Shared.Authentication.Credentials;
+
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Authentication.Dialogs
+namespace RB_Tools.Shared.Authentication.Dialogs
 {
-    public partial class SimpleAuthentication : Form
+    partial class SimpleAuthentication : Form
     {
         // Public Delegates
         public delegate Result RequestAuthentication(string server, string user, string password);
@@ -75,7 +68,7 @@ namespace Authentication.Dialogs
         //
         // Updates the fields with the current values
         //
-        private void UpdateFieldProperties(Credentials credentials)
+        private void UpdateFieldProperties(Credentials.Credentials credentials)
         {
             // We use simple credentials
             Simple simpleCredentials = credentials as Simple;
@@ -99,7 +92,7 @@ namespace Authentication.Dialogs
             // Called when we need to trigger the authentication
             authThread.DoWork += (object objectSender, DoWorkEventArgs args) =>
             {
-                args.Result = Credentials.Create(server);
+                args.Result = Credentials.Credentials.Create(server);
             };
 
             authThread.RunWorkerCompleted += (object objectSender, RunWorkerCompletedEventArgs args) =>
@@ -108,7 +101,7 @@ namespace Authentication.Dialogs
                 UpdateAuthenticateDialogState(true);
 
                 // Try and load in the credentials
-                Credentials credentials = null;
+                Credentials.Credentials credentials = null;
                 if (args.Error != null)
                 {
                     string message = string.Format("Exception thrown when trying to load the existing credentials for {0}\n\nException: {1}\n\nDescription: {2}", server, args.Error.GetType().Name, args.Error.Message);
@@ -116,7 +109,7 @@ namespace Authentication.Dialogs
                 }
                 else
                 {
-                    credentials = args.Result as Credentials;
+                    credentials = args.Result as Credentials.Credentials;
                 }
 
                 // Load our credentials
@@ -149,7 +142,7 @@ namespace Authentication.Dialogs
         //
         private void button_ClearAuthenitcation_Click(object sender, EventArgs e)
         {
-            Credentials clearedCredentials = Credentials.Clear(textBox_Server.Text);
+            Credentials.Credentials clearedCredentials = Credentials.Credentials.Clear(textBox_Server.Text);
             UpdateFieldProperties(clearedCredentials);
         }
 
@@ -177,7 +170,7 @@ namespace Authentication.Dialogs
                 if (authResult.Success == true)
                 {
                     // Save the values out
-                    Credentials.Create(server, user, password);
+                    Credentials.Credentials.Create(server, user, password);
                     MessageBox.Show(authResult.Message, @"Authentication Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else

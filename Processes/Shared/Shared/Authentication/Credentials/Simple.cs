@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace RB_Tools.Shared.Authentication.Credentials
 {
-    public class Simple : Credentials
+    // Simple username/password credentials object
+    class Simple : Credentials
     {
         // Properties
         public string   User { get; private set; }

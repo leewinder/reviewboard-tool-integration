@@ -1,14 +1,8 @@
-﻿using RB_Tools.Shared.Authentication.Credentials;
-using RB_Tools.Shared.Authentication.Targets;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows.Forms;
+
+using RB_Tools.Shared.Authentication.Credentials;
+using RB_Tools.Shared.Authentication.Targets;
 
 namespace Authentication.Dialogs
 {
@@ -24,13 +18,8 @@ namespace Authentication.Dialogs
         //
         private void button_ReviewboardAuthentication_Click(object sender, EventArgs e)
         {
-            // Get our data
-            string serverUrl = RB_Tools.Shared.Server.Names.Url[(int)RB_Tools.Shared.Server.Names.Type.Reviewboard];
-            string serverName = RB_Tools.Shared.Server.Names.Type.Reviewboard.ToString();
-
-            // Kick off the RB authentation
-            SimpleAuthentication authDialog = new SimpleAuthentication(serverName, serverUrl, Reviewboard.Authenticate);
-            authDialog.ShowDialog();
+            // Just authenticate
+            Reviewboard.Authenticate();
         }
 
         //
