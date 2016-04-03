@@ -73,6 +73,9 @@ if %errorlevel% neq 0 goto :error_building_process
 call "%~dp0.\Build Create Review.bat"
 if %errorlevel% neq 0 goto :error_building_process
 
+call "%~dp0.\Build Review Stats.bat"
+if %errorlevel% neq 0 goto :error_building_process
+
 call "%~dp0.\Build RBProc.bat"
 if %errorlevel% neq 0 goto :error_building_process
 
