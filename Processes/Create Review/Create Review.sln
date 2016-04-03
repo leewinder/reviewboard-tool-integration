@@ -4,6 +4,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Create Review", "Create Review\Create Review.csproj", "{8B4141C1-2751-41CB-AB9A-10A25E716FDF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AA40AD13-14AA-4607-8067-075EC87A673E} = {AA40AD13-14AA-4607-8067-075EC87A673E}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External Projects", "External Projects", "{21E2A733-2C4A-4BE8-BFA3-184802D0F4D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "..\Shared\Shared\Shared.csproj", "{AA40AD13-14AA-4607-8067-075EC87A673E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +22,15 @@ Global
 		{8B4141C1-2751-41CB-AB9A-10A25E716FDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B4141C1-2751-41CB-AB9A-10A25E716FDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B4141C1-2751-41CB-AB9A-10A25E716FDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA40AD13-14AA-4607-8067-075EC87A673E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA40AD13-14AA-4607-8067-075EC87A673E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA40AD13-14AA-4607-8067-075EC87A673E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA40AD13-14AA-4607-8067-075EC87A673E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AA40AD13-14AA-4607-8067-075EC87A673E} = {21E2A733-2C4A-4BE8-BFA3-184802D0F4D9}
 	EndGlobalSection
 EndGlobal

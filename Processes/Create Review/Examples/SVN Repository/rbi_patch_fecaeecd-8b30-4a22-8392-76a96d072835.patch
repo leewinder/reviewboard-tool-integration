@@ -1,0 +1,49 @@
+Index: trunk/Text File 1.txt
+===================================================================
+--- trunk/Text File 1.txt	(revision 10)
++++ trunk/Text File 1.txt	(working copy)
+@@ -1,6 +1,8 @@
+-Test 1
+-Another line
+-
+-BLAH
+-
+-ANOTHER CHANGE
+\ No newline at end of file
++Test 1
++Another line
++
++BLAH
++
++ANOTHER CHANGE
++
++New line added for diff in Text File 1
+\ No newline at end of file
+Index: trunk/dir1/Sub File 1.txt
+===================================================================
+--- trunk/dir1/Sub File 1.txt	(revision 10)
++++ trunk/dir1/Sub File 1.txt	(working copy)
+@@ -5,4 +5,6 @@
+ 
+ ANOTHER CHANGE
+ 
+-THIRD CHANGE
+\ No newline at end of file
++THIRD CHANGE
++
++New line added for diff in Sub File 1
+\ No newline at end of file
+Index: trunk/dir1/Sub File 2.txt
+===================================================================
+--- trunk/dir1/Sub File 2.txt	(revision 10)
++++ trunk/dir1/Sub File 2.txt	(working copy)
+@@ -5,4 +5,6 @@
+ 
+ ANOTHER CHANGE
+ 
+-THIRD CHANGE
+\ No newline at end of file
++THIRD CHANGE
++
++New line added for diff in Sub File 2
+\ No newline at end of file

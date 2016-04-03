@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RB_Tools.Shared.Utilities;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -51,6 +52,33 @@ namespace Create_Review.Utilities
             // Can't find the root
             return null;
         }
+
+        //
+        // Returns the current branch of SVN
+        //
+        public static string GetBranch(string workingDirectory)
+        {
+            // Generate the info
+            Process.Output infoOutput = Process.Start(workingDirectory, "svn", "info");
+            if (string.IsNullOrWhiteSpace(infoOutput.StdOut) == true)
+                return null;
+
+            // Find the URL
+            string[] output = infoOutput.StdOut.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string thisLine in output)
+            {
+                string trimmedLine = thisLine.Trim();
+                if (trimmedLine.StartsWith("URL: ") == true)
+                {
+                    string url = trimmedLine.Replace("URL: ", "");
+                    return url;
+                }
+            }
+
+            // Got here so it's not here
+            return null;
+        }
+
         //
         // Returns if the given path is under SVN control
         //

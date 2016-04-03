@@ -38,10 +38,10 @@
             this.label11 = new System.Windows.Forms.Label();
             this.linkLabel_ProjectWebsite = new System.Windows.Forms.LinkLabel();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.label_VersionNumber = new System.Windows.Forms.Label();
             this.label_BuildNumber = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -138,23 +138,14 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Development Team";
             // 
-            // label3
+            // label6
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 16);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(46, 13);
-            this.label3.TabIndex = 0;
-            this.label3.Text = "Authors:";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 40);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(66, 13);
-            this.label4.TabIndex = 1;
-            this.label4.Text = "Contributors:";
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Location = new System.Drawing.Point(81, 40);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(126, 26);
+            this.label6.TabIndex = 3;
+            this.label6.Text = "Why not contribute and get your name here?";
             // 
             // label5
             // 
@@ -165,14 +156,23 @@
             this.label5.TabIndex = 2;
             this.label5.Text = "Lee Winder";
             // 
-            // label6
+            // label4
             // 
-            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(81, 40);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(126, 26);
-            this.label6.TabIndex = 3;
-            this.label6.Text = "Why not contribute and get your name here?";
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 40);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(66, 13);
+            this.label4.TabIndex = 1;
+            this.label4.Text = "Contributors:";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(6, 16);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(46, 13);
+            this.label3.TabIndex = 0;
+            this.label3.Text = "Authors:";
             // 
             // label_VersionNumber
             // 
@@ -213,7 +213,6 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "About";
-            this.ShowInTaskbar = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Reviewboard Integration Tools";

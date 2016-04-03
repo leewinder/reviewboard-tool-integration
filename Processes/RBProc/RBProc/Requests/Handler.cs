@@ -81,6 +81,7 @@ namespace RBProc.Requests
         private static readonly Dictionary<string, string> ProcessApplications = new Dictionary<string, string>()
         {
             {@"create_new_review", @"Create Review.exe"},
+            {@"authenticate", @"Authentication.exe"},
             {@"open_about_dialog", @"About.exe"},
             {@"open_rb_portal", @"open_browser.bat"},
         };
