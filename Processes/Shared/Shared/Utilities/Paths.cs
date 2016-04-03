@@ -42,6 +42,22 @@ namespace RB_Tools.Shared.Utilities
         }
 
         //
+        // Returns the documents folder for the tools
+        //
+        public static string GetDocumentsFolder()
+        {
+            // Get our tools folder
+            string documentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string toolsFolder = string.Format(@"{0}\Reviewboard Integration Tools", documentsFolder);
+
+            // Make sure it exists
+            Directory.CreateDirectory(toolsFolder);
+
+            // Return the path
+            return toolsFolder;
+        }
+
+        //
         // Returns the type of path
         //
         public static Type GetType(string path)

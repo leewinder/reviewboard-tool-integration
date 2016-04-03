@@ -402,7 +402,7 @@ namespace Create_Review
 
             // Do we need to keep our artifacts?
             if (checkBox_KeepArtifacts.Checked == true)
-                Utilities.Storage.KeepAssets();
+                Utilities.Storage.KeepAssets(textBox_Summary.Text);
             Utilities.Storage.Keep(m_originalRequest, "Original File List.txt", false);
 
             // Build up the list of review groups
