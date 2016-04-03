@@ -11,32 +11,6 @@ namespace Create_Review
 {
     class Reviewboard
     {
-        // Server properties
-        public class ConnectionProperties
-        {
-            public readonly string  Directory;
-
-            public readonly string  Server;
-
-            public readonly string  User;
-            public readonly string  Password;
-
-            public readonly bool    DecryptPassword;
-
-            // Constructor
-            public ConnectionProperties(string directory, string server, string user, string password, bool decryptPassword)
-            {
-                Directory = directory;
-
-                Server = server;
-
-                User = user;
-                Password = password;
-
-                DecryptPassword = decryptPassword;
-            }
-        }
-
         // Returns the results of an authentication request
         public class AuthenticationResult
         {
@@ -134,9 +108,6 @@ namespace Create_Review
         //
         public static ReviewGroup[] GetReviewGroups(string workingDirectory, string server, string username, string password)
         {
-            // Get the password
-            password = Utilities.StringCipher.Decrypt(password, Utilities.Identifiers.UUID);
-
             // Build up the command
             string commandOptions = string.Format(@"api-get --server {0} --username {1} --password {2} /groups/", server, username, password);
             string rbtPath = GetRbtPath();
@@ -191,10 +162,7 @@ namespace Create_Review
                 // No review needed so exit
                 return new ReviewRequestResult(string.Empty, string.Empty, reviewProperties);
             }
-
-            // Get the password
-            password = Utilities.StringCipher.Decrypt(password, Utilities.Identifiers.UUID);
-
+            
             // Read out the description and testing into a temp file
             string descriptionFile = GetFileWithContents(reviewProperties.Description, reviewProperties.Summary);
             string testingFile = GetFileWithContents(reviewProperties.Testing, null);

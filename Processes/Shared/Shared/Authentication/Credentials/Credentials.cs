@@ -9,6 +9,16 @@ namespace RB_Tools.Shared.Authentication.Credentials
     public abstract class Credentials
     {
         //
+        // Returns if a given set of credentials is available
+        //
+        public static bool Available(string server)
+        {
+            // Get the path to these credentials and return if they are there
+            string filePath = GetServerFilePath(server);
+            return File.Exists(filePath);
+        }
+
+        //
         // Creates a credentials object from an existing server file
         //
         public static Credentials Create(string server)

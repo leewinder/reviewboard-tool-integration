@@ -2,6 +2,7 @@
 using System.IO;
 using System;
 using System.Text.RegularExpressions;
+using RB_Tools.Shared.Server;
 
 namespace Create_Review
 {
@@ -101,15 +102,16 @@ namespace Create_Review
                 // Get the header
                 jiraTag = string.Format(JiraState_Tag, jiraId);
                 
-                // Build up the IDs we need
+                // Build up the IDs we needs
                 string[] jiras = jiraId.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
                 if (jiras == null || jiras.Length == 0)
                     jiras = new string[] { jiraId };
 
                 // Add the links
+                string jiraServer = Names.Url[(int)Names.Type.Jira];
                 for (int i = 0; i < jiras.Length; ++i)
                 {
-                    string thisJiraLink = string.Format("{0}{1}\n", Settings.Jira.Default.Server, jiras[i]);
+                    string thisJiraLink = string.Format(@"{0}\browse\{1}\n", jiraServer, jiras[i]);
                     jiraTag += thisJiraLink;
                 }
             }

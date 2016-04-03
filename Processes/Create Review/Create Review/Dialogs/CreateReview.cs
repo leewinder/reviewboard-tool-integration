@@ -6,6 +6,9 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 
+using RB_Tools.Shared.Server;
+using RB_Tools.Shared.Authentication.Credentials;
+
 namespace Create_Review
 {
     public partial class CreateReview : Form
@@ -25,14 +28,7 @@ namespace Create_Review
             InitialiseDialofElements();
             InitialiseReviewGroups();
             UpdateCreateReviewDialogState(State.Idle);
-
-            // If we are not authenticated, force it
-            if (Settings.ReviewAuth.Default.Authenticated == false)
-            {
-                Authentication auth = new Authentication(m_requestDirectory);
-                auth.ShowDialog(this);
-            }
-
+            
             // If this is a patch review, disable the list files option
             if (reviewSource.Source == Utilities.Review.Source.Patch)
             {
@@ -62,14 +58,14 @@ namespace Create_Review
         // Review Request Properties
         private class ReviewRequestProperties
         {
-            public readonly Utilities.Review.Properties         ReviewProperties;
-            public readonly Reviewboard.ConnectionProperties    ConnectionProperties;
+            public readonly Utilities.Review.Properties ReviewProperties;
+            public readonly string                      WorkingCopy;
 
             // Constructor
-            public ReviewRequestProperties(Utilities.Review.Properties reviewProperties, Reviewboard.ConnectionProperties connectionProperties)
+            public ReviewRequestProperties(Utilities.Review.Properties reviewProperties, string workingCopy)
             {
                 ReviewProperties = reviewProperties;
-                ConnectionProperties = connectionProperties;
+                WorkingCopy = workingCopy;
             }
         };
 
@@ -255,11 +251,19 @@ namespace Create_Review
             {
                 // Pull out the properties of the request
                 ReviewRequestProperties thisRequest = args.Argument as ReviewRequestProperties;
+
+                // Get our credentials
+                string serverName = Names.Url[(int)Names.Type.Reviewboard];
+                Simple credentials = Credentials.Create(serverName) as Simple;
+                if (credentials == null)
+                    throw new FileNotFoundException(@"Unable to find the credentials for " + serverName);
+
+                // Request the review
                 Reviewboard.ReviewRequestResult result = Reviewboard.RequestReview(
-                    thisRequest.ConnectionProperties.Directory,
-                    thisRequest.ConnectionProperties.Server,
-                    thisRequest.ConnectionProperties.User,
-                    thisRequest.ConnectionProperties.Password,
+                    thisRequest.WorkingCopy,
+                    credentials.Server,
+                    credentials.User,
+                    credentials.Password,
                     thisRequest.ReviewProperties);
 
                 // Save the result
@@ -309,10 +313,9 @@ namespace Create_Review
                     }
                 }
             };
-
+            
             // Kick off the request
-            Reviewboard.ConnectionProperties connectionProperties = new Reviewboard.ConnectionProperties(m_requestDirectory, Settings.ReviewAuth.Default.Server, Settings.ReviewAuth.Default.User, Settings.ReviewAuth.Default.Password, true);
-            ReviewRequestProperties requestProperties = new ReviewRequestProperties(reviewProperties, connectionProperties);
+            ReviewRequestProperties requestProperties = new ReviewRequestProperties(reviewProperties, m_requestDirectory);
             updateThread.RunWorkerAsync(requestProperties);
         }
 
@@ -378,17 +381,14 @@ namespace Create_Review
                 return;
             }
 
-            // Before we do anything, we need to be authenticated
-            if (Settings.ReviewAuth.Default.Authenticated == false)
+            string reviewboardServer = Names.Url[(int)Names.Type.Reviewboard];
+            if (Credentials.Available(reviewboardServer) == false)
             {
                 Notification.Show(this, "Unable to generate review", "You must be authenticated with the Reviewboard server before generating a review.\n\nThe Authentication Request dialog will now open.", Notification.FormIcon.Cross);
 
-                // Now open the authentication dialog
-                Authentication authRequest = new Authentication(m_requestDirectory);
-                authRequest.ShowDialog(this);
-
-                // If we are still not authenticated, bail
-                if (Settings.ReviewAuth.Default.Authenticated == false)
+                // Now open the authentication dialog, if we're still not authenticated, give up
+                RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
+                if (Credentials.Available(reviewboardServer) == false)
                     return;
             }
 
@@ -438,23 +438,20 @@ namespace Create_Review
         private void reviewboardAuthenticationToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Show the authentication dialog
-            Authentication authRequest = new Authentication(m_requestDirectory);
-            authRequest.ShowDialog(this);
+            RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
         }
 
         private void button_RefreshGroups_Click(object sender, EventArgs e)
         {
             // Before we do anything, we need to be authenticated
-            if (Settings.ReviewAuth.Default.Authenticated == false)
+            string reviewboardServer = Names.Url[(int)Names.Type.Reviewboard];
+            if (Credentials.Available(reviewboardServer) == false)
             {
                 Notification.Show(this, "Unable to refresh groups", "You must be authenticated with the Reviewboard server before refreshing the review groups.\n\nThe Authentication Request dialog will now open.", Notification.FormIcon.Cross);
 
-                // Now open the authentication dialog
-                Authentication authRequest = new Authentication(m_requestDirectory);
-                authRequest.ShowDialog(this);
-
-                // If we are still not authenticated, bail
-                if (Settings.ReviewAuth.Default.Authenticated == false)
+                // Now open the authentication dialog, if we're still not authenticated, give up
+                RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
+                if (Credentials.Available(reviewboardServer) == false)
                     return;
             }
 
@@ -474,9 +471,13 @@ namespace Create_Review
             // Called when we need to trigger the request
             updateThread.DoWork += (object objectSender, DoWorkEventArgs args) =>
             {
-                // Kick it off
-                Reviewboard.ConnectionProperties userConnectionProperties = args.Argument as Reviewboard.ConnectionProperties;
-                Reviewboard.ReviewGroup[] result = Reviewboard.GetReviewGroups(m_requestDirectory, userConnectionProperties.Server, userConnectionProperties.User, userConnectionProperties.Password);
+                // Get our credentials
+                Simple credentials = Credentials.Create(reviewboardServer) as Simple;
+                if (credentials == null)
+                    throw new FileNotFoundException(@"Unable to find the credentials for " + reviewboardServer);
+
+                // Get the groups
+                Reviewboard.ReviewGroup[] result = Reviewboard.GetReviewGroups(m_requestDirectory, credentials.Server, credentials.User, credentials.Password);
 
                 // Save the result
                 args.Result = result;
@@ -507,8 +508,7 @@ namespace Create_Review
             };
 
             // Kick off the request
-            Reviewboard.ConnectionProperties requestProperties = new Reviewboard.ConnectionProperties(m_requestDirectory, Settings.ReviewAuth.Default.Server, Settings.ReviewAuth.Default.User, Settings.ReviewAuth.Default.Password, true);
-            updateThread.RunWorkerAsync(requestProperties);
+            updateThread.RunWorkerAsync();
         }
 
         private void CreateReview_FormClosing(object sender, FormClosingEventArgs e)
