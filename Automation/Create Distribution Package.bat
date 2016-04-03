@@ -63,5 +63,27 @@ rem Update the release notes
 set THIS_FILE=%~dp0..\Release Logs\release_notes.html
 "%FART_EXE%" -i -q "%THIS_FILE%" "__VERSION__NUMBER__" "%VERSION_NUMBER%"
 
+rem Build the processes
+call "%~dp0.\Build About.bat"
+if %errorlevel% neq 0 goto :error_building_process
+
+call "%~dp0.\Build Authentication.bat"
+if %errorlevel% neq 0 goto :error_building_process
+
+call "%~dp0.\Build Create Review.bat"
+if %errorlevel% neq 0 goto :error_building_process
+
+call "%~dp0.\Build RBProc.bat"
+if %errorlevel% neq 0 goto :error_building_process
+
 rem Build the installer
 "%~dp0.\Templates\Package Installer.bat" %VERSION_NUMBER%
+
+rem Done
+exit /b 0
+
+: error_building_process
+echo.
+echo Unable to build all processes - see output for more information
+echo.
+pause
