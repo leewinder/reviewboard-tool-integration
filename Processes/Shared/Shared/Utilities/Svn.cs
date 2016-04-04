@@ -119,7 +119,7 @@ namespace RB_Tools.Shared.Utilities
             string filePath = Path.GetDirectoryName(file);
 
             // List the files present in this root path
-            string commandOption = string.Format("status --depth files \"{0}\"", filePath);
+            string commandOption = string.Format("info --depth files \"{0}\"", filePath);
             Process.Output svnOutput = Process.Start(null, "svn", commandOption);
 
             // If we have errors, it's not tracked
