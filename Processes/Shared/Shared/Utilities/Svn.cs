@@ -59,7 +59,8 @@ namespace RB_Tools.Shared.Utilities
         public static string GetBranch(string workingDirectory)
         {
             // Generate the info
-            Process.Output infoOutput = Process.Start(workingDirectory, "svn", "info");
+            string infoPath = string.Format(@"info ""{0}""", workingDirectory);
+            Process.Output infoOutput = Process.Start(null, "svn", infoPath);
             if (string.IsNullOrWhiteSpace(infoOutput.StdOut) == true)
                 return null;
 
