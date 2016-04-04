@@ -67,6 +67,7 @@
     <Compile Include="Utilities\Identifiers.cs" />
     <Compile Include="Utilities\Paths.cs" />
     <Compile Include="Utilities\Process.cs" />
+    <Compile Include="Utilities\Svn.cs" />
     <Compile Include="Utilities\Version.cs" />
   </ItemGroup>
   <ItemGroup>

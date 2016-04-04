@@ -96,7 +96,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Targets\Reviewboard.cs" />
     <Compile Include="Targets\TortoiseSvn.cs" />
-    <Compile Include="Utilities\Svn.cs" />
     <EmbeddedResource Include="Dialogs\CreateReview.resx">
       <DependentUpon>CreateReview.cs</DependentUpon>
     </EmbeddedResource>

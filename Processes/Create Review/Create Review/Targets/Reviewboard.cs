@@ -131,7 +131,7 @@ namespace Create_Review
             }
 
             // Get the name of the branch we're on
-            string branchUrl = Utilities.Svn.GetBranch(workingDirectory);
+            string branchUrl = Svn.GetBranch(workingDirectory);
             if (string.IsNullOrWhiteSpace(branchUrl) == false)
                 commandProperties += string.Format("--branch \"{0}\" ", branchUrl);
 

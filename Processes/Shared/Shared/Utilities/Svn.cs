@@ -6,12 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Create_Review.Utilities
+namespace RB_Tools.Shared.Utilities
 {
     //
     // SVN utilities
     //
-    class Svn
+    public class Svn
     {
         //
         // Gets the root path for this repository
