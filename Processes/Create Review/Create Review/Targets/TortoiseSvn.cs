@@ -26,7 +26,7 @@ namespace Create_Review
 
         // Private Properties
         private const string JiraState_Tag = "[Jira Issue(s): {0}]\n";
-        private const string ReviewState_Tag = "[Review State:{0}]\n{1}\n";
+        private const string ReviewState_Tag = "[Review State: {0}]\n{1}\n";
 
         private const string JiraState_NoJira = "N/A";
 

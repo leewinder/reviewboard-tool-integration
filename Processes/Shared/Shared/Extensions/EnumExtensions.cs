@@ -48,7 +48,7 @@ namespace RB_Tools.Shared.Extensions
             string enumName = Enum.GetName(enumType, value);
             
             // Add spaces before capitals
-            return Regex.Replace(enumName, "[A-Z]", " $0");
+            return Regex.Replace(enumName, "[A-Z]", " $0").Trim();
         }
     }
 }
