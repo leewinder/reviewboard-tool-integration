@@ -32,17 +32,23 @@ namespace Review_Stats.Statistics
                     return;
 
                 // Get the revision list for each path
-                RevisionList.Result[] revisionLists = RequestRevisionLists(pathsToReview);
+                RevisionList.Revisions[] revisionLists = RequestRevisionLists(pathsToReview);
                 if (revisionLists == null)
                     return;
 
                 // Spin through each revision list and do the work for each path selected
-                foreach (RevisionList.Result thisRevisionList in revisionLists)
+                foreach (RevisionList.Revisions thisRevisionList in revisionLists)
                 {
                     // Get the logs for the given set of revisions
-                    SvnLogs.Result[] revisionLogs = GetLogsFromRevisions(thisRevisionList);
+                    SvnLogs.Log[] revisionLogs = GetLogsFromRevisions(thisRevisionList);
                     if (revisionLogs == null)
                         return;
+
+                    ReviewState.GetReviewStatsResults statsResults = GetCommitStats(revisionLogs);
+                    if (statsResults == null)
+                        return;
+                    
+
                 }
             };
 
@@ -59,6 +65,16 @@ namespace Review_Stats.Statistics
 
             // Off it goes
             updateThread.RunWorkerAsync();
+        }
+
+        private static ReviewState.GetReviewStatsResults GetCommitStats(SvnLogs.Log[] revisionLogs)
+        {
+            ReviewState.GetReviewStatsResults results = ReviewState.GetReviewStats(revisionLogs);
+            if (results == null)
+                s_errorMessage = @"Unable to generate the commit stats";
+
+            // Return our results
+            return results;
         }
 
         // Private properties
@@ -105,9 +121,9 @@ namespace Review_Stats.Statistics
         //
         // Gets the list of revisions to review
         //
-        private static RevisionList.Result[] RequestRevisionLists(string[] pathsToReview)
+        private static RevisionList.Revisions[] RequestRevisionLists(string[] pathsToReview)
         {
-            RevisionList.Result[] results = RevisionList.Request(pathsToReview);
+            RevisionList.Revisions[] results = RevisionList.Request(pathsToReview);
             if (results == null)
                 s_errorMessage = @"No valid revisions were selected to review";
 
@@ -115,9 +131,9 @@ namespace Review_Stats.Statistics
             return results;
         }
 
-        private static SvnLogs.Result[] GetLogsFromRevisions(RevisionList.Result revisionsToLog)
+        private static SvnLogs.Log[] GetLogsFromRevisions(RevisionList.Revisions revisionsToLog)
         {
-            SvnLogs.Result[] results = SvnLogs.GetRevisionLogs(revisionsToLog.Path, revisionsToLog.Revisions);
+            SvnLogs.Log[] results = SvnLogs.GetRevisionLogs(revisionsToLog.Path, revisionsToLog.Revision);
             if (results == null)
                 s_errorMessage = @"Unable to get the logs for the revisions selected in " + revisionsToLog.Path;
 

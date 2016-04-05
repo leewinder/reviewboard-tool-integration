@@ -12,33 +12,33 @@ namespace Review_Stats.Utilities
     class RevisionList
     {
         // Result of a call to get the revisions
-        public class Result
+        public class Revisions
         {
             public string Path { get; private set; }
             public string Url { get; private set; }
 
-            public string[] Revisions { get; private set; }
+            public string[] Revision { get; private set; }
 
             // Constructor
-            public Result(string path, string url, string[] revisions)
+            public Revisions(string path, string url, string[] revisions)
             {
                 Path = path;
                 Url = url;
 
-                Revisions = revisions;
+                Revision = revisions;
             }
         }
 
         //
         // Gets the revision lists for a list of files
         //
-        public static Result[] Request(string[] pathList)
+        public static Revisions[] Request(string[] pathList)
         {
             // Spin through and get them all
-            List<Result> results = new List<Result>();
+            List<Revisions> results = new List<Revisions>();
             foreach (string thisPath in pathList)
             {
-                Result thisResult = Request(thisPath);
+                Revisions thisResult = Request(thisPath);
                 if (thisResult != null)
                     results.Add(thisResult);
             }
@@ -50,7 +50,7 @@ namespace Review_Stats.Utilities
         //
         // Returns a revision list for a given path
         //
-        private static Result Request(string path)
+        private static Revisions Request(string path)
         {
             // Get the list of revisions we want to look at
             string revisonList = GetRevisionList(path);
@@ -66,7 +66,7 @@ namespace Review_Stats.Utilities
             string url = Svn.GetBranch(path);
 
             // Return our results
-            return new Result(path, url, revisionsToReview);
+            return new Revisions(path, url, revisionsToReview);
         }
 
         //
@@ -74,9 +74,9 @@ namespace Review_Stats.Utilities
         //
         private static string GetRevisionList(string path)
         {
-            // return @"2,4-8,10";
+            return @"2,4-8,10";
 
-            // Get the path we'll write our revisions to
+            /*// Get the path we'll write our revisions to
             string tempPath = Path.GetTempFileName();
 
             string commandLineOptions = string.Format(@"/command:log /path:""{0}"" /merge /outfile:""{1}""", path, tempPath);
@@ -89,7 +89,7 @@ namespace Review_Stats.Utilities
             File.Delete(tempPath);
 
             // Return the list of files
-            return (revisionList.Length == 0 ? null : revisionList[0]);
+            return (revisionList.Length == 0 ? null : revisionList[0]);*/
         }
 
         // 

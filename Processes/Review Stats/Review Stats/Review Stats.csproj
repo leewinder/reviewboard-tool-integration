@@ -65,6 +65,7 @@
     <Compile Include="Statistics\Display.cs" />
     <Compile Include="Statistics\Generator.cs" />
     <Compile Include="Utilities\CommandRequests.cs" />
+    <Compile Include="Utilities\ReviewState.cs" />
     <Compile Include="Utilities\RevisionList.cs" />
     <Compile Include="Utilities\SvnLogs.cs" />
     <EmbeddedResource Include="Dialogs\Progress.resx">

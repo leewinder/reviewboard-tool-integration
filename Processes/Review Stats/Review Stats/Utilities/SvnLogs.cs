@@ -12,20 +12,20 @@ namespace Review_Stats.Utilities
     class SvnLogs
     {
         // Result of an SVN log request
-        public class Result
+        public class Log
         {
             public int      Revision { get; private set; }
 
             public string   Author { get; private set; }
             public DateTime Date { get; private set; }
 
-            public string[] Log { get; private set; }
+            public string[] Message { get; private set; }
 
             // Constructor
-            public Result(int revision, string[] log, string author, string date)
+            public Log(int revision, string[] log, string author, string date)
             {
                 Revision = revision;
-                Log = log;
+                Message = log;
 
                 Author = author;
 
@@ -51,10 +51,10 @@ namespace Review_Stats.Utilities
         //
         // Gets the logs for a given set of revisions
         //
-        public static Result[] GetRevisionLogs(string svnPath, string[] revisions)
+        public static Log[] GetRevisionLogs(string svnPath, string[] revisions)
         {
             // Spin through all the revisions requested
-            List<Result> logs = new List<Result>();
+            List<Log> logs = new List<Log>();
             foreach(string thisRevision in revisions)
             {
                 string logOutput = Svn.GetLog(svnPath, thisRevision, true);
@@ -62,7 +62,7 @@ namespace Review_Stats.Utilities
                     return null;
 
                 // Read in the log input
-                Result[] individualLogs = ParseLogOutput(logOutput);
+                Log[] individualLogs = ParseLogOutput(logOutput);
                 if (individualLogs == null)
                     return null;
 
@@ -77,10 +77,10 @@ namespace Review_Stats.Utilities
         //
         // Spilts up the log message into individual revisions if the output included more than 1 revision
         //
-        private static Result[] ParseLogOutput(string logOutput)
+        private static Log[] ParseLogOutput(string logOutput)
         {
             // Load the XML in and read in the content
-            List<Result> logs = new List<Result>();
+            List<Log> logs = new List<Log>();
             bool parsed = Xml.LoadXml(logOutput, (XmlDocument xmlDocument) =>
             {
                 // Root
@@ -101,7 +101,7 @@ namespace Review_Stats.Utilities
                     string message = thisLogEntry.SelectSingleNode(@"msg").InnerText;
 
                     // Create and add this log
-                    Result thisLog = new Result(
+                    Log thisLog = new Log(
                         revision,
                         message.Split('\n'),
                         author,
