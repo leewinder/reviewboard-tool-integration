@@ -20,9 +20,6 @@ namespace Review_Stats.Statistics
         //
         public static void Start(string fileList, string debugOptions, GenerationFinished generationFinished)
         {
-            // Start clean
-            s_errorMessage = null;
-
             // Kick off the background threads
             BackgroundWorker updateThread = new BackgroundWorker();
 
@@ -35,9 +32,18 @@ namespace Review_Stats.Statistics
                     return;
 
                 // Get the revision list for each path
-                Utilities.RevisionList.Result[] revisionLists = RequestRevisionLists(pathsToReview);
+                RevisionList.Result[] revisionLists = RequestRevisionLists(pathsToReview);
                 if (revisionLists == null)
                     return;
+
+                // Spin through each revision list and do the work for each path selected
+                foreach (RevisionList.Result thisRevisionList in revisionLists)
+                {
+                    // Get the logs for the given set of revisions
+                    SvnLogs.Result[] revisionLogs = GetLogsFromRevisions(thisRevisionList);
+                    if (revisionLogs == null)
+                        return;
+                }
             };
 
             // Called when it's all been generated
@@ -104,6 +110,16 @@ namespace Review_Stats.Statistics
             RevisionList.Result[] results = RevisionList.Request(pathsToReview);
             if (results == null)
                 s_errorMessage = @"No valid revisions were selected to review";
+
+            // Return our results
+            return results;
+        }
+
+        private static SvnLogs.Result[] GetLogsFromRevisions(RevisionList.Result revisionsToLog)
+        {
+            SvnLogs.Result[] results = SvnLogs.GetRevisionLogs(revisionsToLog.Path, revisionsToLog.Revisions);
+            if (results == null)
+                s_errorMessage = @"Unable to get the logs for the revisions selected in " + revisionsToLog.Path;
 
             // Return our results
             return results;

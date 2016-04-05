@@ -81,6 +81,22 @@ namespace RB_Tools.Shared.Utilities
         }
 
         //
+        // Returns the log for a specific revision
+        //
+        public static string[] GetLog(string workingDirectory, string revision)
+        {
+            // Generate the info
+            string infoPath = string.Format(@"log ""{0}"" --revision {1}", workingDirectory, revision);
+            Process.Output infoOutput = Process.Start(null, "svn", infoPath);
+            if (string.IsNullOrWhiteSpace(infoOutput.StdOut) == true)
+                return null;
+
+            // Break up the output and return it
+            string[] output = infoOutput.StdOut.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            return output;
+        }
+
+        //
         // Returns if the given path is under SVN control
         //
         public static bool IsPathTracked(string path)
