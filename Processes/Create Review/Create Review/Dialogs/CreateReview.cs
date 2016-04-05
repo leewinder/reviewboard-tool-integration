@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using RB_Tools.Shared.Server;
 using RB_Tools.Shared.Authentication.Credentials;
 using RB_Tools.Shared.Utilities;
+using RB_Tools.Shared.Extensions;
 
 namespace Create_Review
 {
@@ -26,7 +27,7 @@ namespace Create_Review
 
             InitializeComponent();
 
-            InitialiseDialofElements();
+            InitialiseDialogElements();
             InitialiseReviewGroups();
             UpdateCreateReviewDialogState(State.Idle);
             
@@ -81,10 +82,21 @@ namespace Create_Review
         //
         // Initialises the elements of the dialog
         //
-        private void InitialiseDialofElements()
+        private void InitialiseDialogElements()
         {
+            // Start with a clean combo
+            comboBox_ReviewLevel.Items.Clear();
+
+            // Add the review level entries to the combo box
+            int reviewTypeCount = Enum.GetNames(typeof(RB_Tools.Shared.Review.Properties.Level)).Length;
+            for (int i = 0; i < reviewTypeCount; ++i)
+            {
+                var thisLevel = (RB_Tools.Shared.Review.Properties.Level)i;
+                comboBox_ReviewLevel.Items.Add(thisLevel.GetDescription());
+            }
+
             // Set the first option by default
-            comboBox_ReviewLevel.SelectedIndex = (int)Review.Review.Level.FullReview;
+            comboBox_ReviewLevel.SelectedIndex = (int)RB_Tools.Shared.Review.Properties.Level.FullReview;
         }
 
         //
@@ -429,7 +441,7 @@ namespace Create_Review
 
                 selectedReviewGroups,
 
-                (Review.Review.Level)comboBox_ReviewLevel.SelectedIndex,
+                (RB_Tools.Shared.Review.Properties.Level)comboBox_ReviewLevel.SelectedIndex,
                 checkBox_CopiesAsAdds.Checked
             );
 

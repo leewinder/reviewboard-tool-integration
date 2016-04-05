@@ -97,7 +97,7 @@ namespace Create_Review
         public static ReviewRequestResult RequestReview(string workingDirectory, string server, string username, string password, Review.Review.Properties reviewProperties)
         {
             // We may not need to generate a review
-            if (reviewProperties.ReviewLevel != Review.Review.Level.FullReview)
+            if (reviewProperties.ReviewLevel != RB_Tools.Shared.Review.Properties.Level.FullReview)
             {
                 // No review needed so exit
                 return new ReviewRequestResult(string.Empty, string.Empty, reviewProperties);
