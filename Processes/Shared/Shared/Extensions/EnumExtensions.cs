@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace RB_Tools.Shared.Extensions
 {
@@ -35,6 +36,19 @@ namespace RB_Tools.Shared.Extensions
 
             // Can't find anything
             return string.Empty;
+        }
+
+        //
+        // Returns the description of the enum if it's attached
+        //
+        public static string GetSplitName(this Enum value)
+        {
+            // Get the type and name of this enum
+            Type enumType = value.GetType();
+            string enumName = Enum.GetName(enumType, value);
+            
+            // Add spaces before capitals
+            return Regex.Replace(enumName, "[A-Z]", " $0");
         }
     }
 }
