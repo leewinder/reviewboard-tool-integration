@@ -1,9 +1,11 @@
 ﻿using RB_Tools.Shared.Utilities;
+using Stats_Runner.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Review_Stats.Utilities
 {
@@ -12,14 +14,37 @@ namespace Review_Stats.Utilities
         // Result of an SVN log request
         public class Result
         {
-            public int Revision { get; private set; }
+            public int      Revision { get; private set; }
+
+            public string   Author { get; private set; }
+            public DateTime Date { get; private set; }
+
             public string[] Log { get; private set; }
 
             // Constructor
-            public Result(int revision, string[] log)
+            public Result(int revision, string[] log, string author, string date)
             {
                 Revision = revision;
                 Log = log;
+
+                Author = author;
+
+                // Pull the time apart so we can save it
+                string dateFormat = @"yyyy-MM-dd HH:mm:ss";
+                try
+                {
+                    // Format the date so we on;y save what we want
+                    string[] timeSplit = date.Split('.');
+                    string timeToFormat = timeSplit[0].Replace("T", " ");
+
+                    // Save the time
+                    Date = DateTime.ParseExact(timeToFormat, dateFormat, System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch
+                {
+                    // Just a dummy time
+                    Date = DateTime.ParseExact(@"2001-01-01 00:00:00", dateFormat, System.Globalization.CultureInfo.InvariantCulture);
+                }
             }
         }
 
@@ -32,63 +57,67 @@ namespace Review_Stats.Utilities
             List<Result> logs = new List<Result>();
             foreach(string thisRevision in revisions)
             {
-                string[] logOutput = Svn.GetLog(svnPath, thisRevision);
+                string logOutput = Svn.GetLog(svnPath, thisRevision, true);
                 if (logOutput == null)
                     return null;
 
-                // Parse the log so we have a log per revision
-                SplitLogsResult revisionLogs = SplitCombinedLogs(logOutput, thisRevision);
+                // Read in the log input
+                Result[] individualLogs = ParseLogOutput(logOutput);
+                if (individualLogs == null)
+                    return null;
 
-                // Create an object for each log message
-                for (int i = 0; i < revisionLogs.Logs.Count; ++i)
-                {
-                    Result thisResult = new Result(revisionLogs.StartRevision + i, revisionLogs.Logs[i]);
-                    logs.Add(thisResult);
-                }
-
+                // Keep track
+                logs.AddRange(individualLogs);
             }
 
-
+            // Return all our logs
             return logs.ToArray();
-        }
-
-        // Result of splitting up a set of logs
-        private class SplitLogsResult
-        {
-            public int              StartRevision { get; private set; }
-            public List<string[]>   Logs { get; private set; }
-
-            public SplitLogsResult(int startRevision, List<string[]> logs)
-            {
-                StartRevision = startRevision;
-                Logs = logs;
-            }
         }
 
         //
         // Spilts up the log message into individual revisions if the output included more than 1 revision
         //
-        private static SplitLogsResult SplitCombinedLogs(string[] logOutput, string thisRevision)
+        private static Result[] ParseLogOutput(string logOutput)
         {
-            // Break up a sequence of revisions
-            string[] revisions = thisRevision.Split(':');
+            // Load the XML in and read in the content
+            List<Result> logs = new List<Result>();
+            bool parsed = Xml.LoadXml(logOutput, (XmlDocument xmlDocument) =>
+            {
+                // Root
+                XmlElement logRoot = xmlDocument.DocumentElement;
 
-            // Get the revision we start from
-            int startRevision;
-            bool parsedRevision = int.TryParse(revisions[0], out startRevision);
-            if (parsedRevision == false)
+                // Get all the log entries
+                XmlNodeList logEntries = logRoot.SelectNodes("logentry");
+                if (logEntries.Count == 0)
+                    return false;
+
+                // Spin through them all
+                logs.Capacity = logEntries.Count;
+                foreach (XmlNode thisLogEntry in logEntries)
+                {
+                    int revision = int.Parse(thisLogEntry.Attributes[@"revision"].Value);
+                    string author = thisLogEntry.SelectSingleNode(@"author").InnerText;
+                    string date = thisLogEntry.SelectSingleNode(@"date").InnerText;
+                    string message = thisLogEntry.SelectSingleNode(@"msg").InnerText;
+
+                    // Create and add this log
+                    Result thisLog = new Result(
+                        revision,
+                        message.Split('\n'),
+                        author,
+                        date);
+                    logs.Add(thisLog);
+                }
+
+
+                return true;
+            });
+            if (parsed == false)
                 return null;
 
-            // Is this just a single revision
-            if (revisions.Length == 1)
-            {
-                List<string[]> revisionLog = new List<string[]>() { logOutput };
-                return new SplitLogsResult(startRevision, revisionLog);
-            }
-
-            // We have multiple logs, so split them up
-            List<string[]> revisionLog2 = new List<string[]>() { logOutput };
-            return new SplitLogsResult(startRevision, revisionLog2);
+            // Return our content, put it in the right order
+            logs.Reverse();
+            return logs.ToArray();
         }
     }
 }

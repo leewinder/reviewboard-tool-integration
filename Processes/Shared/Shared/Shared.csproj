@@ -69,6 +69,7 @@
     <Compile Include="Utilities\Process.cs" />
     <Compile Include="Utilities\Svn.cs" />
     <Compile Include="Utilities\Version.cs" />
+    <Compile Include="Utilities\Xml.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Authentication\Dialogs\SimpleAuthentication.resx">
