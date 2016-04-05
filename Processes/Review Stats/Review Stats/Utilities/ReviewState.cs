@@ -1,4 +1,5 @@
 ﻿using RB_Tools.Shared.Extensions;
+using RB_Tools.Shared.Server;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,10 +18,14 @@ namespace Review_Stats.Utilities
             public int[]    CommitCount { get; private set; }
             public int      UnknownCommits { get; private set; }
 
-            public GetReviewStatsResults(int[] commitCount, int unknown)
+            public string[] Reviews { get; private set; }
+
+            public GetReviewStatsResults(int[] commitCount, int unknown, string[] reviews)
             {
                 CommitCount = commitCount;
                 UnknownCommits = unknown;
+
+                Reviews = reviews;
             }
         };
 
@@ -32,6 +37,9 @@ namespace Review_Stats.Utilities
             // We need to track the types of reviews
             int unknownReviews = 0;
             int[] commitCounts = new int[Enum.GetNames(typeof(RB_Tools.Shared.Review.Properties.Level)).Length];
+
+            // Keep track of the reviews we find
+            List<string> reviews = new List<string>();
 
             // Spin through them all and parse the log message
             foreach (SvnLogs.Log thisLog in svnLogs)
@@ -63,6 +71,15 @@ namespace Review_Stats.Utilities
                         string thisEnumName = ((RB_Tools.Shared.Review.Properties.Level)i).GetSplitName();
                         if (thisEnumName.Equals(reviewType, StringComparison.InvariantCultureIgnoreCase) == true)
                         {
+                            // If this is a review, pull out the review
+                            if (i == (int)RB_Tools.Shared.Review.Properties.Level.FullReview)
+                            {
+                                string reviewUrl = GetReviewUrl(thisLog.Message);
+                                if (string.IsNullOrEmpty(reviewUrl) == false)
+                                    reviews.Add(reviewUrl);
+                            }
+
+                            // Track the number of reviews
                             ++commitCounts[i];
                             break;
                         }
@@ -77,7 +94,22 @@ namespace Review_Stats.Utilities
             }
 
             // Return our reviews
-            return new GetReviewStatsResults(commitCounts, unknownReviews);
+            return new GetReviewStatsResults(commitCounts, unknownReviews, reviews.ToArray());
+        }
+
+        //
+        // Returns the review URL from the commit
+        //
+        private static string GetReviewUrl(string[] message)
+        {
+            // Get the line with the review address in
+            string serverNamePattern = string.Format(@".*{0}.*", Names.Url[(int)Names.Type.Reviewboard]);
+            string reviewStateLine = message.FirstOrDefault(line =>
+            {
+                Match regExMatch = Regex.Match(line, serverNamePattern);
+                return regExMatch.Success;
+            });
+            return (reviewStateLine == null ? null : reviewStateLine.Trim());
         }
     }
 }
