@@ -171,11 +171,17 @@ namespace RB_Tools.Shared.Authentication.Dialogs
                 {
                     // Save the values out
                     Credentials.Credentials.Create(server, user, password);
-                    MessageBox.Show(this, authResult.Message, @"Authentication Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        MessageBox.Show(this, authResult.Message, @"Authentication Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    });
                 }
                 else
                 {
-                    MessageBox.Show(this, authResult.Message, @"Authentication Failed", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        MessageBox.Show(this, authResult.Message, @"Authentication Failed", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    });
                 }
 
                 // Save the results

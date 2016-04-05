@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Review_Stats.Utilities;
+using RB_Tools.Shared.Server;
+using RB_Tools.Shared.Authentication.Credentials;
 
 namespace Review_Stats.Statistics
 {
@@ -18,7 +20,7 @@ namespace Review_Stats.Statistics
         //
         // Start the process of generating the stats
         //
-        public static void Start(string fileList, string debugOptions, GenerationFinished generationFinished)
+        public static void Start(Form owner, string fileList, string debugOptions, GenerationFinished generationFinished)
         {
             // Kick off the background threads
             BackgroundWorker updateThread = new BackgroundWorker();
@@ -26,6 +28,11 @@ namespace Review_Stats.Statistics
             // Does the work of the request
             updateThread.DoWork += (object objectSender, DoWorkEventArgs args) =>
             {
+                // Check if we're authenticated
+                bool autheticated = CheckServerAuthentication(owner);
+                if (autheticated == false)
+                    return;
+
                 // Get the list of paths to review
                 string[] pathsToReview = ParseFileList(fileList, debugOptions);
                 if (pathsToReview == null)
@@ -65,16 +72,6 @@ namespace Review_Stats.Statistics
 
             // Off it goes
             updateThread.RunWorkerAsync();
-        }
-
-        private static ReviewState.GetReviewStatsResults GetCommitStats(SvnLogs.Log[] revisionLogs)
-        {
-            ReviewState.GetReviewStatsResults results = ReviewState.GetReviewStats(revisionLogs);
-            if (results == null)
-                s_errorMessage = @"Unable to generate the commit stats";
-
-            // Return our results
-            return results;
         }
 
         // Private properties
@@ -136,6 +133,44 @@ namespace Review_Stats.Statistics
             SvnLogs.Log[] results = SvnLogs.GetRevisionLogs(revisionsToLog.Path, revisionsToLog.Revision);
             if (results == null)
                 s_errorMessage = @"Unable to get the logs for the revisions selected in " + revisionsToLog.Path;
+
+            // Return our results
+            return results;
+        }
+
+        //
+        // Returns if we're authenticated against our servers
+        //
+        private static bool CheckServerAuthentication(Form owner)
+        {
+            string reviewboardServer = Names.Url[(int)Names.Type.Reviewboard];
+            if (Credentials.Available(reviewboardServer) == false)
+            {
+                // Kick off the request
+                owner.Invoke((MethodInvoker)delegate
+                {
+                    DialogResult dialogResult = MessageBox.Show(owner, "You must be authenticated with the Reviewboard server before generating review statistics.\n\nDo you want to authenticate now?", "Authentication Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (dialogResult == DialogResult.Yes)
+                        RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
+                });
+
+                // Check if we're still unauthenticated
+                if (Credentials.Available(reviewboardServer) == false)
+                    return false;
+            }
+
+            // We're good
+            return true;
+        }
+
+        //
+        // Gets the state of various commits
+        //
+        private static ReviewState.GetReviewStatsResults GetCommitStats(SvnLogs.Log[] revisionLogs)
+        {
+            ReviewState.GetReviewStatsResults results = ReviewState.GetReviewStats(revisionLogs);
+            if (results == null)
+                s_errorMessage = @"Unable to generate the commit stats";
 
             // Return our results
             return results;

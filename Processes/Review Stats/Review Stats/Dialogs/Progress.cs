@@ -19,7 +19,7 @@ namespace Review_Stats.Dialogs
 
             // Kick it off and we're done
             Display.SetDisplayProperties(label_Progress);
-            Generator.Start(fileList, debugOptions, () =>
+            Generator.Start(this, fileList, debugOptions, () =>
             {
                 // Lose our dialog
                 this.Close();
