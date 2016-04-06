@@ -51,11 +51,14 @@ namespace Review_Stats.Statistics
                     if (revisionLogs == null)
                         return;
 
-                    ReviewState.GetReviewStatsResults statsResults = GetCommitStats(revisionLogs);
-                    if (statsResults == null)
+                    ReviewState.GetCommitStatsResult commitStats = GetCommitStats(revisionLogs);
+                    if (commitStats == null)
                         return;
-                    
 
+                    // Now generate unformation about the reviews
+                    ReviewState.GetReviewStatisticsResult reviewStats = GetReviewStats(commitStats.Reviews);
+                    if (reviewStats == null)
+                        return;
                 }
             };
 
@@ -166,11 +169,24 @@ namespace Review_Stats.Statistics
         //
         // Gets the state of various commits
         //
-        private static ReviewState.GetReviewStatsResults GetCommitStats(SvnLogs.Log[] revisionLogs)
+        private static ReviewState.GetCommitStatsResult GetCommitStats(SvnLogs.Log[] revisionLogs)
         {
-            ReviewState.GetReviewStatsResults results = ReviewState.GetReviewStats(revisionLogs);
+            ReviewState.GetCommitStatsResult results = ReviewState.GetCommitStats(revisionLogs);
             if (results == null)
                 s_errorMessage = @"Unable to generate the commit stats";
+
+            // Return our results
+            return results;
+        }
+
+        //
+        // Returns stats about the reviews in this repository
+        //
+        private static ReviewState.GetReviewStatisticsResult GetReviewStats(string[] reviews)
+        {
+            ReviewState.GetReviewStatisticsResult results = ReviewState.GetReviewStatistics(reviews);
+            if (results == null)
+                s_errorMessage = @"Unable to generate the review stats against the RB server";
 
             // Return our results
             return results;

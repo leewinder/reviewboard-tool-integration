@@ -13,14 +13,14 @@ namespace Review_Stats.Utilities
     class ReviewState
     {
         // Results of commit review types
-        public class GetReviewStatsResults
+        public class GetCommitStatsResult
         {
             public int[]    CommitCount { get; private set; }
             public int      UnknownCommits { get; private set; }
 
             public string[] Reviews { get; private set; }
 
-            public GetReviewStatsResults(int[] commitCount, int unknown, string[] reviews)
+            public GetCommitStatsResult(int[] commitCount, int unknown, string[] reviews)
             {
                 CommitCount = commitCount;
                 UnknownCommits = unknown;
@@ -29,10 +29,24 @@ namespace Review_Stats.Utilities
             }
         };
 
+        // Results of a review stats request
+        public class GetReviewStatisticsResult
+        {
+
+        }
+
+        //
+        // Returns the statistics on the raised reviews
+        //
+        public static GetReviewStatisticsResult GetReviewStatistics(string[] reviewList)
+        {
+            return null;
+        }
+
         //
         // Counts the type of reviews in a set of commits
         //
-        public static GetReviewStatsResults GetReviewStats(SvnLogs.Log[] svnLogs)
+        public static GetCommitStatsResult GetCommitStats(SvnLogs.Log[] svnLogs)
         {
             // We need to track the types of reviews
             int unknownReviews = 0;
@@ -94,7 +108,7 @@ namespace Review_Stats.Utilities
             }
 
             // Return our reviews
-            return new GetReviewStatsResults(commitCounts, unknownReviews, reviews.ToArray());
+            return new GetCommitStatsResult(commitCounts, unknownReviews, reviews.ToArray());
         }
 
         //
