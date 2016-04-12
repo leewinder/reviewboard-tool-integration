@@ -12,15 +12,30 @@ namespace Review_Stats.Utilities
     // Provides information about reviews
     class ReviewState
     {
+        // A commit with an associated review
+        public class CommitReview
+        {
+            public int Revision { get; private set; }
+            public string Review { get; private set; }
+
+            // Constructor
+            public CommitReview(int revision, string review)
+            {
+                Revision = revision;
+                Review = review;
+            }
+        };
+
         // Results of commit review types
         public class GetCommitStatsResult
         {
-            public int[]    CommitCount { get; private set; }
-            public int      UnknownCommits { get; private set; }
+            public int[]            CommitCount { get; private set; }
+            public int              UnknownCommits { get; private set; }
 
-            public string[] Reviews { get; private set; }
+            public CommitReview[]   Reviews { get; private set; }
 
-            public GetCommitStatsResult(int[] commitCount, int unknown, string[] reviews)
+            // Constructor
+            public GetCommitStatsResult(int[] commitCount, int unknown, CommitReview[] reviews)
             {
                 CommitCount = commitCount;
                 UnknownCommits = unknown;
@@ -32,15 +47,38 @@ namespace Review_Stats.Utilities
         // Results of a review stats request
         public class GetReviewStatisticsResult
         {
+            public CommitReview[] OpenReviewsWithShipIts { get; private set; }
+            public CommitReview[] OpenReviewsNoShipIts { get; private set; }
+            public CommitReview[] ClosedReviews { get; private set; }
 
+            public int      CommentsGenerated { get; private set; }
+            public int      ShipItsGenerated { get; private set; }
+
+            // Constructor
+            public GetReviewStatisticsResult(CommitReview[] shipItReviews, CommitReview[] noShipItReviews, CommitReview[] closedReviews, int commentCount, int shipItCount)
+            {
+                OpenReviewsWithShipIts = shipItReviews;
+                OpenReviewsNoShipIts = noShipItReviews;
+                ClosedReviews = closedReviews;
+
+                CommentsGenerated = commentCount;
+                ShipItsGenerated = shipItCount;
+            }
         }
 
         //
         // Returns the statistics on the raised reviews
         //
-        public static GetReviewStatisticsResult GetReviewStatistics(string[] reviewList)
+        public static GetReviewStatisticsResult GetReviewStatistics(CommitReview[] reviewList)
         {
-            return null;
+            // We need to spin through every review and pull out the information about each one
+            foreach (CommitReview thisReview in reviewList)
+            {
+
+            }
+
+            // Return our object
+            return new GetReviewStatisticsResult(null, null, null, 0, 0);
         }
 
         //
@@ -53,7 +91,7 @@ namespace Review_Stats.Utilities
             int[] commitCounts = new int[Enum.GetNames(typeof(RB_Tools.Shared.Review.Properties.Level)).Length];
 
             // Keep track of the reviews we find
-            List<string> reviews = new List<string>();
+            var reviews = new List<CommitReview>();
 
             // Spin through them all and parse the log message
             foreach (SvnLogs.Log thisLog in svnLogs)
@@ -90,7 +128,7 @@ namespace Review_Stats.Utilities
                             {
                                 string reviewUrl = GetReviewUrl(thisLog.Message);
                                 if (string.IsNullOrEmpty(reviewUrl) == false)
-                                    reviews.Add(reviewUrl);
+                                    reviews.Add( new CommitReview(thisLog.Revision, reviewUrl) );
                             }
 
                             // Track the number of reviews

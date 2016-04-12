@@ -182,7 +182,7 @@ namespace Review_Stats.Statistics
         //
         // Returns stats about the reviews in this repository
         //
-        private static ReviewState.GetReviewStatisticsResult GetReviewStats(string[] reviews)
+        private static ReviewState.GetReviewStatisticsResult GetReviewStats(ReviewState.CommitReview[] reviews)
         {
             ReviewState.GetReviewStatisticsResult results = ReviewState.GetReviewStatistics(reviews);
             if (results == null)
