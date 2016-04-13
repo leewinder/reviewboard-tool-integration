@@ -69,6 +69,7 @@
     </Compile>
     <Compile Include="Review\Properties.cs" />
     <Compile Include="Server\Names.cs" />
+    <Compile Include="Structures\Pair.cs" />
     <Compile Include="Targets\Reviewboard.cs" />
     <Compile Include="Utilities\Cipher.cs" />
     <Compile Include="Utilities\Identifiers.cs" />

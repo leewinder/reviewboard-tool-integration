@@ -98,7 +98,7 @@ namespace Review_Stats.Statistics
         private static readonly string[] StateMessages = new string[]
         {
             @"Requesting SVN logs to review",
-            @"Processed {0}/{1} logs",
+            @"Downloaded {0}/{1} logs",
             @"Parsing {0}/{1} logs",
             @"Processed {0}/{1} reviews",
             @"Creating review report",

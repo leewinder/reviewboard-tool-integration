@@ -13,15 +13,28 @@ namespace RB_Tools.Shared.Targets
     // Shared information about the RB target
     public class Reviewboard
     {
+        // API Codes
+        public enum Result
+        {
+            Success = 200,
+            NotFound = 100,
+
+            Error = 500,
+        };
+        
         // API call result
         public class RequestApiResult
         {
+            public Result   Code { get; private set; }
+
             public JObject  Result { get; private set; }
             public string   Error { get; private set; }
 
             // Constructor
-            public RequestApiResult(JObject result, string error)
+            public RequestApiResult(Result code, JObject result, string error)
             {
+                Code = code;
+
                 Result = result;
                 Error = error;
             }
@@ -66,7 +79,7 @@ namespace RB_Tools.Shared.Targets
 
             Process.Output output = Process.Start(workingDirectory, rbtPath, rbtArgs);
             if (string.IsNullOrEmpty(output.StdErr) == false)
-                return new RequestApiResult(null, output.StdErr);
+                return new RequestApiResult(Result.Error, null, output.StdErr);
 
             // Parse the data
             try
@@ -82,18 +95,24 @@ namespace RB_Tools.Shared.Targets
                     string errorMessage = (string)parsedOutput["err"]["msg"];
                     string returnMessage = string.Format("Error Code: {0}\n{1}", errorCode, errorMessage);
 
-                    // Return our result
-                    return new RequestApiResult(null, returnMessage);
+                    // Do we have a valid code?
+                    int resultCode = int.Parse(errorCode);
+                    bool knownResult = Enum.IsDefined(typeof(Result), resultCode);
+                    if (knownResult == true)
+                        return new RequestApiResult((Result)resultCode, null, returnMessage);
+
+                    // Return a general error
+                    return new RequestApiResult(Result.Error, null, returnMessage);
                 }
                 else
                 {
                     // We had a valid response so return it
-                    return new RequestApiResult(parsedOutput, string.Empty);
+                    return new RequestApiResult(Result.Success, parsedOutput, string.Empty);
                 }
             }
             catch
             {
-                return new RequestApiResult(null, @"Unable to parse the Reviewboard API result");
+                return new RequestApiResult(Result.Error, null, @"Unable to parse the Reviewboard API result");
             }
         }
 

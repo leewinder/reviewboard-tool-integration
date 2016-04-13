@@ -57,7 +57,7 @@ namespace Review_Stats.Statistics
                         return;
 
                     // Now generate unformation about the reviews
-                    ReviewState.GetReviewStatisticsResult reviewStats = GetReviewStats(commitStats.Reviews, thisRevisionList.Path, credentials);
+                    ReviewState.ReviewStatistics[] reviewStats = GetReviewStats(commitStats.Reviews, thisRevisionList.Path, credentials);
                     if (reviewStats == null)
                         return;
 
@@ -207,16 +207,15 @@ namespace Review_Stats.Statistics
         //
         // Returns stats about the reviews in this repository
         //
-        private static ReviewState.GetReviewStatisticsResult GetReviewStats(ReviewState.CommitReview[] reviews, string workingDirectory, Simple credentials)
+        private static ReviewState.ReviewStatistics[] GetReviewStats(ReviewState.CommitReview[] reviews, string workingDirectory, Simple credentials)
         {
             // Starting to review logs
             Display.Start(Display.State.QueryingReviewboard, reviews.Length);
 
             // Try to query the server for our review state
-            ReviewState.GetReviewStatisticsResult results = null;
             try
             {
-                results = ReviewState.GetReviewStatistics(reviews, workingDirectory, credentials, (currentCount) =>
+                ReviewState.ReviewStatistics[] results = ReviewState.GetReviewStatistics(reviews, workingDirectory, credentials, (currentCount) =>
                 {
                     Display.Update(currentCount, reviews.Length);
                 });
@@ -227,6 +226,9 @@ namespace Review_Stats.Statistics
                     s_errorMessage = @"Unable to generate the review stats against the RB server";
                     return null;
                 }
+
+                // Return what we have
+                return results;
             }
             catch (ReviewboardApiException e)
             {
@@ -234,9 +236,6 @@ namespace Review_Stats.Statistics
                 s_errorMessage = "Unable to generate the review stats against the RB server\n\n" + e.Message;
                 return null;
             }
-
-            // Return our results
-            return results;
         }
 
     }

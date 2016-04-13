@@ -9,6 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using RB_Tools.Shared.Structures;
 
 namespace Review_Stats.Utilities
 {
@@ -18,11 +20,25 @@ namespace Review_Stats.Utilities
         // Public Delegates
         public delegate void StatisticGenerated(int count);
 
+        // Review states
+        public enum State
+        {
+            Pending, 
+
+            Open,
+            Closed,
+
+            Discarded,
+            NotFound,
+
+            Unknown,
+        }
+
         // A commit with an associated review
         public class CommitReview
         {
-            public int Revision { get; private set; }
-            public string Review { get; private set; }
+            public int      Revision { get; private set; }
+            public string   Review { get; private set; }
 
             // Constructor
             public CommitReview(int revision, string review)
@@ -50,25 +66,33 @@ namespace Review_Stats.Utilities
             }
         };
 
-        // Results of a review stats request
-        public class GetReviewStatisticsResult
+        // Statistics of a given review
+        public class ReviewStatistics
         {
-            public CommitReview[] OpenReviewsWithShipIts { get; private set; }
-            public CommitReview[] OpenReviewsNoShipIts { get; private set; }
-            public CommitReview[] ClosedReviews { get; private set; }
+            public CommitReview Commit { get; private set; }
+            public State        State { get; private set; }
 
-            public int      CommentsGenerated { get; private set; }
-            public int      ShipItsGenerated { get; private set; }
+            public int          Reviews { get; private set; }
+            public int          Replies { get; private set; }
+
+            public int          ShipIts { get; private set; }
 
             // Constructor
-            public GetReviewStatisticsResult(CommitReview[] shipItReviews, CommitReview[] noShipItReviews, CommitReview[] closedReviews, int commentCount, int shipItCount)
+            public ReviewStatistics(CommitReview commit, State state, int reviews, int replies, int shipIts)
             {
-                OpenReviewsWithShipIts = shipItReviews;
-                OpenReviewsNoShipIts = noShipItReviews;
-                ClosedReviews = closedReviews;
+                Commit = commit;
 
-                CommentsGenerated = commentCount;
-                ShipItsGenerated = shipItCount;
+                State = state;
+
+                Reviews = reviews;
+                Replies = replies;
+
+                ShipIts = shipIts;
+            }
+
+            // Constructor
+            public ReviewStatistics(CommitReview commit, State state) : this(commit, state, 0, 0, 0)
+            {
             }
         }
 
@@ -148,19 +172,21 @@ namespace Review_Stats.Utilities
         //
         // Returns the statistics on the raised reviews
         //
-        public static GetReviewStatisticsResult GetReviewStatistics(CommitReview[] reviewList, string workingDirectory, Simple credentials, StatisticGenerated statGenerated)
+        public static ReviewStatistics[] GetReviewStatistics(CommitReview[] reviewList, string workingDirectory, Simple credentials, StatisticGenerated statGenerated)
         {
             // We need to spin through every review and pull out the information about each one
+            List<ReviewStatistics> properties = new List<ReviewStatistics>(reviewList.Length);
             for (int i = 0; i < reviewList.Length; ++i)
             {
-                string reviewState = GetUrlReviewState(reviewList[i].Review, workingDirectory, credentials);
+                ReviewStatistics reviewProperties = GetPropertiesOfReview(reviewList[i], workingDirectory, credentials);
+                properties.Add(reviewProperties);
 
                 // Another one done
                 statGenerated(i+1);
             }
 
-            // Return our object
-            return new GetReviewStatisticsResult(null, null, null, 0, 0);
+            // Return our properties
+            return properties.ToArray();
         }
 
         //
@@ -181,20 +207,157 @@ namespace Review_Stats.Utilities
         //
         // Gets the results of a review request
         //
-        private static string GetUrlReviewState(string url, string workingDirectory, Simple credentials)
+        private static ReviewStatistics GetPropertiesOfReview(CommitReview review, string workingDirectory, Simple credentials)
         {
-            string reviewId = ExtractReviewId(url);
+            // Get the API
+            string reviewId = ExtractReviewId(review.Review);
             string apiRequest = string.Format(@"/review-requests/{0}", reviewId);
 
+            // Try this review code
+            JObject result = MakeApiCall(credentials, workingDirectory, apiRequest);
+            if (result == null)
+                return new ReviewStatistics(review, State.NotFound);
+
+            // We have the review information so process
+            int shipItCount = GetShipItCount(result);
+            Pair<int, int> reviewsAndReplies = GetReviewsAndReplies(workingDirectory, reviewId, credentials);
+
+            // Get the state of this review
+            State reviewState = GetReviewState(result);
+
+            // Return our properties
+            return new ReviewStatistics(review, reviewState, reviewsAndReplies.First, reviewsAndReplies.Second, shipItCount);
+        }
+
+        //
+        // Returns the number of ship it's in a review
+        //
+        private static int GetShipItCount(JObject result)
+        {
+            try
+            {
+                string shipItCount = (string)result["review_request"]["ship_it_count"];
+                return int.Parse(shipItCount);
+            }
+            catch
+            {
+                // Nothing
+                return 0;
+            }
+        }
+
+        //
+        // Returns the number of reviews and replies
+        //
+        private static Pair<int, int> GetReviewsAndReplies(string workingDirectory, string reviewId, Simple credentials)
+        {
+            int reviews = 0;
+            try
+            {
+                // Try this review code
+                string apiRequest = string.Format(@"/review-requests/{0}/reviews --counts-only=1", reviewId);
+                JObject result = MakeApiCall(credentials, workingDirectory, apiRequest);
+                if (result == null)
+                    return new Pair<int, int>();
+                
+                // Get the reviews from the call
+                string reviewCount = (string)result["count"];
+                reviews = int.Parse(reviewCount);
+            }
+            catch
+            {
+                // Can't get the values out
+                return new Pair<int, int>();
+            }
+
+            // If we have no reviews, bail
+            if (reviews == 0)
+                return new Pair<int, int>();
+
+            // Spin through all the replies if we have them
+            int replies = 0;
+            for (int thisReview = 0; thisReview < reviews; ++thisReview)
+            {
+                try
+                {
+                    string apiRequest = string.Format(@"/review-requests/{0}/reviews/{1}/replies --counts-only=1", reviewId, thisReview+1);
+                    JObject result = MakeApiCall(credentials, workingDirectory, apiRequest);
+
+                    // If we failed, return what we have
+                    if (result == null)
+                        return new Pair<int, int>(reviews, replies);
+                
+                    string replyCount = (string)result["count"];
+                    replies += int.Parse(replyCount);
+                }
+                catch
+                {
+                    // Can't get the values out so return what we have
+                    return new Pair<int, int>(reviews, replies);
+                }
+            }
+
+            // Return what we have
+            return new Pair<int, int>(reviews, replies);
+        }
+
+        //
+        // Gets the state of this review
+        //
+        private static State GetReviewState(JObject result)
+        {
+            State thisState = State.Unknown;
+            try
+            {
+                // Get the state of this review
+                string currentState = (string)result["review_request"]["status"];
+                string publicState = (string)result["review_request"]["public"];
+
+                // Check our state
+                if (currentState.Equals("pending", StringComparison.InvariantCultureIgnoreCase) == true)
+                {
+                    if (publicState.Equals("true", StringComparison.InvariantCultureIgnoreCase) == true)
+                        thisState = State.Open;
+                    else
+                        thisState = State.Pending;
+                }
+                else if (currentState.Equals("discarded", StringComparison.InvariantCultureIgnoreCase) == true)
+                {
+                    thisState = State.Discarded;
+                }
+                else if (currentState.Equals("submitted", StringComparison.InvariantCultureIgnoreCase) == true)
+                {
+                    thisState = State.Closed;
+                }
+            }
+            catch
+            {
+                // Unknown state
+                return State.Unknown;
+            }
+
+            // Done
+            return thisState;
+        }
+
+        //
+        // Runs through the RB Api
+        //
+        private static JObject MakeApiCall(Simple credentials, string workingDirectory, string apiRequest)
+        {
+            // Make the API request
             RB_Tools.Shared.Targets.Reviewboard.RequestApiResult result = RB_Tools.Shared.Targets.Reviewboard.RequestApi(credentials, apiRequest, workingDirectory);
-            if (result.Result == null)
+
+            // We can deal with a non-success call in a numver of ways
+            if (result.Code == RB_Tools.Shared.Targets.Reviewboard.Result.Error)
                 throw new ReviewboardApiException(result.Error);
-            
 
+            // If we can't find it, return null as we want to track this
+            if (result.Code != RB_Tools.Shared.Targets.Reviewboard.Result.Success)
+                return null;
 
-
-
-            return null;
+            // Return our object
+            return result.Result;
         }
 
         //
