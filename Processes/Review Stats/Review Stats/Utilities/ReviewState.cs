@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using RB_Tools.Shared.Structures;
+using System.Threading;
 
 namespace Review_Stats.Utilities
 {
@@ -259,7 +260,7 @@ namespace Review_Stats.Utilities
             string apiRequest = string.Format(@"/review-requests/{0}", reviewId);
 
             // Try this review code
-            JObject result = MakeApiCallAsync(credentials, workingDirectory, apiRequest);
+            JObject result = MakeApiCall(credentials, workingDirectory, apiRequest);
             if (result == null)
                 return new ReviewStatistics(review, State.NotFound);
 
@@ -329,8 +330,12 @@ namespace Review_Stats.Utilities
 
             // Get the replies in this response
             JArray commentList = (JArray)reviewResponse["reviews"];
-            foreach(JObject thisComment in commentList.Children())
+            Parallel.ForEach(commentList.Children(), (thisComment, loopState) =>
             {
+                // Do we need to?
+                if (loopState.IsStopped == true)
+                    return;
+
                 try
                 {
                     // Pull out the ID of this comment so we can see the replies
@@ -342,17 +347,20 @@ namespace Review_Stats.Utilities
 
                     // If we failed, return what we have
                     if (result == null)
-                        return new Pair<int, int>(reviews, replies);
+                        loopState.Stop();
 
-                    string replyCount = (string)result["count"];
-                    replies += int.Parse(replyCount);
+                    if (loopState.IsStopped == false)
+                    {
+                        string replyCount = (string)result["count"];
+                        Interlocked.Add(ref replies, int.Parse(replyCount));
+                    }
                 }
                 catch
                 {
                     // Can't get the values out so return what we have
-                    return new Pair<int, int>(reviews, replies);
+                    loopState.Stop();
                 }
-            }
+            });
 
             // Return what we have
             return new Pair<int, int>(reviews, replies);
@@ -404,30 +412,6 @@ namespace Review_Stats.Utilities
         {
             // Make the API request
             RB_Tools.Shared.Targets.Reviewboard.RequestApiResult result = RB_Tools.Shared.Targets.Reviewboard.RequestApi(credentials, apiRequest, workingDirectory);
-
-            // We can deal with a non-success call in a numver of ways
-            if (result.Code == RB_Tools.Shared.Targets.Reviewboard.Result.Error)
-                throw new ReviewboardApiException(result.Error);
-
-            // If we're unable to access the review, return an empty one
-            if (result.Code == RB_Tools.Shared.Targets.Reviewboard.Result.AccessDenied)
-                return EmptyReview;
-
-            // If we can't find it, return null as we want to track this
-            if (result.Code != RB_Tools.Shared.Targets.Reviewboard.Result.Success)
-                return null;
-
-            // Return our object
-            return result.Result;
-        }
-
-        //
-        // Runs through the RB Api
-        //
-        private static JObject MakeApiCallAsync(Simple credentials, string workingDirectory, string apiRequest)
-        {
-            // Make the API request
-            RB_Tools.Shared.Targets.Reviewboard.RequestApiResult result = RB_Tools.Shared.Targets.Reviewboard.RequestApiSync(credentials, apiRequest, workingDirectory);
 
             // We can deal with a non-success call in a numver of ways
             if (result.Code == RB_Tools.Shared.Targets.Reviewboard.Result.Error)
