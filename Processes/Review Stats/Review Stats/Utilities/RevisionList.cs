@@ -74,9 +74,7 @@ namespace Review_Stats.Utilities
         //
         private static string GetRevisionList(string path)
         {
-            return @"2,4-8,10";
-
-            /*// Get the path we'll write our revisions to
+            // Get the path we'll write our revisions to
             string tempPath = Path.GetTempFileName();
 
             string commandLineOptions = string.Format(@"/command:log /path:""{0}"" /merge /outfile:""{1}""", path, tempPath);
@@ -89,7 +87,7 @@ namespace Review_Stats.Utilities
             File.Delete(tempPath);
 
             // Return the list of files
-            return (revisionList.Length == 0 ? null : revisionList[0]);*/
+            return (revisionList.Length == 0 ? null : revisionList[0]);
         }
 
         // 
