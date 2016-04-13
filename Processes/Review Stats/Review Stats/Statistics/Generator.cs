@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using Review_Stats.Utilities;
 using RB_Tools.Shared.Server;
 using RB_Tools.Shared.Authentication.Credentials;
+using Review_Stats.Exceptions;
 
 namespace Review_Stats.Statistics
 {
@@ -29,8 +30,8 @@ namespace Review_Stats.Statistics
             updateThread.DoWork += (object objectSender, DoWorkEventArgs args) =>
             {
                 // Check if we're authenticated
-                bool autheticated = CheckServerAuthentication(owner);
-                if (autheticated == false)
+                Simple credentials = CheckServerAuthentication(owner);
+                if (credentials == null)
                     return;
 
                 // Get the list of paths to review
@@ -56,7 +57,7 @@ namespace Review_Stats.Statistics
                         return;
 
                     // Now generate unformation about the reviews
-                    ReviewState.GetReviewStatisticsResult reviewStats = GetReviewStats(commitStats.Reviews);
+                    ReviewState.GetReviewStatisticsResult reviewStats = GetReviewStats(commitStats.Reviews, thisRevisionList.Path, credentials);
                     if (reviewStats == null)
                         return;
                 }
@@ -144,7 +145,7 @@ namespace Review_Stats.Statistics
         //
         // Returns if we're authenticated against our servers
         //
-        private static bool CheckServerAuthentication(Form owner)
+        private static Simple CheckServerAuthentication(Form owner)
         {
             string reviewboardServer = Names.Url[(int)Names.Type.Reviewboard];
             if (Credentials.Available(reviewboardServer) == false)
@@ -159,11 +160,11 @@ namespace Review_Stats.Statistics
 
                 // Check if we're still unauthenticated
                 if (Credentials.Available(reviewboardServer) == false)
-                    return false;
+                    return null;
             }
 
             // We're good
-            return true;
+            return Credentials.Create(reviewboardServer) as Simple;
         }
 
         //
@@ -182,11 +183,23 @@ namespace Review_Stats.Statistics
         //
         // Returns stats about the reviews in this repository
         //
-        private static ReviewState.GetReviewStatisticsResult GetReviewStats(ReviewState.CommitReview[] reviews)
+        private static ReviewState.GetReviewStatisticsResult GetReviewStats(ReviewState.CommitReview[] reviews, string workingDirectory, Simple credentials)
         {
-            ReviewState.GetReviewStatisticsResult results = ReviewState.GetReviewStatistics(reviews);
-            if (results == null)
-                s_errorMessage = @"Unable to generate the review stats against the RB server";
+            ReviewState.GetReviewStatisticsResult results = null;
+            try
+            {
+                results = ReviewState.GetReviewStatistics(reviews, workingDirectory, credentials);
+                if (results == null)
+                {
+                    s_errorMessage = @"Unable to generate the review stats against the RB server";
+                    return null;
+                }
+            }
+            catch (ReviewboardApiException e)
+            {
+                s_errorMessage = "Unable to generate the review stats against the RB server\n\n" + e.Message;
+                return null;
+            }
 
             // Return our results
             return results;

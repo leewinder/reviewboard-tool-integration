@@ -1,5 +1,8 @@
-﻿using RB_Tools.Shared.Extensions;
+﻿using RB_Tools.Shared.Authentication.Credentials;
+using RB_Tools.Shared.Extensions;
 using RB_Tools.Shared.Server;
+using RB_Tools.Shared.Utilities;
+using Review_Stats.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -69,12 +72,12 @@ namespace Review_Stats.Utilities
         //
         // Returns the statistics on the raised reviews
         //
-        public static GetReviewStatisticsResult GetReviewStatistics(CommitReview[] reviewList)
+        public static GetReviewStatisticsResult GetReviewStatistics(CommitReview[] reviewList, string workingDirectory, Simple credentials)
         {
             // We need to spin through every review and pull out the information about each one
             foreach (CommitReview thisReview in reviewList)
             {
-
+                string reviewState = GetUrlReviewState(thisReview.Review, workingDirectory, credentials);
             }
 
             // Return our object
@@ -162,6 +165,38 @@ namespace Review_Stats.Utilities
                 return regExMatch.Success;
             });
             return (reviewStateLine == null ? null : reviewStateLine.Trim());
+        }
+
+        //
+        // Gets the results of a review request
+        //
+        private static string GetUrlReviewState(string url, string workingDirectory, Simple credentials)
+        {
+            string reviewId = ExtractReviewId(url);
+            string apiRequest = string.Format(@"/review-requests/{0}", reviewId);
+
+            RB_Tools.Shared.Targets.Reviewboard.RequestApiResult result = RB_Tools.Shared.Targets.Reviewboard.RequestApi(credentials, apiRequest, workingDirectory);
+            if (result.Result == null)
+                throw new ReviewboardApiException(result.Error);
+            
+
+
+
+
+            return null;
+        }
+
+        //
+        // Pulls out the review ID
+        //
+        private static string ExtractReviewId(string review)
+        {
+            string cleanUrl = Paths.Clean(review);
+            string urlPath = Names.Url[(int)Names.Type.Reviewboard] + @"/r/";
+
+            // Strip out the path
+            string reviewId = cleanUrl.Replace(urlPath, "");
+            return reviewId;
         }
     }
 }

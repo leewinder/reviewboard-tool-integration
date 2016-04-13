@@ -8,6 +8,7 @@ set CONFIG_TYPE=%2
 set CONFIG_TYPE=%CONFIG_TYPE:"=%
 
 rem Update Nuget packages 
+"%~dp0..\..\External\Nuget\nuget.exe" restore "%~dp0..\..\Processes\Shared"
 "%~dp0..\..\External\Nuget\nuget.exe" restore "%~dp0..\..\Processes\%PROCESS_NAME%"
 
 rem Build the solution
