@@ -18,7 +18,7 @@ namespace Review_Stats.Dialogs
             InitializeComponent();
 
             // Kick it off and we're done
-            Display.SetDisplayProperties(label_Progress);
+            Display.SetDisplayProperties(this, label_Progress, progressBar_Progress);
             Generator.Start(this, fileList, debugOptions, () =>
             {
                 // Lose our dialog

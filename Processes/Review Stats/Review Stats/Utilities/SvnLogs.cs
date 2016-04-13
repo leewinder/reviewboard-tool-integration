@@ -11,6 +11,9 @@ namespace Review_Stats.Utilities
 {
     class SvnLogs
     {
+        // Public Delegates
+        public delegate void LogRetrieved(int count);
+
         // Result of an SVN log request
         public class Log
         {
@@ -51,12 +54,16 @@ namespace Review_Stats.Utilities
         //
         // Gets the logs for a given set of revisions
         //
-        public static Log[] GetRevisionLogs(string svnPath, string[] revisions)
+        public static Log[] GetRevisionLogs(string svnPath, string[] revisions, LogRetrieved logRetrieved)
         {
             // Spin through all the revisions requested
             List<Log> logs = new List<Log>();
-            foreach(string thisRevision in revisions)
+            for(int i = 0; i < revisions.Length; ++i)
             {
+                // Get this revision
+                string thisRevision = revisions[i];
+
+                // Pull out the log
                 string logOutput = Svn.GetLog(svnPath, thisRevision, true);
                 if (logOutput == null)
                     return null;
@@ -68,6 +75,9 @@ namespace Review_Stats.Utilities
 
                 // Keep track
                 logs.AddRange(individualLogs);
+
+                // One more done
+                logRetrieved(i + 1);
             }
 
             // Return all our logs

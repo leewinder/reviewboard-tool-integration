@@ -15,6 +15,9 @@ namespace Review_Stats.Utilities
     // Provides information about reviews
     class ReviewState
     {
+        // Public Delegates
+        public delegate void StatisticGenerated(int count);
+
         // A commit with an associated review
         public class CommitReview
         {
@@ -70,24 +73,9 @@ namespace Review_Stats.Utilities
         }
 
         //
-        // Returns the statistics on the raised reviews
-        //
-        public static GetReviewStatisticsResult GetReviewStatistics(CommitReview[] reviewList, string workingDirectory, Simple credentials)
-        {
-            // We need to spin through every review and pull out the information about each one
-            foreach (CommitReview thisReview in reviewList)
-            {
-                string reviewState = GetUrlReviewState(thisReview.Review, workingDirectory, credentials);
-            }
-
-            // Return our object
-            return new GetReviewStatisticsResult(null, null, null, 0, 0);
-        }
-
-        //
         // Counts the type of reviews in a set of commits
         //
-        public static GetCommitStatsResult GetCommitStats(SvnLogs.Log[] svnLogs)
+        public static GetCommitStatsResult GetCommitStatistics(SvnLogs.Log[] svnLogs, StatisticGenerated statGenerated)
         {
             // We need to track the types of reviews
             int unknownReviews = 0;
@@ -97,8 +85,11 @@ namespace Review_Stats.Utilities
             var reviews = new List<CommitReview>();
 
             // Spin through them all and parse the log message
-            foreach (SvnLogs.Log thisLog in svnLogs)
+            for (int logIndex = 0; logIndex < svnLogs.Length; ++logIndex)
             {
+                // Get this logs
+                SvnLogs.Log thisLog = svnLogs[logIndex];
+
                 // Get the line with the review state in it
                 string reviewStateLine = thisLog.Message.FirstOrDefault(line =>
                 {
@@ -146,10 +137,30 @@ namespace Review_Stats.Utilities
                     return null;
                 }
 
+                // Another one done
+                statGenerated(logIndex + 1);
             }
 
             // Return our reviews
             return new GetCommitStatsResult(commitCounts, unknownReviews, reviews.ToArray());
+        }
+
+        //
+        // Returns the statistics on the raised reviews
+        //
+        public static GetReviewStatisticsResult GetReviewStatistics(CommitReview[] reviewList, string workingDirectory, Simple credentials, StatisticGenerated statGenerated)
+        {
+            // We need to spin through every review and pull out the information about each one
+            for (int i = 0; i < reviewList.Length; ++i)
+            {
+                string reviewState = GetUrlReviewState(reviewList[i].Review, workingDirectory, credentials);
+
+                // Another one done
+                statGenerated(i+1);
+            }
+
+            // Return our object
+            return new GetReviewStatisticsResult(null, null, null, 0, 0);
         }
 
         //

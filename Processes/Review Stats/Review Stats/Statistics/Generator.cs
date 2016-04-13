@@ -60,6 +60,9 @@ namespace Review_Stats.Statistics
                     ReviewState.GetReviewStatisticsResult reviewStats = GetReviewStats(commitStats.Reviews, thisRevisionList.Path, credentials);
                     if (reviewStats == null)
                         return;
+
+                    // Create the review
+                    Display.Start(Display.State.CreatingResults);
                 }
             };
 
@@ -120,29 +123,6 @@ namespace Review_Stats.Statistics
         }
 
         //
-        // Gets the list of revisions to review
-        //
-        private static RevisionList.Revisions[] RequestRevisionLists(string[] pathsToReview)
-        {
-            RevisionList.Revisions[] results = RevisionList.Request(pathsToReview);
-            if (results == null)
-                s_errorMessage = @"No valid revisions were selected to review";
-
-            // Return our results
-            return results;
-        }
-
-        private static SvnLogs.Log[] GetLogsFromRevisions(RevisionList.Revisions revisionsToLog)
-        {
-            SvnLogs.Log[] results = SvnLogs.GetRevisionLogs(revisionsToLog.Path, revisionsToLog.Revision);
-            if (results == null)
-                s_errorMessage = @"Unable to get the logs for the revisions selected in " + revisionsToLog.Path;
-
-            // Return our results
-            return results;
-        }
-
-        //
         // Returns if we're authenticated against our servers
         //
         private static Simple CheckServerAuthentication(Form owner)
@@ -168,11 +148,55 @@ namespace Review_Stats.Statistics
         }
 
         //
+        // Gets the list of revisions to review
+        //
+        private static RevisionList.Revisions[] RequestRevisionLists(string[] pathsToReview)
+        {
+            RevisionList.Revisions[] results = RevisionList.Request(pathsToReview);
+            if (results == null)
+                s_errorMessage = @"No valid revisions were selected to review";
+
+            // Return our results
+            return results;
+        }
+
+        //
+        // Pulls out the logs for given revisions
+        //
+        private static SvnLogs.Log[] GetLogsFromRevisions(RevisionList.Revisions revisionsToLog)
+        {
+            // Starting to review logs
+            Display.Start(Display.State.ExtractingLogs, revisionsToLog.Revision.Length);
+
+            // Get our results
+            SvnLogs.Log[] results = SvnLogs.GetRevisionLogs(revisionsToLog.Path, revisionsToLog.Revision, (currentCount) =>
+            {
+                Display.Update(currentCount, revisionsToLog.Revision.Length);
+            });
+
+            // Did we fail?
+            if (results == null)
+                s_errorMessage = @"Unable to get the logs for the revisions selected in " + revisionsToLog.Path;
+
+            // Return our results
+            return results;
+        }
+
+        //
         // Gets the state of various commits
         //
         private static ReviewState.GetCommitStatsResult GetCommitStats(SvnLogs.Log[] revisionLogs)
         {
-            ReviewState.GetCommitStatsResult results = ReviewState.GetCommitStats(revisionLogs);
+            // Starting to pasring
+            Display.Start(Display.State.ParsingLogs, revisionLogs.Length);
+
+            // Get the stats about these commits
+            ReviewState.GetCommitStatsResult results = ReviewState.GetCommitStatistics(revisionLogs, (currentCount) =>
+            {
+                Display.Update(currentCount, revisionLogs.Length);
+            });
+
+            // Did we fail?
             if (results == null)
                 s_errorMessage = @"Unable to generate the commit stats";
 
@@ -185,10 +209,19 @@ namespace Review_Stats.Statistics
         //
         private static ReviewState.GetReviewStatisticsResult GetReviewStats(ReviewState.CommitReview[] reviews, string workingDirectory, Simple credentials)
         {
+            // Starting to review logs
+            Display.Start(Display.State.QueryingReviewboard, reviews.Length);
+
+            // Try to query the server for our review state
             ReviewState.GetReviewStatisticsResult results = null;
             try
             {
-                results = ReviewState.GetReviewStatistics(reviews, workingDirectory, credentials);
+                results = ReviewState.GetReviewStatistics(reviews, workingDirectory, credentials, (currentCount) =>
+                {
+                    Display.Update(currentCount, reviews.Length);
+                });
+
+                // Did we fail
                 if (results == null)
                 {
                     s_errorMessage = @"Unable to generate the review stats against the RB server";
@@ -197,6 +230,7 @@ namespace Review_Stats.Statistics
             }
             catch (ReviewboardApiException e)
             {
+                // API error
                 s_errorMessage = "Unable to generate the review stats against the RB server\n\n" + e.Message;
                 return null;
             }
