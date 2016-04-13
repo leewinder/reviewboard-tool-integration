@@ -92,8 +92,6 @@ namespace Review_Stats.Statistics
 
         private static State        s_state = State.RequestingLogs;
 
-        private static Int64        s_currentCount = 0;
-
         // Display messages
         private static readonly string[] StateMessages = new string[]
         {

@@ -18,6 +18,7 @@ namespace RB_Tools.Shared.Targets
         {
             Success = 200,
             NotFound = 100,
+            AccessDenied = 101,
 
             Error = 500,
         };
@@ -77,6 +78,54 @@ namespace RB_Tools.Shared.Targets
             string rbtPath = Path();
             string rbtArgs = string.Format(@"api-get --username {0} --password {1} --server {2} {3}", credentials.User, credentials.Password, Names.Url[(int)Names.Type.Reviewboard], apiRequest);
 
+            Process.Output output = Process.Start(workingDirectory, rbtPath, rbtArgs);
+            if (string.IsNullOrEmpty(output.StdErr) == false)
+                return new RequestApiResult(Result.Error, null, output.StdErr);
+
+            // Parse the data
+            try
+            {
+                JObject parsedOutput = JObject.Parse(output.StdOut);
+
+                // Good or bad?
+                string result = (string)parsedOutput["stat"];
+                if (result.Equals("fail", StringComparison.InvariantCultureIgnoreCase) == true)
+                {
+                    // This was a bad response, so pull out the message
+                    string errorCode = (string)parsedOutput["err"]["code"];
+                    string errorMessage = (string)parsedOutput["err"]["msg"];
+                    string returnMessage = string.Format("Error Code: {0}\n{1}", errorCode, errorMessage);
+
+                    // Do we have a valid code?
+                    int resultCode = int.Parse(errorCode);
+                    bool knownResult = Enum.IsDefined(typeof(Result), resultCode);
+                    if (knownResult == true)
+                        return new RequestApiResult((Result)resultCode, null, returnMessage);
+
+                    // Return a general error
+                    return new RequestApiResult(Result.Error, null, returnMessage);
+                }
+                else
+                {
+                    // We had a valid response so return it
+                    return new RequestApiResult(Result.Success, parsedOutput, string.Empty);
+                }
+            }
+            catch
+            {
+                return new RequestApiResult(Result.Error, null, @"Unable to parse the Reviewboard API result");
+            }
+        }
+
+        //
+        // Runs an API request
+        //
+        public static RequestApiResult RequestApiSync(Simple credentials, string apiRequest, string workingDirectory)
+        {
+            // Build up the RBT request
+            string rbtPath = Path();
+            string rbtArgs = string.Format(@"api-get --username {0} --password {1} --server {2} {3}", credentials.User, credentials.Password, Names.Url[(int)Names.Type.Reviewboard], apiRequest);
+       
             Process.Output output = Process.Start(workingDirectory, rbtPath, rbtArgs);
             if (string.IsNullOrEmpty(output.StdErr) == false)
                 return new RequestApiResult(Result.Error, null, output.StdErr);

@@ -56,29 +56,44 @@ namespace Review_Stats.Utilities
         //
         public static Log[] GetRevisionLogs(string svnPath, string[] revisions, LogRetrieved logRetrieved)
         {
-            // Spin through all the revisions requested
-            List<Log> logs = new List<Log>();
-            for(int i = 0; i < revisions.Length; ++i)
-            {
-                // Get this revision
-                string thisRevision = revisions[i];
+            // We need to track properties throughout the loop
+            Object      writeLock = new Object();
+            List<Log>   logs = new List<Log>();
+            int         logCount = 0;
 
+            // Spin through all the revisions requested
+            ParallelLoopResult result = Parallel.ForEach(revisions, (thisRevision, loopState) =>
+            {
                 // Pull out the log
                 string logOutput = Svn.GetLog(svnPath, thisRevision, true);
                 if (logOutput == null)
-                    return null;
+                    loopState.Stop();
 
-                // Read in the log input
-                Log[] individualLogs = ParseLogOutput(logOutput);
-                if (individualLogs == null)
-                    return null;
+                // Continue?
+                if (loopState.IsStopped == false)
+                {
+                    // Read in the log input
+                    Log[] individualLogs = ParseLogOutput(logOutput);
+                    if (individualLogs == null)
+                        loopState.Stop();
 
-                // Keep track
-                logs.AddRange(individualLogs);
+                    // Continue?
+                    if (loopState.IsStopped == false)
+                    {
+                        // Lock our writes
+                        lock (writeLock)
+                        {
+                            // Add and update
+                            logs.AddRange(individualLogs);
+                            logRetrieved(++logCount);
+                        }
+                    }
+                }
+            });
 
-                // One more done
-                logRetrieved(i + 1);
-            }
+            // If we didn't succeed, bail
+            if (result.IsCompleted == false)
+                return null;
 
             // Return all our logs
             return logs.ToArray();
