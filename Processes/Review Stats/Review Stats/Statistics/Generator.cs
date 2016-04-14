@@ -10,6 +10,7 @@ using Review_Stats.Utilities;
 using RB_Tools.Shared.Server;
 using RB_Tools.Shared.Authentication.Credentials;
 using Review_Stats.Exceptions;
+using System.Diagnostics;
 
 namespace Review_Stats.Statistics
 {
@@ -47,6 +48,10 @@ namespace Review_Stats.Statistics
                 // Spin through each revision list and do the work for each path selected
                 foreach (RevisionList.Revisions thisRevisionList in revisionLists)
                 {
+                    // We need to time this review
+                    Stopwatch stopWatch = new Stopwatch();
+                    stopWatch.Start();
+
                     // Get the logs for the given set of revisions
                     SvnLogs.Log[] revisionLogs = GetLogsFromRevisions(thisRevisionList);
                     if (revisionLogs == null)
@@ -62,7 +67,9 @@ namespace Review_Stats.Statistics
                         return;
 
                     // Create the review
-                    Display.Start(Display.State.CreatingResults);
+                    bool reportGenerated = CreateReviewReport(thisRevisionList, revisionLogs, commitStats, reviewStats, stopWatch);
+                    if (reportGenerated == false)
+                        return;
                 }
             };
 
@@ -236,6 +243,23 @@ namespace Review_Stats.Statistics
                 s_errorMessage = "Unable to generate the review stats against the RB server\n\n" + e.Message;
                 return null;
             }
+        }
+
+        //
+        // Generates the report
+        //
+        private static bool CreateReviewReport(RevisionList.Revisions revisions, SvnLogs.Log[] revisionLogs, ReviewState.GetCommitStatsResult commitStats, ReviewState.ReviewStatistics[] reviewStats, Stopwatch reviewTimer)
+        {
+            // We're now generating
+            Display.Start(Display.State.CreatingResults);
+            
+            // Try and generate the report
+            bool generated = Report.Generate(revisions, revisionLogs, commitStats, reviewStats, reviewTimer.Elapsed);
+            if (generated == false)
+                s_errorMessage = @"Unable to generate the Review Report";
+
+            // Return our results
+            return generated;
         }
 
     }

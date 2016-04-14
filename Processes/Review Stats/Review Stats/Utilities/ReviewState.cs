@@ -38,13 +38,13 @@ namespace Review_Stats.Utilities
         // A commit with an associated review
         public class CommitReview
         {
-            public int      Revision { get; private set; }
-            public string   Review { get; private set; }
+            public SvnLogs.Log  Log { get; private set; }
+            public string       Review { get; private set; }
 
             // Constructor
-            public CommitReview(int revision, string review)
+            public CommitReview(SvnLogs.Log log, string review)
             {
-                Revision = revision;
+                Log = log;
                 Review = review;
             }
         };
@@ -148,7 +148,7 @@ namespace Review_Stats.Utilities
                                 {
                                     string reviewUrl = GetReviewUrl(thisLog.Message);
                                     if (string.IsNullOrEmpty(reviewUrl) == false)
-                                        commitToAdd = new CommitReview(thisLog.Revision, reviewUrl);
+                                        commitToAdd = new CommitReview(thisLog, reviewUrl);
                                 }
 
                                 // Track the number of reviews
