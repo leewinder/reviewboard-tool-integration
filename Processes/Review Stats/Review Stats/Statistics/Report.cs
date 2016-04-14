@@ -28,6 +28,7 @@ namespace Review_Stats.Statistics
             outputContent = UpdateOverview(outputContent, revisionLogs, revisions.Url, reviewTime);
             outputContent = UpdateCommitStatistics(outputContent, commitStats);
             outputContent = UpdateReviewStatistics(outputContent, reviewStats);
+            outputContent = UpdateAverageResults(outputContent, reviewStats);
 
             // Display the content
             DisplayReport(outputContent, revisions.Url);
@@ -38,6 +39,7 @@ namespace Review_Stats.Statistics
         // Private properties
         private const string NumberFormat = @"N0";
         private const string PercentageFormat = @"n0";
+        private const string RatioFormat = @"n2";
         private const string DateFormat = @"r";
 
         //
@@ -149,6 +151,34 @@ namespace Review_Stats.Statistics
             var discardedCount = GetPercentageBreakdown(discardedReviews.First + discardedReviews.Second, reviewStats.Length);
             outputContent = outputContent.Replace(@"___REVIEW_DISCARDED___", discardedCount.First);
             outputContent = outputContent.Replace(@"___REVIEW_DISCARDED_PERCENTAGE___", discardedCount.Second);
+
+            // Return our updated report
+            return outputContent;
+        }
+
+        //
+        // Updates the averages section
+        //
+        private static string UpdateAverageResults(string outputContent, ReviewState.ReviewStatistics[] reviewStats)
+        {
+            // Get our counts
+            int numberOfReviews = 0, numberOfReplies = 0, numberOfShipIts = 0;
+            foreach (ReviewState.ReviewStatistics thisReview in reviewStats)
+            {
+                numberOfShipIts += thisReview.ShipIts;
+                numberOfReplies += thisReview.Reviews - thisReview.Replies;
+                numberOfReviews += thisReview.Reviews;
+            }
+
+            // Update our values
+            float reviewsPerReview = numberOfReviews / (float)reviewStats.Length;
+            outputContent = outputContent.Replace(@"___REVIEWS_PER_REVIEW___", reviewsPerReview.ToString(RatioFormat));
+
+            float repliesPerReview = numberOfReplies / (float)reviewStats.Length;
+            outputContent = outputContent.Replace(@"___REPLIES_PER_REVIEW___", repliesPerReview.ToString(RatioFormat));
+
+            float shipItsPerReview = numberOfShipIts / (float)reviewStats.Length;
+            outputContent = outputContent.Replace(@"___SHIP_ITS_PER_REVIEW___", shipItsPerReview.ToString(RatioFormat));
 
             // Return our updated report
             return outputContent;

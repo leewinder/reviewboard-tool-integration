@@ -113,7 +113,7 @@
 			<ul>
 				<li>Average number of reviews per review: ___REVIEWS_PER_REVIEW___</li>
 				<li>Average number of replies per review: ___REPLIES_PER_REVIEW___</li>
-				<li>Average number of Ship It's per review: ___SHIP_ITS_PER_REVIEW___)</li>
+				<li>Average number of Ship It's per review: ___SHIP_ITS_PER_REVIEW___</li>
 			</ul>
 		</td>
 	</tr>
