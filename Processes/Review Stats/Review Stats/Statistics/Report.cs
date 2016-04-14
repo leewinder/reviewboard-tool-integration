@@ -31,6 +31,10 @@ namespace Review_Stats.Statistics
             return true;
         }
 
+        // Private properties
+        private const string NumberFormatter = @"N0";
+        private const string DateFormatter = @"r";
+
         //
         // Updates the overview properties for the review
         //
@@ -46,15 +50,15 @@ namespace Review_Stats.Statistics
             outputContent = outputContent.Replace(@"___REPOSITORY_NAME___", repositoryName);
             outputContent = outputContent.Replace(@"___REPOSITORY_URL___", url);
 
-            outputContent = outputContent.Replace(@"___REVISION_RANGE_MIN___", startLog.Revision.ToString("N0"));
-            outputContent = outputContent.Replace(@"___REVISION_RANGE_MAX___", endLog.Revision.ToString("N0"));
+            outputContent = outputContent.Replace(@"___REVISION_RANGE_MIN___", startLog.Revision.ToString(NumberFormatter));
+            outputContent = outputContent.Replace(@"___REVISION_RANGE_MAX___", endLog.Revision.ToString(NumberFormatter));
 
-            outputContent = outputContent.Replace(@"___RANGE_DATE_START___", startLog.Date.ToString("r"));
-            outputContent = outputContent.Replace(@"___RANGE_DATE_END___", endLog.Date.ToString("r"));
+            outputContent = outputContent.Replace(@"___RANGE_DATE_START___", startLog.Date.ToUniversalTime().ToString(DateFormatter));
+            outputContent = outputContent.Replace(@"___RANGE_DATE_END___", endLog.Date.ToUniversalTime().ToString(DateFormatter));
 
-            outputContent = outputContent.Replace(@"___REVIEW_DATE___", DateTime.Now.ToString("r"));
+            outputContent = outputContent.Replace(@"___REVIEW_DATE___", DateTime.Now.ToUniversalTime().ToString(DateFormatter));
 
-            string reviewLength = string.Format("{0:D2}h:{1:D2}m:{2:D2}s",
+            string reviewLength = string.Format(@"{0:D2}h:{1:D2}m:{2:D2}s",
                         reviewTime.Hours,
                         reviewTime.Minutes,
                         reviewTime.Seconds);
@@ -81,7 +85,7 @@ namespace Review_Stats.Statistics
             Directory.CreateDirectory(reportsFolder);
 
             // Output file
-            string currentDate = DateTime.Now.ToString("r").Replace(",", "").Replace(":", "-");
+            string currentDate = DateTime.Now.ToUniversalTime().ToString(DateFormatter).Replace(",", "").Replace(":", "-");
             string filePath = string.Format(@"{0}\{1} {2}.html", reportsFolder, GetRepositoryName(url), currentDate);
 
             // Write our file and show it
