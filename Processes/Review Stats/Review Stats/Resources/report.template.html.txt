@@ -102,10 +102,11 @@
 				<li>Number of reviews closed (with Ship It's): ___REVIEW_CLOSED_SHIPPED___ (___REVIEW_CLOSED_SHIPPED_PERCENTAGE___%)</li>
 				<li>Number of reviews closed (no Ship It's): ___REVIEW_CLOSED_NOT_SHIPPED___ (___REVIEW_CLOSED_NOT_SHIPPED_PERCENTAGE___%)</li>
 				<br>
-				<li>Number of reviews open (with Ship It's): 1___REVIEW_OPEN_SHIPPED___ (___REVIEW_OPEN_SHIPPED_PERCENTAGE___%)</li>
+				<li>Number of reviews open (with Ship It's): ___REVIEW_OPEN_SHIPPED___ (___REVIEW_OPEN_SHIPPED_PERCENTAGE___%)</li>
 				<li>Number of reviews open (no Ship It's): ___REVIEW_OPEN_NOT_SHIPPED___ (___REVIEW_OPEN_NOT_SHIPPED_PERCENTAGE___%)</li>
 				<br>
 				<li>Number of reviews discarded: ___REVIEW_DISCARDED___ (___REVIEW_DISCARDED_PERCENTAGE___%)</li>
+				<li>Number of reviews pending: ___REVIEW_PENDING___ (___REVIEW_PENDING_PERCENTAGE___%)</li>
 			</ul>
 		</td>
 		<td valign="top" align="left">

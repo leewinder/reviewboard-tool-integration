@@ -27,6 +27,7 @@ namespace Review_Stats.Statistics
             // Spin through and update various sections
             outputContent = UpdateOverview(outputContent, revisionLogs, revisions.Url, reviewTime);
             outputContent = UpdateCommitStatistics(outputContent, commitStats);
+            outputContent = UpdateReviewStatistics(outputContent, reviewStats);
 
             // Display the content
             DisplayReport(outputContent, revisions.Url);
@@ -110,6 +111,50 @@ namespace Review_Stats.Statistics
         }
 
         //
+        // Updates the review stats of the report
+        //
+        private static string UpdateReviewStatistics(string outputContent, ReviewState.ReviewStatistics[] reviewStats)
+        {
+            // Update our values
+            outputContent = outputContent.Replace(@"___REVIEW_TOTAL___", reviewStats.Length.ToString(NumberFormat));
+
+            // Closed reviews
+            var closedReviews = GetReviewCount(reviewStats, ReviewState.State.Closed);
+            var closedShippedCount = GetPercentageBreakdown(closedReviews.First, reviewStats.Length);
+            outputContent = outputContent.Replace(@"___REVIEW_CLOSED_SHIPPED___", closedShippedCount.First);
+            outputContent = outputContent.Replace(@"___REVIEW_CLOSED_SHIPPED_PERCENTAGE___", closedShippedCount.Second);
+
+            var closedNotShippedCount = GetPercentageBreakdown(closedReviews.Second, reviewStats.Length);
+            outputContent = outputContent.Replace(@"___REVIEW_CLOSED_NOT_SHIPPED___", closedNotShippedCount.First);
+            outputContent = outputContent.Replace(@"___REVIEW_CLOSED_NOT_SHIPPED_PERCENTAGE___", closedNotShippedCount.Second);
+
+            // Open reviews
+            var openedReviews = GetReviewCount(reviewStats, ReviewState.State.Open);
+            var openedShippedCount = GetPercentageBreakdown(openedReviews.First, reviewStats.Length);
+            outputContent = outputContent.Replace(@"___REVIEW_OPEN_SHIPPED___", openedShippedCount.First);
+            outputContent = outputContent.Replace(@"___REVIEW_OPEN_SHIPPED_PERCENTAGE___", openedShippedCount.Second);
+
+            var openedNotShippedCount = GetPercentageBreakdown(openedReviews.Second, reviewStats.Length);
+            outputContent = outputContent.Replace(@"___REVIEW_OPEN_NOT_SHIPPED___", openedNotShippedCount.First);
+            outputContent = outputContent.Replace(@"___REVIEW_OPEN_NOT_SHIPPED_PERCENTAGE___", openedNotShippedCount.Second);
+            
+            // Pending reviews
+            var pendingReviews = GetReviewCount(reviewStats, ReviewState.State.Pending);
+            var pendingCount = GetPercentageBreakdown(pendingReviews.First + pendingReviews.Second, reviewStats.Length);
+            outputContent = outputContent.Replace(@"___REVIEW_PENDING___", pendingCount.First);
+            outputContent = outputContent.Replace(@"___REVIEW_PENDING_PERCENTAGE___", pendingCount.Second);
+
+            // Discarded reviews
+            var discardedReviews = GetReviewCount(reviewStats, ReviewState.State.Discarded);
+            var discardedCount = GetPercentageBreakdown(discardedReviews.First + discardedReviews.Second, reviewStats.Length);
+            outputContent = outputContent.Replace(@"___REVIEW_DISCARDED___", discardedCount.First);
+            outputContent = outputContent.Replace(@"___REVIEW_DISCARDED_PERCENTAGE___", discardedCount.Second);
+
+            // Return our updated report
+            return outputContent;
+        }
+
+        //
         // Gets the name of the repository
         //
         private static string GetRepositoryName(string repository)
@@ -142,6 +187,17 @@ namespace Review_Stats.Statistics
         {
             float percentage = (actual / (float)max) * 100.0f;
             return new Pair<string, string>(actual.ToString(NumberFormat), percentage.ToString(PercentageFormat));
+        }
+
+        //
+        // Returns the number of reviews with this state
+        //
+        private static Pair<int, int> GetReviewCount(ReviewState.ReviewStatistics[] reviewStats, ReviewState.State requestedState)
+        {
+            int shippedCount = reviewStats.Count(thisReview => thisReview.State == requestedState && thisReview.ShipIts > 0);
+            int notShippedCount = reviewStats.Count(thisReview => thisReview.State == requestedState && thisReview.ShipIts == 0);
+
+            return new Pair<int, int>(shippedCount, notShippedCount);
         }
     }
 }
