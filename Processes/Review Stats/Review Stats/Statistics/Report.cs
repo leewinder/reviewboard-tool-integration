@@ -30,6 +30,8 @@ namespace Review_Stats.Statistics
             outputContent = UpdateReviewStatistics(outputContent, reviewStats);
             outputContent = UpdateAverageResults(outputContent, reviewStats);
 
+            outputContent = UpdateCopyrightSection(outputContent);
+
             // Display the content
             DisplayReport(outputContent, revisions.Url);
 
@@ -41,6 +43,8 @@ namespace Review_Stats.Statistics
         private const string PercentageFormat = @"n0";
         private const string RatioFormat = @"n2";
         private const string DateFormat = @"r";
+
+        private const string Copyright = @"";
 
         //
         // Updates the overview properties for the review
@@ -181,6 +185,16 @@ namespace Review_Stats.Statistics
             outputContent = outputContent.Replace(@"___SHIP_ITS_PER_REVIEW___", shipItsPerReview.ToString(RatioFormat));
 
             // Return our updated report
+            return outputContent;
+        }
+
+        //
+        // Updates the copyright section
+        //
+        private static string UpdateCopyrightSection(string outputContent)
+        {
+            // Update it and return
+            outputContent = outputContent.Replace(@"___COPYRIGHT_STATEMENT___", Copyright);
             return outputContent;
         }
 
