@@ -176,13 +176,13 @@ namespace Review_Stats.Statistics
             }
 
             // Update our values
-            float reviewsPerReview = numberOfReviews / (float)reviewStats.Length;
+            float reviewsPerReview = (reviewStats.Length == 0 ? 0 : numberOfReviews / (float)reviewStats.Length);
             outputContent = outputContent.Replace(@"___REVIEWS_PER_REVIEW___", reviewsPerReview.ToString(RatioFormat));
 
-            float repliesPerReview = numberOfReplies / (float)reviewStats.Length;
+            float repliesPerReview = (reviewStats.Length == 0 ? 0 : numberOfReplies / (float)reviewStats.Length);
             outputContent = outputContent.Replace(@"___REPLIES_PER_REVIEW___", repliesPerReview.ToString(RatioFormat));
 
-            float shipItsPerReview = numberOfShipIts / (float)reviewStats.Length;
+            float shipItsPerReview = (reviewStats.Length == 0 ? 0 : numberOfShipIts / (float)reviewStats.Length);
             outputContent = outputContent.Replace(@"___SHIP_ITS_PER_REVIEW___", shipItsPerReview.ToString(RatioFormat));
 
             // Return our updated report
@@ -333,6 +333,11 @@ namespace Review_Stats.Statistics
         //
         private static Pair<string, string> GetPercentageBreakdown(int actual, int max)
         {
+            // Check any divide by zero's
+            if (max == 0)
+                return new Pair<string, string>("0", "0");
+
+            // Calculate the percentage
             float percentage = (actual / (float)max) * 100.0f;
             return new Pair<string, string>(actual.ToString(NumberFormat), percentage.ToString(PercentageFormat));
         }
