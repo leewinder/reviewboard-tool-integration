@@ -292,7 +292,7 @@ namespace Review_Stats.Statistics
                                                                       TrimAuthor(thisReview.Commit.Log.Author),
                                                                       reviewCode,
                                                                       thisReview.ShipIts.ToString(NumberFormat),
-                                                                      (thisReview.ShipIts - thisReview.Replies).ToString(NumberFormat));
+                                                                      thisReview.Replies.ToString(NumberFormat));
                 // Add this row
                 reviewRows.AppendLine(thisRow);
             }
