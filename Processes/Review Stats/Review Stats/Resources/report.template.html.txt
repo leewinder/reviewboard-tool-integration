@@ -123,108 +123,11 @@
 <br>
 <heading_2>Code Reviews</heading_2>
 <br>
-<br>
-<heading_3>Open Reviews</heading_3>
-<br>
-<br>
-<table>
-	<tr>
-		<td width="100px"><heading_table>Revision</heading_table></td>
-		<td width="200px"><heading_table>Review</heading_table></td>
-		<td width="75px"><heading_table>Ship It's</heading_table></td>
-		<td width="200px"><heading_table>Additional Comments</heading_table></td>
-	</tr>
-	
-	___OPEN_REVIEWS_SHIPPED_TABLE___
-
-</table>
-
-<br>
-<table>
-	<tr>
-		<td width="100px"><heading_table>Revision</heading_table></td>
-		<td width="200px"><heading_table>Review</heading_table></td>
-		<td width="75px"><heading_table>Ship It's</heading_table></td>
-		<td width="200px"><heading_table>Additional Comments</heading_table></td>
-	</tr>
-	
-	___OPEN_REVIEWS_NOT_SHIPPED_TABLE___
-
-</table> 
-
-<br>
-<br>
-<heading_3>Closed Reviews</heading_3>
-<br>
-<br>
-<table>
-	<tr>
-		<td width="100px"><heading_table>Revision</heading_table></td>
-		<td width="200px"><heading_table>Review</heading_table></td>
-		<td width="75px"><heading_table>Ship It's</heading_table></td>
-		<td width="200px"><heading_table>Additional Comments</heading_table></td>
-	</tr>
-	
-	___CLOSED_REVIEWS_SHIPPED_TABLE___
-
-</table>
-
-<br>
-<table>
-	<tr>
-		<td width="100px"><heading_table>Revision</heading_table></td>
-		<td width="200px"><heading_table>Review</heading_table></td>
-		<td width="75px"><heading_table>Ship It's</heading_table></td>
-		<td width="200px"><heading_table>Additional Comments</heading_table></td>
-	</tr>
-	
-	___CLOSED_REVIEWS_NOT_SHIPPED_TABLE___
-
-</table> 
-
-<br>
-<br>
-<heading_3>Discarded Reviews</heading_3>
-<br>
-<br>
-<table>
-	<tr>
-		<td width="100px"><heading_table>Revision</heading_table></td>
-		<td width="200px"><heading_table>Review</heading_table></td>
-		<td width="75px"><heading_table>Ship It's</heading_table></td>
-		<td width="200px"><heading_table>Additional Comments</heading_table></td>
-	</tr>
-	
-	___DISCARDED_REVIEWS_SHIPPED_TABLE___
-
-</table> 
-
-<br>
-<table>
-	<tr>
-		<td width="100px"><heading_table>Revision</heading_table></td>
-		<td width="200px"><heading_table>Review</heading_table></td>
-		<td width="75px"><heading_table>Ship It's</heading_table></td>
-		<td width="200px"><heading_table>Additional Comments</heading_table></td>
-	</tr>
-	
-	___DISCARDED_REVIEWS_NOT_SHIPPED_TABLE___
-
-</table> 
-<br>
-<br>
-<heading_3>Invalid Reviews</heading_3>
-<br>
-<br>
-<table>
-	<tr>
-		<td width="100px"><heading_table>Revision</heading_table></td>
-		<td width="200px"><heading_table>Review</heading_table></td>
-	</tr>
-	
-	___INVALID_REVIEWS_TABLE___
-
-</table> 
+___OPEN_REVIEWS_TABLE_ENTRY___
+___CLOSED_REVIEWS_TABLE_ENTRY___
+___PENDING_REVIEWS_TABLE_ENTRY___
+___DISCARDED_REVIEWS_TABLE_ENTRY___
+___INVALID_REVIEWS_TABLE_ENTRY___
 <br>
 <br>
 <br>
