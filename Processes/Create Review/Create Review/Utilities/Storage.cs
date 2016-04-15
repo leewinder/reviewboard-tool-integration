@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RB_Tools.Shared.Utilities;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,18 +16,23 @@ namespace Create_Review.Utilities
         //
         // Enables storge of assets, if this isn't called then other calls are noop
         //
-        public static void KeepAssets()
+        public static void KeepAssets(string summary)
         {
             // If we have a folder, we can just leave
             if (string.IsNullOrEmpty(storageFolder) == false)
                 return;
 
             // Get the folder we'll use
-            string myDocsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            string thisReviewFolder = DateTime.Now.ToString("yy.MM.dd.hh.mm.ss");
+            string myDocsFolder = Paths.GetDocumentsFolder();
 
             // Build up the folder we'll use
-            storageFolder = string.Format("{0}/Reviewboard Integration Tools/Reviews/{1}/", myDocsFolder, thisReviewFolder);
+            storageFolder = string.Format("{0}/Reviews/{1}/", myDocsFolder, summary);
+
+            // Make sure we're not replacing one
+            if (Directory.Exists(storageFolder) == true)
+                Directory.Delete(storageFolder, true);
+
+            // Make sure it's there
             Directory.CreateDirectory(storageFolder);
         }
 

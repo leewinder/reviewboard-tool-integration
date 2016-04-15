@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		body {
+			color: black;
+			font-family: verdana;
+			
+			font-size: 70%;
+		}
+
+		heading_1 {
+			font-size: 300%;
+			font-weight: bold;
+		}
+
+		heading_2 {
+			font-size: 220%;
+			font-weight: bold;
+		}
+
+		heading_3 {
+			font-size: 180%;
+			font-weight: bold;
+		}
+
+		heading_4 {
+			font-size: 120%;
+			font-weight: bold;
+		}
+
+		heading_table {
+			font-size: 100%;
+			font-weight: bold;
+		}
+
+		minorheading {
+			font-size: 100%;
+			font-weight: bold;
+		}
+
+		code {
+			font-family: "Courier New", Courier, monospace
+		}
+
+		li { 
+		  margin-left: -20px;
+		}
+
+		table, th, td {
+		   border: 0px solid black;
+		   
+		} 
+	</style>
+	<title>___REPOSITORY_NAME___ - Review Results</title>
+</head>
+<body>
+<heading_1>___REPOSITORY_NAME___ - Review Results</heading_1>
+<br>
+<br>
+<br>
+<br>
+<heading_2>Review Overview</heading_2>
+<ul>
+	<li>SVN Repository Url: ___REPOSITORY_URL___</li>
+	<li>Revision Range (inclusive): ___REVISION_RANGE_MIN___-___REVISION_RANGE_MAX___ (not necessarily sequential)</li>
+	<br>
+	<li>Range Date (Start): ___RANGE_DATE_START___</li>
+	<li>Range Date (End): ___RANGE_DATE_END___</li>
+	<br>
+	<li>Date of Review: ___REVIEW_DATE___</li>
+	<li>Review Duration: ___REVIEW_DURATION___</li>
+</ul>
+<br>
+<br>
+<heading_2>Review Statistics</heading_2>
+<br>
+<br>
+
+ <table style="width:1200px">
+	<tr>
+		<td width="33%"><heading_table>Commit Stats</heading_table></td>
+		<td width="33%"><heading_table>Review Stats</heading_table></td>
+		<td width="33%"><heading_table>Average Results</heading_table></td>
+	</tr>
+	<tr>
+		<td valign="top" align="left">
+			<ul>
+				<li>Number of commits (Total): ___COMMIT_COUNT_TOTAL___</li>
+				<br>
+				<li>Number of commits (Reviewed): ___COMMIT_COUNT_REVIEWED___ (___COMMIT_COUNT_REVIEWED_PERCENTAGE___%)</li>
+				<li>Number of commits (Later): ___COMMIT_COUNT_LATER___ (___COMMIT_COUNT_LATER_PERCENTAGE___%)</li>
+				<li>Number of commits (No Review): ___COMMIT_COUNT_NO_REVIEW___ (___COMMIT_COUNT_NO_REVIEW_PERCENTAGE___%)</li>
+				<li>Number of commits (Assets Only): ___COMMIT_COUNT_ASSET_ONLY___ (___COMMIT_COUNT_ASSET_ONLY_PERCENTAGE___%)</li>
+				<li>Number of commits (Unreviewed): ___COMMIT_COUNT_NONE___ (___COMMIT_COUNT_NONE_PERCENTAGE___%)</li>
+			</ul>
+		</td>
+		<td valign="top" align="left">
+			<ul>
+				<li>Number of reviews (Total): ___REVIEW_TOTAL___</li>
+				<br>
+				<li>Number of reviews closed (with Ship It's): ___REVIEW_CLOSED_SHIPPED___ (___REVIEW_CLOSED_SHIPPED_PERCENTAGE___%)</li>
+				<li>Number of reviews closed (no Ship It's): ___REVIEW_CLOSED_NOT_SHIPPED___ (___REVIEW_CLOSED_NOT_SHIPPED_PERCENTAGE___%)</li>
+				<br>
+				<li>Number of reviews open (with Ship It's): ___REVIEW_OPEN_SHIPPED___ (___REVIEW_OPEN_SHIPPED_PERCENTAGE___%)</li>
+				<li>Number of reviews open (no Ship It's): ___REVIEW_OPEN_NOT_SHIPPED___ (___REVIEW_OPEN_NOT_SHIPPED_PERCENTAGE___%)</li>
+				<br>
+				<li>Number of reviews discarded: ___REVIEW_DISCARDED___ (___REVIEW_DISCARDED_PERCENTAGE___%)</li>
+				<li>Number of reviews pending: ___REVIEW_PENDING___ (___REVIEW_PENDING_PERCENTAGE___%)</li>
+			</ul>
+		</td>
+		<td valign="top" align="left">
+			<ul>
+				<li>Average number of reviews per review: ___REVIEWS_PER_REVIEW___</li>
+				<li>Average number of replies per review: ___REPLIES_PER_REVIEW___</li>
+				<li>Average number of Ship It's per review: ___SHIP_ITS_PER_REVIEW___</li>
+			</ul>
+		</td>
+	</tr>
+</table> 
+
+<br>
+<br>
+<heading_2>Code Reviews</heading_2>
+<br>
+___OPEN_REVIEWS_TABLE_ENTRY___
+___CLOSED_REVIEWS_TABLE_ENTRY___
+___PENDING_REVIEWS_TABLE_ENTRY___
+___DISCARDED_REVIEWS_TABLE_ENTRY___
+___INVALID_REVIEWS_TABLE_ENTRY___
+<br>
+<br>
+<br>
+</body>
+	<footer>
+		<p align="right">
+			___COPYRIGHT_STATEMENT___
+		</p>
+	</footer> 
+</html>

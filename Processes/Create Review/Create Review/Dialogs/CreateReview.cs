@@ -6,6 +6,11 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 
+using RB_Tools.Shared.Server;
+using RB_Tools.Shared.Authentication.Credentials;
+using RB_Tools.Shared.Utilities;
+using RB_Tools.Shared.Extensions;
+
 namespace Create_Review
 {
     public partial class CreateReview : Form
@@ -13,7 +18,7 @@ namespace Create_Review
         //
         // Constructor
         //
-        public CreateReview(string originalRequest, Utilities.Review.Content reviewSource)
+        public CreateReview(string originalRequest, Review.Review.Content reviewSource)
         {
             // Save our properties
             m_reviewSource = reviewSource;
@@ -22,19 +27,12 @@ namespace Create_Review
 
             InitializeComponent();
 
-            InitialiseDialofElements();
+            InitialiseDialogElements();
             InitialiseReviewGroups();
             UpdateCreateReviewDialogState(State.Idle);
-
-            // If we are not authenticated, force it
-            if (Settings.ReviewAuth.Default.Authenticated == false)
-            {
-                Authentication auth = new Authentication(m_requestDirectory);
-                auth.ShowDialog(this);
-            }
-
+            
             // If this is a patch review, disable the list files option
-            if (reviewSource.Source == Utilities.Review.Source.Patch)
+            if (reviewSource.Source == Review.Review.Source.Patch)
             {
                 filesForReviewToolStripMenuItem.Enabled = false;
                 filesForReviewToolStripMenuItem.ToolTipText = "Unable to view the individual files of a review\nwhen reviewing a manually created patch file";
@@ -62,19 +60,19 @@ namespace Create_Review
         // Review Request Properties
         private class ReviewRequestProperties
         {
-            public readonly Utilities.Review.Properties         ReviewProperties;
-            public readonly Reviewboard.ConnectionProperties    ConnectionProperties;
+            public readonly Review.Review.Properties ReviewProperties;
+            public readonly string                      WorkingCopy;
 
             // Constructor
-            public ReviewRequestProperties(Utilities.Review.Properties reviewProperties, Reviewboard.ConnectionProperties connectionProperties)
+            public ReviewRequestProperties(Review.Review.Properties reviewProperties, string workingCopy)
             {
                 ReviewProperties = reviewProperties;
-                ConnectionProperties = connectionProperties;
+                WorkingCopy = workingCopy;
             }
         };
 
         // Private properties
-        private readonly Utilities.Review.Content   m_reviewSource;
+        private readonly Review.Review.Content   m_reviewSource;
         private readonly string                     m_requestDirectory;
 
         private readonly string                     m_originalRequest;
@@ -84,10 +82,21 @@ namespace Create_Review
         //
         // Initialises the elements of the dialog
         //
-        private void InitialiseDialofElements()
+        private void InitialiseDialogElements()
         {
+            // Start with a clean combo
+            comboBox_ReviewLevel.Items.Clear();
+
+            // Add the review level entries to the combo box
+            int reviewTypeCount = Enum.GetNames(typeof(RB_Tools.Shared.Review.Properties.Level)).Length;
+            for (int i = 0; i < reviewTypeCount; ++i)
+            {
+                var thisLevel = (RB_Tools.Shared.Review.Properties.Level)i;
+                comboBox_ReviewLevel.Items.Add(thisLevel.GetDescription());
+            }
+
             // Set the first option by default
-            comboBox_ReviewLevel.SelectedIndex = (int)Utilities.Review.Level.FullReview;
+            comboBox_ReviewLevel.SelectedIndex = (int)RB_Tools.Shared.Review.Properties.Level.FullReview;
         }
 
         //
@@ -96,16 +105,16 @@ namespace Create_Review
         private void InitialiseReviewGroups()
         {
             // If we have nothing, bail
-            if (string.IsNullOrWhiteSpace(Settings.ReviewGroups.Default.Groups) == true)
+            if (string.IsNullOrWhiteSpace(Settings.Settings.Default.Groups) == true)
                 return;
 
             // Read in what we've selected
             int[] selectedGroups = null;
-            if (string.IsNullOrWhiteSpace(Settings.ReviewGroups.Default.Selected) == false)
-                selectedGroups = JsonConvert.DeserializeObject<int[]>(Settings.ReviewGroups.Default.Selected);
+            if (string.IsNullOrWhiteSpace(Settings.Settings.Default.Selected) == false)
+                selectedGroups = JsonConvert.DeserializeObject<int[]>(Settings.Settings.Default.Selected);
 
             // Update the selection box
-            m_reviewGroups = JsonConvert.DeserializeObject<Reviewboard.ReviewGroup[]>(Settings.ReviewGroups.Default.Groups);
+            m_reviewGroups = JsonConvert.DeserializeObject<Reviewboard.ReviewGroup[]>(Settings.Settings.Default.Groups);
             UpdateSelectedReviewGroups(selectedGroups);
         }
 
@@ -159,8 +168,8 @@ namespace Create_Review
                 selectedIndexJson = JsonConvert.SerializeObject(selectedIndices.ToArray());
 
             // Save the data out
-            Settings.ReviewGroups.Default.Selected = selectedIndexJson;
-            Settings.ReviewGroups.Default.Save();
+            Settings.Settings.Default.Selected = selectedIndexJson;
+            Settings.Settings.Default.Save();
         }
 
         //
@@ -213,7 +222,7 @@ namespace Create_Review
             }
 
             // If this is a patch file, we always have to raise a review and can't delete it
-            if (m_reviewSource.Source == Utilities.Review.Source.Patch)
+            if (m_reviewSource.Source == Review.Review.Source.Patch)
             {
                 requestTypeDropdown = false;
                 requestSelectArtifacts = false;
@@ -245,7 +254,7 @@ namespace Create_Review
         //
         // Runs the review request
         //
-        private void TriggerReviewRequest(Utilities.Review.Properties reviewProperties)
+        private void TriggerReviewRequest(Review.Review.Properties reviewProperties)
         {
             // Build up the background work
             BackgroundWorker updateThread = new BackgroundWorker();
@@ -255,11 +264,19 @@ namespace Create_Review
             {
                 // Pull out the properties of the request
                 ReviewRequestProperties thisRequest = args.Argument as ReviewRequestProperties;
+
+                // Get our credentials
+                string serverName = Names.Url[(int)Names.Type.Reviewboard];
+                Simple credentials = Credentials.Create(serverName) as Simple;
+                if (credentials == null)
+                    throw new FileNotFoundException(@"Unable to find the credentials for " + serverName);
+
+                // Request the review
                 Reviewboard.ReviewRequestResult result = Reviewboard.RequestReview(
-                    thisRequest.ConnectionProperties.Directory,
-                    thisRequest.ConnectionProperties.Server,
-                    thisRequest.ConnectionProperties.User,
-                    thisRequest.ConnectionProperties.Password,
+                    thisRequest.WorkingCopy,
+                    credentials.Server,
+                    credentials.User,
+                    credentials.Password,
                     thisRequest.ReviewProperties);
 
                 // Save the result
@@ -272,7 +289,7 @@ namespace Create_Review
                 if (args.Error != null)
                 {
                     string body = string.Format("Exception thrown when trying to raise a new review\n\nException: {0}\n\nDescription: {1}", args.Error.GetType().Name, args.Error.Message);
-                    Notification.Show(this, @"Unable to raise review", body, Notification.FormIcon.Cross);
+                    MessageBox.Show(this, body, @"Unable to raise review", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                     OnReviewFinished(FinishReason.Error);
                 }
@@ -285,7 +302,7 @@ namespace Create_Review
                     if (string.IsNullOrWhiteSpace(requestResult.Error) == false)
                     {
                         // Raise the error and we're done
-                        Notification.Show(this, @"Unable to raise review", requestResult.Error, Notification.FormIcon.Cross);
+                        MessageBox.Show(this, requestResult.Error, @"Unable to raise review", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         OnReviewFinished(FinishReason.Error);
                     }
                     else
@@ -295,7 +312,7 @@ namespace Create_Review
                             System.Diagnostics.Process.Start(requestResult.Url);
 
                         // If it's just a patch file, we don't need to do anything else
-                        if (m_reviewSource.Source == Utilities.Review.Source.Patch)
+                        if (m_reviewSource.Source == Review.Review.Source.Patch)
                         {
                             OnReviewFinished(FinishReason.Success);
                         }
@@ -309,10 +326,9 @@ namespace Create_Review
                     }
                 }
             };
-
+            
             // Kick off the request
-            Reviewboard.ConnectionProperties connectionProperties = new Reviewboard.ConnectionProperties(m_requestDirectory, Settings.ReviewAuth.Default.Server, Settings.ReviewAuth.Default.User, Settings.ReviewAuth.Default.Password, true);
-            ReviewRequestProperties requestProperties = new ReviewRequestProperties(reviewProperties, connectionProperties);
+            ReviewRequestProperties requestProperties = new ReviewRequestProperties(reviewProperties, m_requestDirectory);
             updateThread.RunWorkerAsync(requestProperties);
         }
 
@@ -338,7 +354,7 @@ namespace Create_Review
                 if (args.Error != null)
                 {
                     string body = string.Format("Exception thrown when trying to commit to SVN\n\nException: {0}\n\nDescription: {1}", args.Error.GetType().Name, args.Error.Message);
-                    Notification.Show(this, @"Unable to commit", body, Notification.FormIcon.Cross);
+                    MessageBox.Show(this, body, @"Unable to commit", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                     // Done
                     OnReviewFinished(FinishReason.Error);
@@ -360,7 +376,7 @@ namespace Create_Review
         private void OnReviewFinished(FinishReason finishReason)
         {
             // Keep the patch file, delete the original if we created it
-            Utilities.Storage.Keep(m_reviewSource.Patch, "Changes.patch", m_reviewSource.Source == Utilities.Review.Source.Files);
+            Utilities.Storage.Keep(m_reviewSource.Patch, "Changes.patch", m_reviewSource.Source == Review.Review.Source.Files);
 
             // Go back to the final state
             if (finishReason == FinishReason.Success)
@@ -374,21 +390,19 @@ namespace Create_Review
             // We need a sumary before we raise the review
             if (string.IsNullOrWhiteSpace(textBox_Summary.Text) == true)
             {
-                Notification.Show(this, "Unable to post review", "You need to provide a summary before you can post a review", Notification.FormIcon.Cross);
+                MessageBox.Show(this, "You need to provide a summary before you can post a review", "Unable to post review", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            // Before we do anything, we need to be authenticated
-            if (Settings.ReviewAuth.Default.Authenticated == false)
+            string reviewboardServer = Names.Url[(int)Names.Type.Reviewboard];
+            if (Credentials.Available(reviewboardServer) == false)
             {
-                Notification.Show(this, "Unable to generate review", "You must be authenticated with the Reviewboard server before generating a review.\n\nThe Authentication Request dialog will now open.", Notification.FormIcon.Cross);
+                DialogResult dialogResult = MessageBox.Show(this, "You must be authenticated with the Reviewboard server before generating a review.\n\nDo you want to authenticate now?", "Authentication Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (dialogResult == DialogResult.Yes)
+                    RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
 
-                // Now open the authentication dialog
-                Authentication authRequest = new Authentication(m_requestDirectory);
-                authRequest.ShowDialog(this);
-
-                // If we are still not authenticated, bail
-                if (Settings.ReviewAuth.Default.Authenticated == false)
+                // Check if we're still unauthenticated
+                if (Credentials.Available(reviewboardServer) == false)
                     return;
             }
 
@@ -400,7 +414,7 @@ namespace Create_Review
 
             // Do we need to keep our artifacts?
             if (checkBox_KeepArtifacts.Checked == true)
-                Utilities.Storage.KeepAssets();
+                Utilities.Storage.KeepAssets(textBox_Summary.Text);
             Utilities.Storage.Keep(m_originalRequest, "Original File List.txt", false);
 
             // Build up the list of review groups
@@ -412,7 +426,7 @@ namespace Create_Review
             }
 
             // Build up the properties of this review
-            Utilities.Review.Properties reviewProperties = new Utilities.Review.Properties(
+            Review.Review.Properties reviewProperties = new Review.Review.Properties(
                 m_requestDirectory,
 
                 m_reviewSource,
@@ -427,7 +441,7 @@ namespace Create_Review
 
                 selectedReviewGroups,
 
-                (Utilities.Review.Level)comboBox_ReviewLevel.SelectedIndex,
+                (RB_Tools.Shared.Review.Properties.Level)comboBox_ReviewLevel.SelectedIndex,
                 checkBox_CopiesAsAdds.Checked
             );
 
@@ -438,45 +452,47 @@ namespace Create_Review
         private void reviewboardAuthenticationToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Show the authentication dialog
-            Authentication authRequest = new Authentication(m_requestDirectory);
-            authRequest.ShowDialog(this);
+            RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
         }
 
         private void button_RefreshGroups_Click(object sender, EventArgs e)
         {
             // Before we do anything, we need to be authenticated
-            if (Settings.ReviewAuth.Default.Authenticated == false)
+            string reviewboardServer = Names.Url[(int)Names.Type.Reviewboard];
+            if (Credentials.Available(reviewboardServer) == false)
             {
-                Notification.Show(this, "Unable to refresh groups", "You must be authenticated with the Reviewboard server before refreshing the review groups.\n\nThe Authentication Request dialog will now open.", Notification.FormIcon.Cross);
-
-                // Now open the authentication dialog
-                Authentication authRequest = new Authentication(m_requestDirectory);
-                authRequest.ShowDialog(this);
-
-                // If we are still not authenticated, bail
-                if (Settings.ReviewAuth.Default.Authenticated == false)
+                DialogResult dialogResult = MessageBox.Show(this, "You must be authenticated with the Reviewboard server before refreshing the review groups.\n\nDo you want to authenticate now?", "Authentication Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (dialogResult == DialogResult.Yes)
+                    RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
+                
+                // Check if we're still unauthenticated
+                if (Credentials.Available(reviewboardServer) == false)
                     return;
             }
+
+            // Turn off the buttons and lock the settings
+            UpdateCreateReviewDialogState(State.RefreshGroups);
 
             // Lose everything in the box
             checkedListBox_ReviewGroups.Items.Clear();
             m_reviewGroups = new Reviewboard.ReviewGroup[0];
 
-            Settings.ReviewGroups.Default.Reset();
-            Settings.ReviewGroups.Default.Save();
+            Settings.Settings.Default.Reset();
+            Settings.Settings.Default.Save();
 
-            // Turn off the buttons and lock the settings
-            UpdateCreateReviewDialogState(State.RefreshGroups);
-            
             // Build up the background work
             BackgroundWorker updateThread = new BackgroundWorker();
 
             // Called when we need to trigger the request
             updateThread.DoWork += (object objectSender, DoWorkEventArgs args) =>
             {
-                // Kick it off
-                Reviewboard.ConnectionProperties userConnectionProperties = args.Argument as Reviewboard.ConnectionProperties;
-                Reviewboard.ReviewGroup[] result = Reviewboard.GetReviewGroups(m_requestDirectory, userConnectionProperties.Server, userConnectionProperties.User, userConnectionProperties.Password);
+                // Get our credentials
+                Simple credentials = Credentials.Create(reviewboardServer) as Simple;
+                if (credentials == null)
+                    throw new FileNotFoundException(@"Unable to find the credentials for " + reviewboardServer);
+
+                // Get the groups
+                Reviewboard.ReviewGroup[] result = Reviewboard.GetReviewGroups(m_requestDirectory, credentials.Server, credentials.User, credentials.Password);
 
                 // Save the result
                 args.Result = result;
@@ -488,7 +504,7 @@ namespace Create_Review
                 if (args.Error != null)
                 {
                     string body = string.Format("Exception thrown when trying to retrive the review groups\n\nException: {0}\n\nDescription: {1}", args.Error.GetType().Name, args.Error.Message);
-                    Notification.Show(this, @"Unable to update group list", body, Notification.FormIcon.Cross);
+                    MessageBox.Show(this, body, @"Unable to update group list", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else
                 {
@@ -498,8 +514,8 @@ namespace Create_Review
 
                     // Save the groups we have returned
                     string groupsJson = JsonConvert.SerializeObject(m_reviewGroups);
-                    Settings.ReviewGroups.Default.Groups = groupsJson;
-                    Settings.ReviewGroups.Default.Save();
+                    Settings.Settings.Default.Groups = groupsJson;
+                    Settings.Settings.Default.Save();
                 }
 
                 // Set the button state back
@@ -507,8 +523,7 @@ namespace Create_Review
             };
 
             // Kick off the request
-            Reviewboard.ConnectionProperties requestProperties = new Reviewboard.ConnectionProperties(m_requestDirectory, Settings.ReviewAuth.Default.Server, Settings.ReviewAuth.Default.User, Settings.ReviewAuth.Default.Password, true);
-            updateThread.RunWorkerAsync(requestProperties);
+            updateThread.RunWorkerAsync();
         }
 
         private void CreateReview_FormClosing(object sender, FormClosingEventArgs e)
@@ -528,12 +543,12 @@ namespace Create_Review
             StringBuilder filesToReview = new StringBuilder("The following files and folder have been included in this review\n\n");
             for (int i = 0; i < m_reviewSource.Files.Length; ++i)
             {
-                string truncatedFile = Utilities.Paths.TruncateLongPath(m_reviewSource.Files[i]);
+                string truncatedFile = Paths.TruncateLongPath(m_reviewSource.Files[i]);
                 filesToReview.Append("- " + truncatedFile + '\n');
             }
 
             // Just show the list
-            Notification.Show(this, "Files in Review", filesToReview.ToString(), Notification.FormIcon.Info);
+            MessageBox.Show(this, filesToReview.ToString(), "Files in Review", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

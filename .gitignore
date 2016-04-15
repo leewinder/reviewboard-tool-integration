@@ -21,3 +21,10 @@ Processes/About/About/obj/
 Processes/About/About/bin/
 *.user
 *.local.bat
+Processes/Review Stats/Review Stats/obj/
+Processes/Authentication/Authentication/obj/
+Processes/Shared/Shared/obj/
+Processes/Review Stats/packages/
+Processes/Shared/packages/
+Processes/Review Stats/Examples/SVN Repository/.svn/pristine/
+Processes/Authentication/packages/

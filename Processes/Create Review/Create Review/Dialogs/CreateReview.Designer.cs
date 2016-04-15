@@ -220,10 +220,6 @@
             this.comboBox_ReviewLevel.AllowDrop = true;
             this.comboBox_ReviewLevel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_ReviewLevel.FormattingEnabled = true;
-            this.comboBox_ReviewLevel.Items.AddRange(new object[] {
-            "Raise code review",
-            "Commit will be reviewed later",
-            "No review"});
             this.comboBox_ReviewLevel.Location = new System.Drawing.Point(60, 18);
             this.comboBox_ReviewLevel.Name = "comboBox_ReviewLevel";
             this.comboBox_ReviewLevel.Size = new System.Drawing.Size(255, 21);
