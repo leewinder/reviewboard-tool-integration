@@ -61,6 +61,11 @@ namespace Review_Stats.Statistics
                     if (commitStats == null)
                         return;
 
+                    // Verify would could get the review information
+                    bool reviewInformationValid = CheckReviewInformation(commitStats);
+                    if (reviewInformationValid == false)
+                        return;
+
                     // Now generate unformation about the reviews
                     ReviewState.ReviewStatistics[] reviewStats = GetReviewStats(commitStats.Reviews, thisRevisionList.Path, credentials);
                     if (reviewStats == null)
@@ -209,6 +214,26 @@ namespace Review_Stats.Statistics
 
             // Return our results
             return results;
+        }
+
+        //
+        // We should have the same number of reviews as we do commits
+        //
+        private static bool CheckReviewInformation(ReviewState.GetCommitStatsResult commitStats)
+        {
+            int commitCount = 0;
+            foreach (int thisCommitCount in commitStats.CommitCount)
+                commitCount += thisCommitCount;
+
+            // If they are not the same, we have an issue
+            if (commitCount != commitStats.Reviews.Length)
+            {
+                s_errorMessage = @"Unable to find the reviews listed in the commits, which means the Reviewboard server does not match the the one authenticated against";
+                return false;
+            }
+
+            // We're OK
+            return true;
         }
 
         //
