@@ -13,14 +13,6 @@ namespace Create_Review.Review
     // Declares the properties defined in the review request
     public class Review
     {
-        // Level of review possible
-        public enum Level
-        {
-            FullReview,
-            PendingReview,
-            NoReview
-        };
-
         // Source Types
         public enum Source
         {
@@ -53,23 +45,23 @@ namespace Create_Review.Review
         //
         public class Properties
         {
-            public readonly string       Path;
-            public readonly Content      Contents;
+            public readonly string                                  Path;
+            public readonly Content                                 Contents;
 
-            public readonly string       ReviewId;
+            public readonly string                                  ReviewId;
 
-            public readonly string       Summary;
-            public readonly string       Description;
-            public readonly string       Testing;
+            public readonly string                                  Summary;
+            public readonly string                                  Description;
+            public readonly string                                  Testing;
 
-            public readonly string       JiraId;
+            public readonly string                                  JiraId;
 
-            public readonly List<string> Groups;
+            public readonly List<string>                            Groups;
 
-            public readonly Level        ReviewLevel;
-            public readonly bool         CopiesAsAdds;
+            public readonly RB_Tools.Shared.Review.Properties.Level ReviewLevel;
+            public readonly bool                                    CopiesAsAdds;
 
-            public Properties(string path, Content reviewProperties, string reviewId, string summary, string description, string testing, string jiraId, List<string> groups, Level level, bool copiesAsAdds)
+            public Properties(string path, Content reviewProperties, string reviewId, string summary, string description, string testing, string jiraId, List<string> groups, RB_Tools.Shared.Review.Properties.Level level, bool copiesAsAdds)
             {
                 Path = path;
 

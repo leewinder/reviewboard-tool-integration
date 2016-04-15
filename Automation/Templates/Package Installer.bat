@@ -6,6 +6,7 @@ set DESTINATION_FOLDER=%~dp0..\..\%RELEASE_FOLDER%
 set INSTALLER_TEMP=%DESTINATION_FOLDER%\Install Reviewboard
 set BIN_FOLDER=%INSTALLER_TEMP%\bin
 set EXTERNALS_FOLDER=%~dp0..\..\External
+set VERSION_NUMBER=%1
 
 rem Create the release folder
 rmdir "%DESTINATION_FOLDER%" /S /Q  >nul 2>&1
@@ -48,14 +49,14 @@ if "%HOUR:~0,1%" == " " (SET DT_FINAL_STAMP=%DT_STAMP_9%) else (SET DT_FINAL_STA
 set DT_FINAL_STAMP=%DT_FINAL_STAMP:~2%
 
 rem Push it out
-echo %1 > "%VERSION_FOLDER%\version"
+echo %VERSION_NUMBER% > "%VERSION_FOLDER%\version"
 echo %DT_FINAL_STAMP% >> "%VERSION_FOLDER%\version"
 
 
 
 rem Zip up the install package
 set ZIP_EXE=%EXTERNALS_FOLDER%\7-zip\7z.exe
-"%ZIP_EXE%" a "%DESTINATION_FOLDER%\Install Reviewboard.zip" "%INSTALLER_TEMP%" -r -mx9
+"%ZIP_EXE%" a "%DESTINATION_FOLDER%\Install Reviewboard %VERSION_NUMBER%.zip" "%INSTALLER_TEMP%" -r -mx9
 
 rem 7-zip leaves temp destination folders
 rmdir "%RELEASE_FOLDER%" /S /Q

@@ -8,10 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Review_Stats.Properties
-{
-
-
+namespace Review_Stats.Properties {
+    using System;
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -22,49 +22,88 @@ namespace Review_Stats.Properties
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources
-    {
-
+    internal class Resources {
+        
         private static global::System.Resources.ResourceManager resourceMan;
-
+        
         private static global::System.Globalization.CultureInfo resourceCulture;
-
+        
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resources()
-        {
+        internal Resources() {
         }
-
+        
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager
-        {
-            get
-            {
-                if ((resourceMan == null))
-                {
+        internal static global::System.Resources.ResourceManager ResourceManager {
+            get {
+                if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Review_Stats.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
             }
         }
-
+        
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture
-        {
-            get
-            {
+        internal static global::System.Globalization.CultureInfo Culture {
+            get {
                 return resourceCulture;
             }
-            set
-            {
+            set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;!DOCTYPE html&gt;
+        ///&lt;html&gt;
+        ///&lt;head&gt;
+        ///	&lt;style&gt;
+        ///		body {
+        ///			color: black;
+        ///			font-family: verdana;
+        ///			
+        ///			font-size: 70%;
+        ///		}
+        ///
+        ///		heading_1 {
+        ///			font-size: 300%;
+        ///			font-weight: bold;
+        ///		}
+        ///
+        ///		heading_2 {
+        ///			font-size: 220%;
+        ///			font-weight: bold;
+        ///		}
+        ///
+        ///		heading_3 {
+        ///			font-size: 180%;
+        ///			font-weight: bold;
+        ///		}
+        ///
+        ///		heading_4 {
+        ///			font-size: 120%;
+        ///			font-weight: bold;
+        ///		}
+        ///
+        ///		heading_table {
+        ///			font-size: 100%;
+        ///			font-weight: bold;
+        ///		}
+        ///
+        ///		minorheading {
+        ///			font-size: 100%;
+        ///			font-we [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string ReportTemplate {
+            get {
+                return ResourceManager.GetString("ReportTemplate", resourceCulture);
             }
         }
     }

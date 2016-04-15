@@ -1,0 +1,16 @@
+Test 1
+Another line
+
+BLAH
+
+ANOTHER CHANGE
+
+Change 1 - Pending
+Change 2 - Open
+Change 3 - Open Ship It
+Change 4 - Closed
+Change 5 - Closed Ship It
+Change 6 - Discarded (again)
+Change 7 - Not found
+Change 8 - Replies
+Change 9 - Another user

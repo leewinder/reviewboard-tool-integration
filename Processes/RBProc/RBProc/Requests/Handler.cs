@@ -82,6 +82,7 @@ namespace RBProc.Requests
         {
             {@"create_new_review", @"Create Review.exe"},
             {@"authenticate", @"Authentication.exe"},
+            {@"review_svn_repo", @"Review Stats.exe"},
             {@"open_about_dialog", @"About.exe"},
             {@"open_rb_portal", @"open_browser.bat"},
         };

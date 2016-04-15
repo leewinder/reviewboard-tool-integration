@@ -6,12 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Create_Review.Utilities
+namespace RB_Tools.Shared.Utilities
 {
     //
     // SVN utilities
     //
-    class Svn
+    public class Svn
     {
         //
         // Gets the root path for this repository
@@ -59,7 +59,8 @@ namespace Create_Review.Utilities
         public static string GetBranch(string workingDirectory)
         {
             // Generate the info
-            Process.Output infoOutput = Process.Start(workingDirectory, "svn", "info");
+            string infoPath = string.Format(@"info ""{0}""", workingDirectory);
+            Process.Output infoOutput = Process.Start(null, "svn", infoPath);
             if (string.IsNullOrWhiteSpace(infoOutput.StdOut) == true)
                 return null;
 
@@ -77,6 +78,21 @@ namespace Create_Review.Utilities
 
             // Got here so it's not here
             return null;
+        }
+
+        //
+        // Returns the log for a specific revision
+        //
+        public static string GetLog(string workingDirectory, string revision, bool xml)
+        {
+            // Generate the info
+            string infoPath = string.Format(@"log ""{0}"" --revision {1} {2}", workingDirectory, revision, xml == true ? "--xml" : "");
+            Process.Output infoOutput = Process.Start(null, "svn", infoPath);
+            if (string.IsNullOrWhiteSpace(infoOutput.StdOut) == true)
+                return null;
+
+            // Sanitise it
+            return infoOutput.StdOut.Replace("\r\n", "\n");
         }
 
         //
@@ -119,7 +135,7 @@ namespace Create_Review.Utilities
             string filePath = Path.GetDirectoryName(file);
 
             // List the files present in this root path
-            string commandOption = string.Format("status --depth files \"{0}\"", filePath);
+            string commandOption = string.Format("info --depth files \"{0}\"", filePath);
             Process.Output svnOutput = Process.Start(null, "svn", commandOption);
 
             // If we have errors, it's not tracked
