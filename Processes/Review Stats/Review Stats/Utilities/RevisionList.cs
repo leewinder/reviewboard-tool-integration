@@ -77,7 +77,7 @@ namespace Review_Stats.Utilities
             // Get the path we'll write our revisions to
             string tempPath = Path.GetTempFileName();
 
-            string commandLineOptions = string.Format(@"/command:log /path:""{0}"" /merge /outfile:""{1}""", path, tempPath);
+            string commandLineOptions = string.Format(@"/command:log /path:""{0}"" /outfile:""{1}""", path, tempPath);
             Process.Start(null, "tortoiseproc", commandLineOptions);
 
             // Pull out the data
