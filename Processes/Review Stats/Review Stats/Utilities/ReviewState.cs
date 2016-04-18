@@ -112,7 +112,7 @@ namespace Review_Stats.Utilities
             var reviews = new List<CommitReview>();
 
             // Spin through them all and parse the log message
-            ParallelLoopResult result = Parallel.ForEach(svnLogs, (thisLog, loopState) =>
+            ParallelLoopResult result = Parallel.ForEach(svnLogs, new ParallelOptions { MaxDegreeOfParallelism = 16 }, (thisLog, loopState) =>
             {
                 // Get the line with the review state in it
                 string reviewStateLine = thisLog.Message.FirstOrDefault(line =>
@@ -205,7 +205,7 @@ namespace Review_Stats.Utilities
             var     properties = new List<ReviewStatistics>(reviewList.Length);
 
             // We need to spin through every review and pull out the information about each one
-            ParallelLoopResult result = Parallel.ForEach(reviewList, (thisReview, loopState) =>
+            ParallelLoopResult result = Parallel.ForEach(reviewList, new ParallelOptions { MaxDegreeOfParallelism = 16 }, (thisReview, loopState) =>
             {
                 // Get our properties
                 ReviewStatistics reviewProperties = GetPropertiesOfReview(thisReview, workingDirectory, credentials);
@@ -330,7 +330,7 @@ namespace Review_Stats.Utilities
 
             // Get the replies in this response
             JArray commentList = (JArray)reviewResponse["reviews"];
-            Parallel.ForEach(commentList.Children(), (thisComment, loopState) =>
+            Parallel.ForEach(commentList.Children(), new ParallelOptions { MaxDegreeOfParallelism = 16 }, (thisComment, loopState) =>
             {
                 // Do we need to?
                 if (loopState.IsStopped == true)

@@ -62,7 +62,7 @@ namespace Review_Stats.Utilities
             int         logCount = 0;
 
             // Spin through all the revisions requested
-            ParallelLoopResult result = Parallel.ForEach(revisions, (thisRevision, loopState) =>
+            ParallelLoopResult result = Parallel.ForEach(revisions, new ParallelOptions { MaxDegreeOfParallelism = 16 }, (thisRevision, loopState) =>
             {
                 // Pull out the log
                 string logOutput = Svn.GetLog(svnPath, thisRevision, true);
