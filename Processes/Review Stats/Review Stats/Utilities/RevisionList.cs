@@ -77,17 +77,25 @@ namespace Review_Stats.Utilities
             // Get the path we'll write our revisions to
             string tempPath = Path.GetTempFileName();
 
-            string commandLineOptions = string.Format(@"/command:log /path:""{0}"" /outfile:""{1}""", path, tempPath);
-            Process.Start(null, "tortoiseproc", commandLineOptions);
+            try
+            {
+                string commandLineOptions = string.Format(@"/command:log /path:""{0}"" /outfile:""{1}""", path, tempPath);
+                Process.Start(null, "tortoiseproc", commandLineOptions);
 
-            // Pull out the data
-            string[] revisionList = File.ReadAllLines(tempPath);
+                // Pull out the data
+                string[] revisionList = File.ReadAllLines(tempPath);
 
-            // Lose the temp file
-            File.Delete(tempPath);
+                // Lose the temp file
+                File.Delete(tempPath);
 
-            // Return the list of files
-            return (revisionList.Length == 0 ? null : revisionList[0]);
+                // Return the list of files
+                return (revisionList.Length == 0 ? null : revisionList[0]);
+            }
+            catch
+            {
+                // This just means we can;t find anything
+                return null;
+            }
         }
 
         // 
