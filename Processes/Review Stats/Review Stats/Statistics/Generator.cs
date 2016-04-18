@@ -221,9 +221,8 @@ namespace Review_Stats.Statistics
         //
         private static bool CheckReviewInformation(ReviewState.GetCommitStatsResult commitStats)
         {
-            int commitCount = 0;
-            foreach (int thisCommitCount in commitStats.CommitCount)
-                commitCount += thisCommitCount;
+            // Check we have the right number of issues
+            int commitCount = commitStats.CommitCount[(int)RB_Tools.Shared.Review.Properties.Level.FullReview];
 
             // If they are not the same, we have an issue
             if (commitCount != commitStats.Reviews.Length)
