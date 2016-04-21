@@ -79,7 +79,7 @@ namespace Review_Stats.Utilities
 
             try
             {
-                string commandLineOptions = string.Format(@"/command:log /path:""{0}"" /outfile:""{1}""", path, tempPath);
+                string commandLineOptions = string.Format(@"/command:log /strict /path:""{0}"" /outfile:""{1}""", path, tempPath);
                 Process.Start(null, "tortoiseproc", commandLineOptions);
 
                 // Pull out the data

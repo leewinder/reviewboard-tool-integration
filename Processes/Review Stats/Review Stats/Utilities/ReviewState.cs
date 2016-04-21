@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using RB_Tools.Shared.Structures;
 using System.Threading;
+using Newtonsoft.Json;
 
 namespace Review_Stats.Utilities
 {
@@ -269,39 +270,22 @@ namespace Review_Stats.Utilities
                 return new ReviewStatistics(review, State.Pending);
 
             // We have the review information so process
-            int shipItCount = GetShipItCount(result);
-            Pair<int, int> reviewsAndReplies = GetReviewsAndReplies(workingDirectory, reviewId, credentials);
+            Tuple<int, int, int> reviewsAndShipitsAndReplies = GetReviewsAndShipItsAndReplies(workingDirectory, reviewId, credentials);
 
             // Get the state of this review
             State reviewState = GetReviewState(result);
 
             // Return our properties
-            return new ReviewStatistics(review, reviewState, reviewsAndReplies.First, reviewsAndReplies.Second, shipItCount);
+            return new ReviewStatistics(review, reviewState, reviewsAndShipitsAndReplies.Item1, reviewsAndShipitsAndReplies.Item3, reviewsAndShipitsAndReplies.Item2);
         }
-
-        //
-        // Returns the number of ship it's in a review
-        //
-        private static int GetShipItCount(JObject result)
-        {
-            try
-            {
-                string shipItCount = (string)result["review_request"]["ship_it_count"];
-                return int.Parse(shipItCount);
-            }
-            catch
-            {
-                // Nothing
-                return 0;
-            }
-        }
-
+        
         //
         // Returns the number of reviews and replies
         //
-        private static Pair<int, int> GetReviewsAndReplies(string workingDirectory, string reviewId, Simple credentials)
+        private static Tuple<int, int, int> GetReviewsAndShipItsAndReplies(string workingDirectory, string reviewId, Simple credentials)
         {
             int reviews = 0;
+            int shipIts = 0;
             JObject reviewResponse = null;
             try
             {
@@ -309,21 +293,33 @@ namespace Review_Stats.Utilities
                 string apiRequest = string.Format(@"/review-requests/{0}/reviews", reviewId);
                 reviewResponse = MakeApiCall(credentials, workingDirectory, apiRequest);
                 if (reviewResponse == null)
-                    return new Pair<int, int>();
+                    return new Tuple<int, int, int>(0, 0, 0);
                 
                 // Get the reviews from the call
                 string reviewCount = (string)reviewResponse["total_results"];
                 reviews = int.Parse(reviewCount);
+
+                // Spin through and get the number of ship-its
+                JArray reviewInfo = (JArray)reviewResponse["reviews"];
+                if (reviewInfo != null)
+                {
+                    dynamic reviewArray = reviewInfo.ToObject<dynamic>();
+                    foreach (dynamic thisReview in reviewArray)
+                    {
+                        if (thisReview.ship_it == true)
+                            ++shipIts;
+                    }
+                }
             }
             catch
             {
                 // Can't get the values out
-                return new Pair<int, int>();
+                return new Tuple<int, int, int>(0, 0, 0);
             }
 
             // If we have no reviews, bail
             if (reviews == 0)
-                return new Pair<int, int>();
+                return new Tuple<int, int, int>(0, 0, 0);
 
             // We now need to track replies
             int replies = 0;
@@ -363,7 +359,7 @@ namespace Review_Stats.Utilities
             });
 
             // Return what we have
-            return new Pair<int, int>(reviews, replies);
+            return new Tuple<int, int, int>(reviews, shipIts, replies);
         }
 
         //

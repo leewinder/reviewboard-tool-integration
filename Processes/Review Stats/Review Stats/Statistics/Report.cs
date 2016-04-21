@@ -171,7 +171,7 @@ namespace Review_Stats.Statistics
             foreach (ReviewState.ReviewStatistics thisReview in reviewStats)
             {
                 numberOfShipIts += thisReview.ShipIts;
-                numberOfReplies += thisReview.Reviews - thisReview.Replies;
+                numberOfReplies += thisReview.Replies;
                 numberOfReviews += thisReview.Reviews;
             }
 
@@ -259,10 +259,11 @@ namespace Review_Stats.Statistics
 	                                <tr>
 		                                <td width=""100px""><heading_table>Revision</heading_table></td>
                                         <td width=""100px""><heading_table>Author</heading_table></td>
-		                                <td width=""200px""><heading_table>Review</heading_table></td>");
+		                                <td width=""150px""><heading_table>Review</heading_table></td>");
             if (includeMetrics == true)
             {
                 tableHeader.Append(@"<td width=""75px""><heading_table>Ship It's</heading_table></td>
+                                        <td width=""75px""><heading_table>Reviews</heading_table></td>
 		                                <td width=""200px""><heading_table>Additional Comments</heading_table></td>");
             }
             tableHeader.Append(@"</tr>");
@@ -275,7 +276,8 @@ namespace Review_Stats.Statistics
             if (includeMetrics == true)
             {
                 rowFormat.Append(@"<td>{3}</td>
-		                            <td>{4}</td>");
+		                            <td>{4}</td>
+                                    <td>{5}</td>");
             }
             rowFormat.Append(@"</tr>");
             string tableFooter = @"</table><br><br>";
@@ -292,6 +294,7 @@ namespace Review_Stats.Statistics
                                                                       TrimAuthor(thisReview.Commit.Log.Author),
                                                                       reviewCode,
                                                                       thisReview.ShipIts.ToString(NumberFormat),
+                                                                      thisReview.Reviews.ToString(NumberFormat),
                                                                       thisReview.Replies.ToString(NumberFormat));
                 // Add this row
                 reviewRows.AppendLine(thisRow);
