@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RB_Tools.Shared.Settings;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -179,8 +180,16 @@ namespace RBProc.Requests
         //
         // Starts a process and reads out the std output and error
         //
-        public static void RunProcess(string command, string options)
+        public static void RunProcess(string command, string commandLineProperties)
         {
+            // Load our settings
+            Options settings = Settings.Load();
+
+            // Build up the command line options
+            string options = string.Format(@"--file-list {0}", commandLineProperties);
+            if (settings.EnableLogging == true)
+                options += @" --enable-logging";
+
             // Build up the process
             ProcessStartInfo processInfo = new ProcessStartInfo(command, options);
 
