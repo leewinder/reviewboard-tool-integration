@@ -3,15 +3,22 @@ using System.Windows.Forms;
 
 using RB_Tools.Shared.Authentication.Credentials;
 using RB_Tools.Shared.Authentication.Targets;
+using RB_Tools.Shared.Logging;
 
 namespace Authentication.Dialogs
 {
     public partial class CredentialOptions : Form
     {
-        public CredentialOptions()
+        public CredentialOptions(Logging logger)
         {
             InitializeComponent();
+
+            // Save our logger
+            m_logger = logger;
         }
+
+        // Properties
+        private readonly Logging m_logger;
 
         //
         // Authorise reviewboard
@@ -19,7 +26,7 @@ namespace Authentication.Dialogs
         private void button_ReviewboardAuthentication_Click(object sender, EventArgs e)
         {
             // Just authenticate
-            Reviewboard.Authenticate();
+            Reviewboard.Authenticate(m_logger);
         }
 
         //
@@ -29,7 +36,7 @@ namespace Authentication.Dialogs
         {
             string[] serverList = RB_Tools.Shared.Server.Names.Url;
             foreach (string thisServer in serverList)
-                Credentials.Clear(thisServer);
+                Credentials.Clear(thisServer, m_logger);
         }
     }
 }
