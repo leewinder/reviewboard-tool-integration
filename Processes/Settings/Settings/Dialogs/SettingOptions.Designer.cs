@@ -28,15 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingOptions));
             this.button_ReviewboardAuthentication = new System.Windows.Forms.Button();
             this.button_ClearAllAuthentication = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.checkBox_Logging = new System.Windows.Forms.CheckBox();
             this.button_Close = new System.Windows.Forms.Button();
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -48,6 +50,7 @@
             this.button_ReviewboardAuthentication.Size = new System.Drawing.Size(98, 24);
             this.button_ReviewboardAuthentication.TabIndex = 0;
             this.button_ReviewboardAuthentication.Text = "Authenticate";
+            this.toolTip.SetToolTip(this.button_ReviewboardAuthentication, "Authenticate against the Reviewboard server");
             this.button_ReviewboardAuthentication.UseVisualStyleBackColor = true;
             this.button_ReviewboardAuthentication.Click += new System.EventHandler(this.button_ReviewboardAuthentication_Click);
             // 
@@ -58,6 +61,7 @@
             this.button_ClearAllAuthentication.Size = new System.Drawing.Size(98, 24);
             this.button_ClearAllAuthentication.TabIndex = 2;
             this.button_ClearAllAuthentication.Text = "Clear All";
+            this.toolTip.SetToolTip(this.button_ClearAllAuthentication, "Clears the authentication data for all servers");
             this.button_ClearAllAuthentication.UseVisualStyleBackColor = true;
             this.button_ClearAllAuthentication.Click += new System.EventHandler(this.button_ClearAllAuthentication_Click);
             // 
@@ -74,15 +78,6 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Server Authentication";
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 23);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(70, 13);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "Reviewboard";
-            // 
             // label2
             // 
             this.label2.AutoSize = true;
@@ -91,6 +86,15 @@
             this.label2.Size = new System.Drawing.Size(101, 13);
             this.label2.TabIndex = 4;
             this.label2.Text = "Authentication Data";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 23);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(70, 13);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "Reviewboard";
             // 
             // groupBox2
             // 
@@ -110,6 +114,8 @@
             this.checkBox_Logging.Size = new System.Drawing.Size(100, 17);
             this.checkBox_Logging.TabIndex = 0;
             this.checkBox_Logging.Text = "Enable Logging";
+            this.toolTip.SetToolTip(this.checkBox_Logging, "If enabled, logs will be created for all Reviewboard\r\nIntegration to help identif" +
+        "y issues or problems");
             this.checkBox_Logging.UseVisualStyleBackColor = true;
             this.checkBox_Logging.CheckedChanged += new System.EventHandler(this.checkBox_Logging_CheckedChanged);
             // 
@@ -154,6 +160,7 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.CheckBox checkBox_Logging;
         private System.Windows.Forms.Button button_Close;
+        private System.Windows.Forms.ToolTip toolTip;
     }
 }
 
