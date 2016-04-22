@@ -267,6 +267,12 @@ namespace Review_Stats.Statistics
                 s_errorMessage = "Unable to generate the review stats against the RB server\n\n" + e.Message;
                 return null;
             }
+            catch (Exception generalException)
+            {
+                String exceptionMessage = (generalException.InnerException == null ? generalException.Message : generalException.InnerException.Message);
+                s_errorMessage = "Unable to generate the review stats against the RB server\n\n" + exceptionMessage;
+                return null;
+            }
         }
 
         //
