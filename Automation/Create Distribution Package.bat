@@ -44,7 +44,7 @@ rem Update the process assembly versions
 set THIS_FILE=%~dp0..\Processes\About\About\Properties\AssemblyInfo.cs
 "%FART_EXE%" -i -q "%THIS_FILE%" "%DEFAULT_VERSION_NUMBER%" "%VERSION_NUMBER%.0"
 
-set THIS_FILE=%~dp0..\Processes\Authentication\Authentication\Properties\AssemblyInfo.cs
+set THIS_FILE=%~dp0..\Processes\Settings\Settings\Properties\AssemblyInfo.cs
 "%FART_EXE%" -i -q "%THIS_FILE%" "%DEFAULT_VERSION_NUMBER%" "%VERSION_NUMBER%.0"
 
 set THIS_FILE=%~dp0..\Processes\Create Review\Create Review\Properties\AssemblyInfo.cs
@@ -67,7 +67,7 @@ rem Build the processes
 call "%~dp0.\Build About.bat"
 if %errorlevel% neq 0 goto :error_building_process
 
-call "%~dp0.\Build Authentication.bat"
+call "%~dp0.\Build Settings.bat"
 if %errorlevel% neq 0 goto :error_building_process
 
 call "%~dp0.\Build Create Review.bat"
