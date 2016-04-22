@@ -1,4 +1,5 @@
-﻿using RB_Tools.Shared.Utilities;
+﻿using RB_Tools.Shared.Logging;
+using RB_Tools.Shared.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,7 +17,7 @@ namespace Create_Review.Utilities
         //
         // Enables storge of assets, if this isn't called then other calls are noop
         //
-        public static void KeepAssets(string summary)
+        public static void KeepAssets(string summary, Logging logger)
         {
             // If we have a folder, we can just leave
             if (string.IsNullOrEmpty(storageFolder) == false)
@@ -27,6 +28,7 @@ namespace Create_Review.Utilities
 
             // Build up the folder we'll use
             storageFolder = string.Format("{0}/Reviews/{1}/", myDocsFolder, summary);
+            logger.Log("Storing content in '{0}'", storageFolder);
 
             // Make sure we're not replacing one
             if (Directory.Exists(storageFolder) == true)
@@ -39,7 +41,7 @@ namespace Create_Review.Utilities
         //
         // Keeps the folder passed through
         //
-        public static bool Keep(string file, string newName, bool removeOriginal)
+        public static bool Keep(string file, string newName, bool removeOriginal, Logging logger)
         {
             // Only if we're set up
             if (string.IsNullOrEmpty(storageFolder) == false)
@@ -50,7 +52,14 @@ namespace Create_Review.Utilities
                     newNameToUse = newName;
 
                 // Copy the folder over
-                try { File.Copy(file, storageFolder + newNameToUse, true); } catch (Exception) { }
+                try
+                {
+                    File.Copy(file, storageFolder + newNameToUse, true);
+                    logger.Log("Storing content in '{0}{1}'", storageFolder, newNameToUse);
+                }
+                catch (Exception)
+                {
+                }
             }
 
             // Remove the original if we need to

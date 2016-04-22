@@ -4,6 +4,7 @@ using System;
 using System.Text.RegularExpressions;
 using RB_Tools.Shared.Server;
 using RB_Tools.Shared.Extensions;
+using RB_Tools.Shared.Logging;
 
 namespace Create_Review
 {
@@ -15,13 +16,13 @@ namespace Create_Review
         //
         // Opens a new commit dialog with the given options
         //
-        public static void OpenCommitDialog(Review.Review.Properties properties, string reviewUrl)
+        public static void OpenCommitDialog(Review.Review.Properties properties, string reviewUrl, Logging logger)
         {
-            string logFile = GenerateLogMessage(properties, reviewUrl);
-            OpenTortoiseSVN(properties.Contents.Files, properties.Path, logFile);
+            string logFile = GenerateLogMessage(properties, reviewUrl, logger);
+            OpenTortoiseSVN(properties.Contents.Files, properties.Path, logFile, logger);
 
             // Clean up
-            CleanUpTemporaryFiles(logFile);
+            CleanUpTemporaryFiles(logFile, logger);
         }
 
         // Private Properties
@@ -34,7 +35,7 @@ namespace Create_Review
         //
         // Creates a new log file and returns the path
         //
-        private static string GenerateLogMessage(Review.Review.Properties properties, string reviewUrl)
+        private static string GenerateLogMessage(Review.Review.Properties properties, string reviewUrl, Logging logger)
         {
             // Get the temp file
             string logFile = Path.GetTempFileName();
@@ -59,14 +60,17 @@ namespace Create_Review
             }
 
             // Return the log file
+            logger.Log("Log file generated - {0}", logFile);
             return logFile;
         }
 
         //
         // Opens TortoiseSVN with the given commit options
         //
-        private static void OpenTortoiseSVN(string[] files, string path, string logFile)
+        private static void OpenTortoiseSVN(string[] files, string path, string logFile, Logging logger)
         {
+            logger.Log("Requesting TortoiseSVN");
+
             // Do we have a specific list of files or a path?
             string tsvnPath = path;
             if (files != null && files.Length > 0)
@@ -82,6 +86,9 @@ namespace Create_Review
             System.Diagnostics.Process ExternalProcess = new System.Diagnostics.Process();
             ExternalProcess.StartInfo.FileName = "tortoiseproc";
             ExternalProcess.StartInfo.Arguments = string.Format(@"/command:commit /logmsgfile:""{0}"" /path:""{1}""", logFile, tsvnPath);
+
+            // Update process
+            logger.Log(" * Calling {0} {1}", ExternalProcess.StartInfo.FileName, ExternalProcess.StartInfo.Arguments);
 
             // Start the process
             ExternalProcess.Start();
@@ -123,9 +130,9 @@ namespace Create_Review
         //
         // Deletes the temporary files we created for the review
         //
-        private static void CleanUpTemporaryFiles(string logFile)
+        private static void CleanUpTemporaryFiles(string logFile, Logging logger)
         {
-            Utilities.Storage.Keep(logFile, "SVN Log File.txt", true);
+            Utilities.Storage.Keep(logFile, "SVN Log File.txt", true, logger);
         }
     }
 }

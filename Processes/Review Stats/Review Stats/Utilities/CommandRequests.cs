@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using RB_Tools.Shared.Utilities;
+using RB_Tools.Shared.Logging;
 
 namespace Review_Stats.Utilities
 {
@@ -26,17 +27,26 @@ namespace Review_Stats.Utilities
         //
         // Parses the command line options
         //
-        public static Result ParseCommands(string fileList, string debugOptions)
+        public static Result ParseCommands(string fileList, bool injectPaths, Logging logger)
         {
+            logger.Log(@"Parsing the file list command");
+
             // Get the file
             if (File.Exists(fileList) == false)
+            {
+                logger.Log(@"Unable to find the file list command file - {0}", fileList);
                 return null;
+            }
+
             string[] fileContent = File.ReadAllLines(fileList);
             if (fileContent.Length == 0)
+            {
+                logger.Log(@"The given file list contains no content - {0}", fileList);
                 return null;
+            }
 
             // Handle any debug options
-            fileContent = HandleDebugRequest(fileContent, debugOptions);
+            fileContent = HandleDebugRequest(fileContent, injectPaths);
 
             // Track all our content
             List<string> validPaths = new List<string>();
@@ -52,6 +62,7 @@ namespace Review_Stats.Utilities
                 // Does it exist
                 if (File.Exists(thisPath) == false && Directory.Exists(thisPath) == false)
                 {
+                    logger.Log(@"* Invalid path found in file list - {0}", thisPath);
                     invalidPaths.Add(thisPath);
                     continue;
                 }
@@ -59,11 +70,13 @@ namespace Review_Stats.Utilities
                 // SVN path
                 if (Svn.IsPathTracked(thisPath) == false)
                 {
+                    logger.Log(@"* Invalid path found in file list - {0}", thisPath);
                     invalidPaths.Add(thisPath);
                     continue;
                 }
 
                 // It's fine
+                logger.Log(@"* Using - {0}", thisPath);
                 validPaths.Add(thisPath);
             }
 
@@ -77,18 +90,10 @@ namespace Review_Stats.Utilities
         //
         // Updates the data based on the debug options
         //
-        private static string[] HandleDebugRequest(string[] fileContent, string debugOptions)
+        private static string[] HandleDebugRequest(string[] fileContent, bool injectPaths)
         {
-            // Do we want to inject the path of the files because we're running a test
-            bool injectTestPath = false;
-            if (string.IsNullOrWhiteSpace(debugOptions) == false)
-            {
-                if (debugOptions.Equals(InjectDirectoryRequest, StringComparison.InvariantCultureIgnoreCase) == true)
-                    injectTestPath = true;
-            }
-
             // If we need to, inject the test path
-            if (injectTestPath == true)
+            if (injectPaths == true)
             {
                 // Get the path we need to inject into the test documents
                 string runningPath = Directory.GetCurrentDirectory();

@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 
 using System.IO;
 using RB_Tools.Shared.Utilities;
+using RB_Tools.Shared.Logging;
 
 namespace Create_Review
 {
@@ -46,18 +47,25 @@ namespace Create_Review
         //
         // Returns a list of review groups from the given server
         //
-        public static ReviewGroup[] GetReviewGroups(string workingDirectory, string server, string username, string password)
+        public static ReviewGroup[] GetReviewGroups(string workingDirectory, string server, string username, string password, Logging logger)
         {
             // Build up the command
             string commandOptions = string.Format(@"api-get --server {0} --username {1} --password {2} /groups/", server, username, password);
             string rbtPath = RB_Tools.Shared.Targets.Reviewboard.Path();
+
+            // Update process
+            logger.Log("Getting review groups");
+            logger.Log("* Calling {0} {1}", rbtPath, commandOptions);
 
             // Run the process
             Process.Output output = Process.Start(workingDirectory, rbtPath, commandOptions);
 
             // Throw to return the error
             if (string.IsNullOrWhiteSpace(output.StdErr) == false)
+            {
+                logger.Log("Error encountered when getting review groups\n\n{0}", output.StdErr);
                 throw new ApplicationException(output.StdErr);
+            }
 
             // Get the list we'll add out review groups to
             var returnedGroups = new[]{ new { display_name = "", name = "" } }.ToList();
@@ -74,6 +82,7 @@ namespace Create_Review
                 var searchResult = JsonConvert.DeserializeAnonymousType(result.ToString(), anonObject);
 
                 returnedGroups.Add(searchResult);
+                logger.Log(" * Found group - {0} : {1}", searchResult.display_name, searchResult.name);
             }
 
             // Remove the dummy entry
@@ -86,20 +95,22 @@ namespace Create_Review
                 var thisGroup = returnedGroups.ElementAt(i);
                 groups[i] = new ReviewGroup(thisGroup.display_name, thisGroup.name);
             }
-            
+
             // Return the list of groups
+            logger.Log(" * Found {0} groups", groups.Length);
             return groups;
         }
 
         //
         // Raises a new review
         //
-        public static ReviewRequestResult RequestReview(string workingDirectory, string server, string username, string password, Review.Review.Properties reviewProperties)
+        public static ReviewRequestResult RequestReview(string workingDirectory, string server, string username, string password, Review.Review.Properties reviewProperties, Logging logger)
         {
             // We may not need to generate a review
             if (reviewProperties.ReviewLevel != RB_Tools.Shared.Review.Properties.Level.FullReview)
             {
                 // No review needed so exit
+                logger.Log("Ignoring review request as a full review was not requested");
                 return new ReviewRequestResult(string.Empty, string.Empty, reviewProperties);
             }
             
@@ -146,12 +157,18 @@ namespace Create_Review
             string commandOptions = string.Format(@"post {0}", commandProperties);
             string rbtPath = RB_Tools.Shared.Targets.Reviewboard.Path();
 
+            logger.Log("Requesting review");
+            logger.Log("* Calling {0} {1}", rbtPath, commandOptions);
+
             // Run the process
             Process.Output output = Process.Start(workingDirectory, rbtPath, commandOptions);
 
             // Throw to return the error
             if (string.IsNullOrWhiteSpace(output.StdErr) == false)
+            {
+                logger.Log("Error raised when requesting review - {0}", output.StdErr);
                 throw new ApplicationException(output.StdErr);
+            }
 
             // Break up the results
             string[] outputLines = output.StdOut.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
@@ -166,7 +183,7 @@ namespace Create_Review
                 reviewError = output.StdOut;
 
             // Lose the temp files if we have them
-            CleanUpTemporaryFiles(descriptionFile, testingFile);
+            CleanUpTemporaryFiles(descriptionFile, testingFile, logger);
 
             // Return the results
             return new ReviewRequestResult(reviewUrl, reviewError, reviewProperties);
@@ -192,10 +209,10 @@ namespace Create_Review
         //
         // Deletes the temporary files we created for the review
         //
-        private static void CleanUpTemporaryFiles(string descriptionFile, string testingFile)
+        private static void CleanUpTemporaryFiles(string descriptionFile, string testingFile, Logging logger)
         {
-            Utilities.Storage.Keep(descriptionFile, "Review Description.txt", true);
-            Utilities.Storage.Keep(testingFile, "Review Testing.txt", true);
+            Utilities.Storage.Keep(descriptionFile, "Review Description.txt", true, logger);
+            Utilities.Storage.Keep(testingFile, "Review Testing.txt", true, logger);
         }
     }
 }

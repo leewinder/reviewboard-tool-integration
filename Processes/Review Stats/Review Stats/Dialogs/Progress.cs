@@ -1,4 +1,5 @@
-﻿using Review_Stats.Statistics;
+﻿using RB_Tools.Shared.Logging;
+using Review_Stats.Statistics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,15 +14,16 @@ namespace Review_Stats.Dialogs
 {
     public partial class Progress : Form
     {
-        public Progress(string fileList, string debugOptions)
+        public Progress(string fileList, bool injectPaths, Logging logger)
         {
             InitializeComponent();
 
             // Kick it off and we're done
-            Display.SetDisplayProperties(this, label_Progress, progressBar_Progress);
-            Generator.Start(this, fileList, debugOptions, () =>
+            Display.SetDisplayProperties(this, label_Progress, progressBar_Progress, logger);
+            Generator.Start(this, fileList, logger, injectPaths, () =>
             {
                 // Lose our dialog
+                logger.Log("Closing dialog - work done");
                 this.Close();
             });
         }

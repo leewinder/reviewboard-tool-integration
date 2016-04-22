@@ -28,3 +28,7 @@ Processes/Review Stats/packages/
 Processes/Shared/packages/
 Processes/Review Stats/Examples/SVN Repository/.svn/pristine/
 Processes/Authentication/packages/
+Processes/Settings/Authentication/obj/
+Processes/Settings/packages/
+Processes/Settings/Settings/obj/
+Processes/RBProc/packages/
