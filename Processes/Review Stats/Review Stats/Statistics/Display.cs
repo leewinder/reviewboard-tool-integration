@@ -1,4 +1,5 @@
 ﻿using Ingg.Stats_Runner.Shared.Extensions;
+using RB_Tools.Shared.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,13 +23,15 @@ namespace Review_Stats.Statistics
         //
         // Set our properties
         //
-        public static void SetDisplayProperties(Form owner, Label progressLabel, ProgressBar progressBar)
+        public static void SetDisplayProperties(Form owner, Label progressLabel, ProgressBar progressBar, Logging logger)
         {
             // Save our properties
             s_owner = owner;
 
             s_progressLabel = progressLabel;
             s_progressBar = progressBar;
+
+            s_logger = logger;
 
             // Default state
             Start(State.RequestingLogs);
@@ -50,6 +53,7 @@ namespace Review_Stats.Statistics
         {
             // Save our state
             s_state = state;
+            s_logger.Log("Started state - {0} (assuming count of {1})", state.ToString(), progressCountMax);
 
             // Get our state
             string progressText = string.Format(StateMessages[(int)state], 0, progressCountMax);
@@ -81,6 +85,8 @@ namespace Review_Stats.Statistics
 
                 float sessionProgress = (currentProgress / (float)progressMax) * s_progressBar.Maximum;
                 s_progressBar.SetProgressNoAnimation((int)sessionProgress);
+
+                s_logger.Log("Progress so far - {0}", sessionProgress);
             });
         }
 
@@ -89,6 +95,8 @@ namespace Review_Stats.Statistics
 
         private static Label        s_progressLabel;
         private static ProgressBar  s_progressBar;
+
+        private static Logging      s_logger;
 
         private static State        s_state = State.RequestingLogs;
 

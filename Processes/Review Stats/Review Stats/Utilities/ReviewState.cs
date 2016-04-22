@@ -13,6 +13,7 @@ using Newtonsoft.Json.Linq;
 using RB_Tools.Shared.Structures;
 using System.Threading;
 using Newtonsoft.Json;
+using RB_Tools.Shared.Logging;
 
 namespace Review_Stats.Utilities
 {
@@ -101,7 +102,7 @@ namespace Review_Stats.Utilities
         //
         // Counts the type of reviews in a set of commits
         //
-        public static GetCommitStatsResult GetCommitStatistics(SvnLogs.Log[] svnLogs, StatisticGenerated statGenerated)
+        public static GetCommitStatsResult GetCommitStatistics(SvnLogs.Log[] svnLogs, Logging logger, StatisticGenerated statGenerated)
         {
             // We need to track the types of reviews
             Object  writeLock = new Object();
@@ -113,6 +114,7 @@ namespace Review_Stats.Utilities
             var reviews = new List<CommitReview>();
 
             // Spin through them all and parse the log message
+            logger.Log("Starting to pull out the commit statistics from the SVN logs");
             ParallelLoopResult result = Parallel.ForEach(svnLogs, new ParallelOptions { MaxDegreeOfParallelism = 16 }, (thisLog, loopState) =>
             {
                 // Get the line with the review state in it
@@ -121,6 +123,9 @@ namespace Review_Stats.Utilities
                     Match regExMatch = Regex.Match(line, @".*\[Review State.*:.*\]");
                     return regExMatch.Success;
                 });
+
+                // Identify what we have
+                logger.Log(@"* Found the review state line '{0}' in revision {1}", reviewStateLine, thisLog.Revision);
 
                 // Do we have anything
                 bool unknownReview = false;
@@ -144,6 +149,9 @@ namespace Review_Stats.Utilities
                             string thisEnumName = ((RB_Tools.Shared.Review.Properties.Level)i).GetSplitName();
                             if (thisEnumName.Equals(reviewType, StringComparison.InvariantCultureIgnoreCase) == true)
                             {
+                                // Let us know what type of review we found
+                                logger.Log(@"* Found review type '{0}'", ((RB_Tools.Shared.Review.Properties.Level)i).ToString());
+
                                 // If this is a review, pull out the review
                                 if (i == (int)RB_Tools.Shared.Review.Properties.Level.FullReview)
                                 {
@@ -171,6 +179,9 @@ namespace Review_Stats.Utilities
                     // Update our information
                     lock (writeLock)
                     {
+                        // Update
+                        logger.Log("Updating the review type counts");
+
                         // Update the view type
                         if (unknownReview == true)
                             ++unknownReviews;
@@ -189,7 +200,17 @@ namespace Review_Stats.Utilities
 
             // Did we fail 
             if (result.IsCompleted == false)
+            {
+                logger.Log("The commit statistics completed unsuccessfully");
                 return null;
+            }
+
+            // Update what we found
+            logger.Log("The following review types were found");
+            logger.Log("* Commit count: {0}", commitCounts);
+            logger.Log("* Unknown reviews: {0}", unknownReviews);
+            for (int i = 0; i < reviews.Count; ++i)
+                logger.Log("* {0}: {1}", ((RB_Tools.Shared.Review.Properties.Level)i).ToString(), reviews[i]);
 
             // Return our reviews
             return new GetCommitStatsResult(commitCounts, unknownReviews, reviews.ToArray());
@@ -198,7 +219,7 @@ namespace Review_Stats.Utilities
         //
         // Returns the statistics on the raised reviews
         //
-        public static ReviewStatistics[] GetReviewStatistics(CommitReview[] reviewList, string workingDirectory, Simple credentials, StatisticGenerated statGenerated)
+        public static ReviewStatistics[] GetReviewStatistics(CommitReview[] reviewList, string workingDirectory, Simple credentials, Logging logger, StatisticGenerated statGenerated)
         {
             // Track our updates
             Object  writeLock = new object();
@@ -206,10 +227,11 @@ namespace Review_Stats.Utilities
             var     properties = new List<ReviewStatistics>(reviewList.Length);
 
             // We need to spin through every review and pull out the information about each one
+            logger.Log("Starting to pull out the review stats from generated reviews");
             ParallelLoopResult result = Parallel.ForEach(reviewList, new ParallelOptions { MaxDegreeOfParallelism = 16 }, (thisReview, loopState) =>
             {
                 // Get our properties
-                ReviewStatistics reviewProperties = GetPropertiesOfReview(thisReview, workingDirectory, credentials);
+                ReviewStatistics reviewProperties = GetPropertiesOfReview(thisReview, workingDirectory, credentials, logger);
                 if (reviewProperties == null)
                     loopState.Stop();
 
@@ -219,6 +241,9 @@ namespace Review_Stats.Utilities
                     // Update
                     lock (writeLock)
                     {
+                        logger.Log("Updating review properties");
+
+                        // Update
                         properties.Add(reviewProperties);
                         statGenerated(++reviewCount);
                     }
@@ -227,9 +252,13 @@ namespace Review_Stats.Utilities
 
             // How did we do?
             if (result.IsCompleted == false)
+            {
+                logger.Log("The review statistics completed unsuccessfully");
                 return null;
+            }
 
             // Return our properties
+            logger.Log("Created {0} review stats", properties.Count);
             return properties.ToArray();
         }
 
@@ -254,26 +283,32 @@ namespace Review_Stats.Utilities
         //
         // Gets the results of a review request
         //
-        private static ReviewStatistics GetPropertiesOfReview(CommitReview review, string workingDirectory, Simple credentials)
+        private static ReviewStatistics GetPropertiesOfReview(CommitReview review, string workingDirectory, Simple credentials, Logging logger)
         {
             // Get the API
             string reviewId = ExtractReviewId(review.Review);
             string apiRequest = string.Format(@"/review-requests/{0}", reviewId);
 
             // Try this review code
-            JObject result = MakeApiCall(credentials, workingDirectory, apiRequest);
+            JObject result = MakeApiCall(credentials, workingDirectory, apiRequest, logger);
             if (result == null)
+            {
+                logger.Log("API called failed, returning no statistics");
                 return new ReviewStatistics(review, State.NotFound);
+            }
 
             // If it's an empty review it's pending because we couldn't access
             if (result == EmptyReview)
+            {
+                logger.Log("API called failed with Empty Review, assuming a pending review");
                 return new ReviewStatistics(review, State.Pending);
+            }
 
             // We have the review information so process
-            Tuple<int, int, int> reviewsAndShipitsAndReplies = GetReviewsAndShipItsAndReplies(workingDirectory, reviewId, credentials);
+            Tuple<int, int, int> reviewsAndShipitsAndReplies = GetReviewsAndShipItsAndReplies(workingDirectory, reviewId, credentials, logger);
 
             // Get the state of this review
-            State reviewState = GetReviewState(result);
+            State reviewState = GetReviewState(result, logger);
 
             // Return our properties
             return new ReviewStatistics(review, reviewState, reviewsAndShipitsAndReplies.Item1, reviewsAndShipitsAndReplies.Item3, reviewsAndShipitsAndReplies.Item2);
@@ -282,18 +317,24 @@ namespace Review_Stats.Utilities
         //
         // Returns the number of reviews and replies
         //
-        private static Tuple<int, int, int> GetReviewsAndShipItsAndReplies(string workingDirectory, string reviewId, Simple credentials)
+        private static Tuple<int, int, int> GetReviewsAndShipItsAndReplies(string workingDirectory, string reviewId, Simple credentials, Logging logger)
         {
             int reviews = 0;
             int shipIts = 0;
             JObject reviewResponse = null;
+
             try
             {
+                logger.Log("Requesting reviews and replies");
+
                 // Try this review code
                 string apiRequest = string.Format(@"/review-requests/{0}/reviews", reviewId);
-                reviewResponse = MakeApiCall(credentials, workingDirectory, apiRequest);
+                reviewResponse = MakeApiCall(credentials, workingDirectory, apiRequest, logger);
                 if (reviewResponse == null)
+                {
+                    logger.Log("API called, assumed no reviews or replies");
                     return new Tuple<int, int, int>(0, 0, 0);
+                }
                 
                 // Get the reviews from the call
                 string reviewCount = (string)reviewResponse["total_results"];
@@ -311,15 +352,19 @@ namespace Review_Stats.Utilities
                     }
                 }
             }
-            catch
+            catch (Exception e)
             {
                 // Can't get the values out
+                logger.Log("Exception raised when requesting reviews\n\n{0}\n", e.Message);
                 return new Tuple<int, int, int>(0, 0, 0);
             }
 
             // If we have no reviews, bail
             if (reviews == 0)
+            {
+                logger.Log("No reviews were found");
                 return new Tuple<int, int, int>(0, 0, 0);
+            }
 
             // We now need to track replies
             int replies = 0;
@@ -339,11 +384,14 @@ namespace Review_Stats.Utilities
 
                     // Build up the request
                     string apiRequest = string.Format(@"/review-requests/{0}/reviews/{1}/replies --counts-only=1", reviewId, commentId);
-                    JObject result = MakeApiCall(credentials, workingDirectory, apiRequest);
+                    JObject result = MakeApiCall(credentials, workingDirectory, apiRequest, logger);
 
                     // If we failed, return what we have
                     if (result == null)
+                    {
+                        logger.Log("API called failed, assumed no replies");
                         loopState.Stop();
+                    }
 
                     if (loopState.IsStopped == false)
                     {
@@ -351,21 +399,23 @@ namespace Review_Stats.Utilities
                         Interlocked.Add(ref replies, int.Parse(replyCount));
                     }
                 }
-                catch
+                catch (Exception e)
                 {
                     // Can't get the values out so return what we have
+                    logger.Log("Exception raised when requesting replies\n\n{0}\n", e.Message);
                     loopState.Stop();
                 }
             });
 
             // Return what we have
+            logger.Log("Found\n* Reviews: {0}\n* Ship Its: {1}\n* Replies: {2}", reviews, shipIts, replies);
             return new Tuple<int, int, int>(reviews, shipIts, replies);
         }
 
         //
         // Gets the state of this review
         //
-        private static State GetReviewState(JObject result)
+        private static State GetReviewState(JObject result, Logging logger)
         {
             State thisState = State.Unknown;
             try
@@ -391,9 +441,10 @@ namespace Review_Stats.Utilities
                     thisState = State.Closed;
                 }
             }
-            catch
+            catch (Exception e)
             {
                 // Unknown state
+                logger.Log("Exception raised when checking review status\n\n{0}\n", e.Message);
                 return State.Unknown;
             }
 
@@ -404,24 +455,35 @@ namespace Review_Stats.Utilities
         //
         // Runs through the RB Api
         //
-        private static JObject MakeApiCall(Simple credentials, string workingDirectory, string apiRequest)
+        private static JObject MakeApiCall(Simple credentials, string workingDirectory, string apiRequest, Logging logger)
         {
             // Make the API request
+            logger.Log("Requesting RB API call - {0}", apiRequest);
             RB_Tools.Shared.Targets.Reviewboard.RequestApiResult result = RB_Tools.Shared.Targets.Reviewboard.RequestApi(credentials, apiRequest, workingDirectory);
 
             // We can deal with a non-success call in a numver of ways
             if (result.Code == RB_Tools.Shared.Targets.Reviewboard.Result.Error)
+            {
+                logger.Log("* Error thrown - {0}", result.Error);
                 throw new ReviewboardApiException(result.Error);
+            }
 
             // If we're unable to access the review, return an empty one
             if (result.Code == RB_Tools.Shared.Targets.Reviewboard.Result.AccessDenied)
+            {
+                logger.Log("* Access denied");
                 return EmptyReview;
+            }
 
             // If we can't find it, return null as we want to track this
             if (result.Code != RB_Tools.Shared.Targets.Reviewboard.Result.Success)
+            {
+                logger.Log("* Failed");
                 return null;
+            }
 
             // Return our object
+            logger.Log("* Result - {0}", result.Result);
             return result.Result;
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using RB_Tools.Shared.Utilities;
+using RB_Tools.Shared.Logging;
 
 namespace Review_Stats.Utilities
 {
@@ -26,14 +27,23 @@ namespace Review_Stats.Utilities
         //
         // Parses the command line options
         //
-        public static Result ParseCommands(string fileList, string debugOptions)
+        public static Result ParseCommands(string fileList, string debugOptions, Logging logger)
         {
+            logger.Log(@"Parsing the file list command");
+
             // Get the file
             if (File.Exists(fileList) == false)
+            {
+                logger.Log(@"Unable to find the file list command file - {0}", fileList);
                 return null;
+            }
+
             string[] fileContent = File.ReadAllLines(fileList);
             if (fileContent.Length == 0)
+            {
+                logger.Log(@"The given file list contains no content - {0}", fileList);
                 return null;
+            }
 
             // Handle any debug options
             fileContent = HandleDebugRequest(fileContent, debugOptions);
@@ -52,6 +62,7 @@ namespace Review_Stats.Utilities
                 // Does it exist
                 if (File.Exists(thisPath) == false && Directory.Exists(thisPath) == false)
                 {
+                    logger.Log(@"* Invalid path found in file list - {0}", thisPath);
                     invalidPaths.Add(thisPath);
                     continue;
                 }
@@ -59,11 +70,13 @@ namespace Review_Stats.Utilities
                 // SVN path
                 if (Svn.IsPathTracked(thisPath) == false)
                 {
+                    logger.Log(@"* Invalid path found in file list - {0}", thisPath);
                     invalidPaths.Add(thisPath);
                     continue;
                 }
 
                 // It's fine
+                logger.Log(@"* Using - {0}", thisPath);
                 validPaths.Add(thisPath);
             }
 

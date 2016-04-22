@@ -1,4 +1,5 @@
-﻿using RB_Tools.Shared.Server;
+﻿using RB_Tools.Shared.Logging;
+using RB_Tools.Shared.Server;
 using RB_Tools.Shared.Structures;
 using RB_Tools.Shared.Utilities;
 using Review_Stats.Utilities;
@@ -20,22 +21,30 @@ namespace Review_Stats.Statistics
         //
         // Generates the final report
         //
-        public static bool Generate(RevisionList.Revisions revisions, SvnLogs.Log[] revisionLogs, ReviewState.GetCommitStatsResult commitStats, ReviewState.ReviewStatistics[] reviewStats, TimeSpan reviewTime)
+        public static bool Generate(RevisionList.Revisions revisions, SvnLogs.Log[] revisionLogs, ReviewState.GetCommitStatsResult commitStats, ReviewState.ReviewStatistics[] reviewStats, Logging logger, TimeSpan reviewTime)
         {
             // Start with the clean template
             string outputContent = Properties.Resources.ReportTemplate;
 
-            // Spin through and update various sections
-            outputContent = UpdateOverview(outputContent, revisionLogs, revisions.Url, reviewTime);
-            outputContent = UpdateCommitStatistics(outputContent, commitStats);
-            outputContent = UpdateReviewStatistics(outputContent, reviewStats);
-            outputContent = UpdateAverageResults(outputContent, reviewStats);
-            outputContent = UpdateReviewLists(outputContent, reviewStats);
-            outputContent = UpdateCopyrightSection(outputContent);
+            try
+            {
+                // Spin through and update various sections
+                outputContent = UpdateOverview(outputContent, revisionLogs, revisions.Url, reviewTime);
+                outputContent = UpdateCommitStatistics(outputContent, commitStats);
+                outputContent = UpdateReviewStatistics(outputContent, reviewStats);
+                outputContent = UpdateAverageResults(outputContent, reviewStats);
+                outputContent = UpdateReviewLists(outputContent, reviewStats);
+                outputContent = UpdateCopyrightSection(outputContent);
 
-            // Display the content
-            DisplayReport(outputContent, revisions.Url);
+                // Display the content
+                DisplayReport(outputContent, revisions.Url);
+            }
+            catch (Exception e)
+            {
+                logger.Log("Exception raised when generating report\n\n{0}\n", e.Message);
+            }
 
+            // Done
             return true;
         }
 

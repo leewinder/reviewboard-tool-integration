@@ -11,6 +11,7 @@ using RB_Tools.Shared.Server;
 using RB_Tools.Shared.Authentication.Credentials;
 using Review_Stats.Exceptions;
 using System.Diagnostics;
+using RB_Tools.Shared.Logging;
 
 namespace Review_Stats.Statistics
 {
@@ -22,68 +23,88 @@ namespace Review_Stats.Statistics
         //
         // Start the process of generating the stats
         //
-        public static void Start(Form owner, string fileList, string debugOptions, GenerationFinished generationFinished)
+        public static void Start(Form owner, string fileList, Logging logger, string debugOptions, GenerationFinished generationFinished)
         {
+            // Track our properties
+            s_logger = logger;
+
             // Kick off the background threads
             BackgroundWorker updateThread = new BackgroundWorker();
 
             // Does the work of the request
             updateThread.DoWork += (object objectSender, DoWorkEventArgs args) =>
             {
-                // Check if we're authenticated
-                Simple credentials = CheckServerAuthentication(owner);
-                if (credentials == null)
-                    return;
-
-                // Get the list of paths to review
-                string[] pathsToReview = ParseFileList(fileList, debugOptions);
-                if (pathsToReview == null)
-                    return;
-
-                // Get the revision list for each path
-                RevisionList.Revisions[] revisionLists = RequestRevisionLists(pathsToReview);
-                if (revisionLists == null)
-                    return;
-
-                // Spin through each revision list and do the work for each path selected
-                foreach (RevisionList.Revisions thisRevisionList in revisionLists)
+                logger.Log(@"Starting stats generation");
+                try
                 {
-                    // We need to time this review
-                    Stopwatch stopWatch = new Stopwatch();
-                    stopWatch.Start();
-
-                    // Get the logs for the given set of revisions
-                    SvnLogs.Log[] revisionLogs = GetLogsFromRevisions(thisRevisionList);
-                    if (revisionLogs == null)
+                    // Check if we're authenticated
+                    Simple credentials = CheckServerAuthentication(owner);
+                    if (credentials == null)
                         return;
 
-                    ReviewState.GetCommitStatsResult commitStats = GetCommitStats(revisionLogs);
-                    if (commitStats == null)
+                    // Get the list of paths to review
+                    string[] pathsToReview = ParseFileList(fileList, debugOptions);
+                    if (pathsToReview == null)
                         return;
 
-                    // Verify would could get the review information
-                    bool reviewInformationValid = CheckReviewInformation(commitStats);
-                    if (reviewInformationValid == false)
+                    // Get the revision list for each path
+                    RevisionList.Revisions[] revisionLists = RequestRevisionLists(pathsToReview);
+                    if (revisionLists == null)
                         return;
 
-                    // Now generate unformation about the reviews
-                    ReviewState.ReviewStatistics[] reviewStats = GetReviewStats(commitStats.Reviews, thisRevisionList.Path, credentials);
-                    if (reviewStats == null)
-                        return;
+                    // Spin through each revision list and do the work for each path selected
+                    foreach (RevisionList.Revisions thisRevisionList in revisionLists)
+                    {
+                        // Identify which path we'll go through 
+                        s_logger.Log(@"Generating stats for\n{0}", thisRevisionList.Path);
 
-                    // Create the review
-                    bool reportGenerated = CreateReviewReport(thisRevisionList, revisionLogs, commitStats, reviewStats, stopWatch);
-                    if (reportGenerated == false)
-                        return;
+                        // We need to time this review
+                        Stopwatch stopWatch = new Stopwatch();
+                        stopWatch.Start();
+
+                        // Get the logs for the given set of revisions
+                        SvnLogs.Log[] revisionLogs = GetLogsFromRevisions(thisRevisionList);
+                        if (revisionLogs == null)
+                            return;
+
+                        ReviewState.GetCommitStatsResult commitStats = GetCommitStats(revisionLogs);
+                        if (commitStats == null)
+                            return;
+
+                        // Verify would could get the review information
+                        bool reviewInformationValid = CheckReviewInformation(commitStats);
+                        if (reviewInformationValid == false)
+                            return;
+
+                        // Now generate unformation about the reviews
+                        ReviewState.ReviewStatistics[] reviewStats = GetReviewStats(commitStats.Reviews, thisRevisionList.Path, credentials);
+                        if (reviewStats == null)
+                            return;
+
+                        // Create the review
+                        bool reportGenerated = CreateReviewReport(thisRevisionList, revisionLogs, commitStats, reviewStats, stopWatch);
+                        if (reportGenerated == false)
+                            return;
+                    }
+                }
+                catch (Exception e)
+                {
+                    s_logger.Log("Exception raised when generating review stats\n\n{0}\n", e.Message);
+                    s_errorMessage = string.Format("Unable to generate review statistics for the given path\n\n{0}", e.Message);
                 }
             };
 
             // Called when it's all been generated
             updateThread.RunWorkerCompleted += (object objectSender, RunWorkerCompletedEventArgs args) =>
             {
+                s_logger.Log("Review generation complete");
+
                 // Inform the user something went wrong?
                 if (string.IsNullOrEmpty(s_errorMessage) == false)
+                {
+                    s_logger.Log(@"* Error encountered when running\n{0}\n", s_errorMessage);
                     MessageBox.Show(s_errorMessage, @"Stats Generation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
 
                 // Done
                 generationFinished();
@@ -94,15 +115,18 @@ namespace Review_Stats.Statistics
         }
 
         // Private properties
-        private static string s_errorMessage = null;
+        private static string   s_errorMessage = null;
+        private static Logging  s_logger = null;
 
         //
         // Parses and checks the file list
         //
         private static string[] ParseFileList(string fileList, string debugOptions)
         {
+            s_logger.Log(@"Staring command line parsing");
+
             // Parse the file
-            Utilities.CommandRequests.Result parseResult = Utilities.CommandRequests.ParseCommands(fileList, debugOptions);
+            Utilities.CommandRequests.Result parseResult = Utilities.CommandRequests.ParseCommands(fileList, debugOptions, s_logger);
             if (parseResult == null)
             {
                 s_errorMessage = @"Unable to read the given file list data";
@@ -139,10 +163,15 @@ namespace Review_Stats.Statistics
         //
         private static Simple CheckServerAuthentication(Form owner)
         {
+            // Get our server
             string reviewboardServer = Names.Url[(int)Names.Type.Reviewboard];
+
+            // Check our credentials
+            s_logger.Log(@"Checking credentials against {0}", reviewboardServer);
             if (Credentials.Available(reviewboardServer) == false)
             {
                 // Kick off the request
+                s_logger.Log(@"Credentials not found for {0}", reviewboardServer);
                 owner.Invoke((MethodInvoker)delegate
                 {
                     DialogResult dialogResult = MessageBox.Show(owner, "You must be authenticated with the Reviewboard server before generating review statistics.\n\nDo you want to authenticate now?", "Authentication Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -151,11 +180,16 @@ namespace Review_Stats.Statistics
                 });
 
                 // Check if we're still unauthenticated
+                s_logger.Log(@"Authentication completed");
                 if (Credentials.Available(reviewboardServer) == false)
+                {
+                    s_logger.Log(@"Authentication still not present");
                     return null;
+                }
             }
 
             // We're good
+            s_logger.Log(@"Creating credentials object for {0}", reviewboardServer);
             return Credentials.Create(reviewboardServer) as Simple;
         }
 
@@ -164,11 +198,13 @@ namespace Review_Stats.Statistics
         //
         private static RevisionList.Revisions[] RequestRevisionLists(string[] pathsToReview)
         {
-            RevisionList.Revisions[] results = RevisionList.Request(pathsToReview);
+            s_logger.Log(@"Identifying revisions list for all paths");
+            RevisionList.Revisions[] results = RevisionList.Request(pathsToReview, s_logger);
             if (results == null)
                 s_errorMessage = @"No valid revisions were selected to review";
 
             // Return our results
+            s_logger.Log(@"Revisions identified");
             return results;
         }
 
@@ -178,10 +214,11 @@ namespace Review_Stats.Statistics
         private static SvnLogs.Log[] GetLogsFromRevisions(RevisionList.Revisions revisionsToLog)
         {
             // Starting to review logs
+            s_logger.Log(@"Getting logs for\n{0}", revisionsToLog.Revision);
             Display.Start(Display.State.ExtractingLogs, revisionsToLog.Revision.Length);
 
             // Get our results
-            SvnLogs.Log[] results = SvnLogs.GetRevisionLogs(revisionsToLog.Path, revisionsToLog.Revision, (currentCount) =>
+            SvnLogs.Log[] results = SvnLogs.GetRevisionLogs(revisionsToLog.Path, revisionsToLog.Revision, s_logger, (currentCount) =>
             {
                 Display.Update(currentCount, revisionsToLog.Revision.Length);
             });
@@ -191,6 +228,7 @@ namespace Review_Stats.Statistics
                 s_errorMessage = @"Unable to get the logs for the revisions selected in " + revisionsToLog.Path;
 
             // Return our results
+            s_logger.Log(@"Logs recieved");
             return results;
         }
 
@@ -200,10 +238,11 @@ namespace Review_Stats.Statistics
         private static ReviewState.GetCommitStatsResult GetCommitStats(SvnLogs.Log[] revisionLogs)
         {
             // Starting to pasring
+            s_logger.Log(@"Starting to generate the commit statistics");
             Display.Start(Display.State.ParsingLogs, revisionLogs.Length);
 
             // Get the stats about these commits
-            ReviewState.GetCommitStatsResult results = ReviewState.GetCommitStatistics(revisionLogs, (currentCount) =>
+            ReviewState.GetCommitStatsResult results = ReviewState.GetCommitStatistics(revisionLogs, s_logger, (currentCount) =>
             {
                 Display.Update(currentCount, revisionLogs.Length);
             });
@@ -213,6 +252,7 @@ namespace Review_Stats.Statistics
                 s_errorMessage = @"Unable to generate the commit stats";
 
             // Return our results
+            s_logger.Log(@"Commit stats generated");
             return results;
         }
 
@@ -241,12 +281,13 @@ namespace Review_Stats.Statistics
         private static ReviewState.ReviewStatistics[] GetReviewStats(ReviewState.CommitReview[] reviews, string workingDirectory, Simple credentials)
         {
             // Starting to review logs
+            s_logger.Log("Starting to extract the review stats");
             Display.Start(Display.State.QueryingReviewboard, reviews.Length);
 
             // Try to query the server for our review state
             try
             {
-                ReviewState.ReviewStatistics[] results = ReviewState.GetReviewStatistics(reviews, workingDirectory, credentials, (currentCount) =>
+                ReviewState.ReviewStatistics[] results = ReviewState.GetReviewStatistics(reviews, workingDirectory, credentials, s_logger, (currentCount) =>
                 {
                     Display.Update(currentCount, reviews.Length);
                 });
@@ -259,6 +300,7 @@ namespace Review_Stats.Statistics
                 }
 
                 // Return what we have
+                s_logger.Log("Review stats generated");
                 return results;
             }
             catch (ReviewboardApiException e)
@@ -281,10 +323,11 @@ namespace Review_Stats.Statistics
         private static bool CreateReviewReport(RevisionList.Revisions revisions, SvnLogs.Log[] revisionLogs, ReviewState.GetCommitStatsResult commitStats, ReviewState.ReviewStatistics[] reviewStats, Stopwatch reviewTimer)
         {
             // We're now generating
+            s_logger.Log("Starting to generate review report");
             Display.Start(Display.State.CreatingResults);
             
             // Try and generate the report
-            bool generated = Report.Generate(revisions, revisionLogs, commitStats, reviewStats, reviewTimer.Elapsed);
+            bool generated = Report.Generate(revisions, revisionLogs, commitStats, reviewStats, s_logger, reviewTimer.Elapsed);
             if (generated == false)
                 s_errorMessage = @"Unable to generate the Review Report";
 
