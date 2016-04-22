@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RB_Tools.Shared.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,17 +26,20 @@ namespace Create_Review
                 return;
             }
 
+            // Create our logger
+            Logging logger = Logging.Create("Create Review", Logging.Type.File, Logging.Threading.MultiThread);
+
             // Copy user settings from previous version if necessary
             UpdateVersionSettings();
             
             // Build up the content we've been asked to review
             // If we don't have any, we've already complained
-            Review.Review.Content requestContent = Review.Review.ExtractContent(args[0], args.Length < 2 ? null : args[1]);
+            Review.Review.Content requestContent = Review.Review.ExtractContent(args[0], args.Length < 2 ? null : args[1], logger);
             if (requestContent == null)
                 return;
 
             // Run the dialog
-            Application.Run(new CreateReview(args[0], requestContent));
+            Application.Run(new CreateReview(args[0], requestContent, logger));
         }
 
         //
