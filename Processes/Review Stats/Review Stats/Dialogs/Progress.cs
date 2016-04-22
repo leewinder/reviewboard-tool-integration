@@ -14,12 +14,9 @@ namespace Review_Stats.Dialogs
 {
     public partial class Progress : Form
     {
-        public Progress(string fileList, string debugOptions)
+        public Progress(string fileList, string debugOptions, Logging logger)
         {
             InitializeComponent();
-
-            // Enable logging
-            Logging logger = Logging.Create("Generate Review Stats", Logging.Type.File, Logging.Threading.MultiThread);
 
             // Kick it off and we're done
             Display.SetDisplayProperties(this, label_Progress, progressBar_Progress, logger);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RB_Tools.Shared.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,8 +27,11 @@ namespace Review_Stats
                 return;
             }
 
+            // Enable logging
+            Logging logger = Logging.Create("Generate Review Stats", Logging.Type.File, Logging.Threading.MultiThread);
+
             // Run the dialog
-            Application.Run(new Dialogs.Progress(args[0], args.Length < 2 ? null : args[1]));
+            Application.Run(new Dialogs.Progress(args[0], args.Length < 2 ? null : args[1], logger));
         }
     }
 }
