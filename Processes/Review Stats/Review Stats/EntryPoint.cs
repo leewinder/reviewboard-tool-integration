@@ -19,19 +19,16 @@ namespace Review_Stats
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // Check we have some arguments
-            if (args == null || args.Length == 0)
+            RB_Tools.Shared.Cli.Options commandLineOptions = new RB_Tools.Shared.Cli.Options();
+            if (CommandLine.Parser.Default.ParseArguments(args, commandLineOptions))
             {
-                // Show an error dialog
-                MessageBox.Show("No arguments have been passed to the statistics dialog so no statistics can be generated", "Unable To Generate Statistics", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                // Create our logger
+                Logging.Type loggingType = (commandLineOptions.Logging == true ? Logging.Type.File : Logging.Type.Null);
+                Logging logger = Logging.Create("Generate Review Stats", loggingType, Logging.Threading.MultiThread);
+
+                // Run the dialog
+                Application.Run(new Dialogs.Progress(commandLineOptions.FileList, commandLineOptions.InjectPaths, logger));
             }
-
-            // Enable logging
-            Logging logger = Logging.Create("Generate Review Stats", Logging.Type.File, Logging.Threading.MultiThread);
-
-            // Run the dialog
-            Application.Run(new Dialogs.Progress(args[0], args.Length < 2 ? null : args[1], logger));
         }
     }
 }

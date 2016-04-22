@@ -23,7 +23,7 @@ namespace Review_Stats.Statistics
         //
         // Start the process of generating the stats
         //
-        public static void Start(Form owner, string fileList, Logging logger, string debugOptions, GenerationFinished generationFinished)
+        public static void Start(Form owner, string fileList, Logging logger, bool injectPaths, GenerationFinished generationFinished)
         {
             // Track our properties
             s_logger = logger;
@@ -43,7 +43,7 @@ namespace Review_Stats.Statistics
                         return;
 
                     // Get the list of paths to review
-                    string[] pathsToReview = ParseFileList(fileList, debugOptions);
+                    string[] pathsToReview = ParseFileList(fileList, injectPaths);
                     if (pathsToReview == null)
                         return;
 
@@ -121,12 +121,12 @@ namespace Review_Stats.Statistics
         //
         // Parses and checks the file list
         //
-        private static string[] ParseFileList(string fileList, string debugOptions)
+        private static string[] ParseFileList(string fileList, bool injectPaths)
         {
             s_logger.Log(@"Staring command line parsing");
 
             // Parse the file
-            Utilities.CommandRequests.Result parseResult = Utilities.CommandRequests.ParseCommands(fileList, debugOptions, s_logger);
+            Utilities.CommandRequests.Result parseResult = Utilities.CommandRequests.ParseCommands(fileList, injectPaths, s_logger);
             if (parseResult == null)
             {
                 s_errorMessage = @"Unable to read the given file list data";

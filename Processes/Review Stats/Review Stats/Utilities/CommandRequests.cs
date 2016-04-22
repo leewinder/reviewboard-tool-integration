@@ -27,7 +27,7 @@ namespace Review_Stats.Utilities
         //
         // Parses the command line options
         //
-        public static Result ParseCommands(string fileList, string debugOptions, Logging logger)
+        public static Result ParseCommands(string fileList, bool injectPaths, Logging logger)
         {
             logger.Log(@"Parsing the file list command");
 
@@ -46,7 +46,7 @@ namespace Review_Stats.Utilities
             }
 
             // Handle any debug options
-            fileContent = HandleDebugRequest(fileContent, debugOptions);
+            fileContent = HandleDebugRequest(fileContent, injectPaths);
 
             // Track all our content
             List<string> validPaths = new List<string>();
@@ -90,18 +90,10 @@ namespace Review_Stats.Utilities
         //
         // Updates the data based on the debug options
         //
-        private static string[] HandleDebugRequest(string[] fileContent, string debugOptions)
+        private static string[] HandleDebugRequest(string[] fileContent, bool injectPaths)
         {
-            // Do we want to inject the path of the files because we're running a test
-            bool injectTestPath = false;
-            if (string.IsNullOrWhiteSpace(debugOptions) == false)
-            {
-                if (debugOptions.Equals(InjectDirectoryRequest, StringComparison.InvariantCultureIgnoreCase) == true)
-                    injectTestPath = true;
-            }
-
             // If we need to, inject the test path
-            if (injectTestPath == true)
+            if (injectPaths == true)
             {
                 // Get the path we need to inject into the test documents
                 string runningPath = Directory.GetCurrentDirectory();
