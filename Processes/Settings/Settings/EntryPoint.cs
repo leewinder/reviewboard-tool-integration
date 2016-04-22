@@ -3,7 +3,7 @@ using RB_Tools.Shared.Logging;
 using System;
 using System.Windows.Forms;
 
-namespace Authentication
+namespace Settings
 {
     static class EntryPoint
     {
@@ -14,11 +14,11 @@ namespace Authentication
         static void Main()
         {
             // Enable logging
-            Logging logger = Logging.Create("Authentication", Logging.Type.File, Logging.Threading.MultiThread);
+            Logging logger = Logging.Create("Settings", Logging.Type.File, Logging.Threading.MultiThread);
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Dialogs.CredentialOptions(logger));
+            Application.Run(new Dialogs.SettingOptions(logger));
         }
     }
 }

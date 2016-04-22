@@ -5,11 +5,11 @@ using RB_Tools.Shared.Authentication.Credentials;
 using RB_Tools.Shared.Authentication.Targets;
 using RB_Tools.Shared.Logging;
 
-namespace Authentication.Dialogs
+namespace Settings.Dialogs
 {
-    public partial class CredentialOptions : Form
+    public partial class SettingOptions : Form
     {
-        public CredentialOptions(Logging logger)
+        public SettingOptions(Logging logger)
         {
             InitializeComponent();
 

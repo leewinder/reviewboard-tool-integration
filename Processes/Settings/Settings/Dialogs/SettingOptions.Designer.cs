@@ -1,6 +1,6 @@
-﻿namespace Authentication.Dialogs
+﻿namespace Settings.Dialogs
 {
-    partial class CredentialOptions
+    partial class SettingOptions
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CredentialOptions));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingOptions));
             this.button_ReviewboardAuthentication = new System.Windows.Forms.Button();
             this.button_ClearAllAuthentication = new System.Windows.Forms.Button();
             this.SuspendLayout();
