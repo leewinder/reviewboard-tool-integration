@@ -86,7 +86,7 @@ namespace Create_Review.Review
         //
         // Extracts the content of the review from the file passed to the tool
         //
-        public static Content ExtractContent(string requestSource, string injectRequest, Logging logger)
+        public static Content ExtractContent(string requestSource, bool injectPaths, Logging logger)
         {
             logger.Log("Extracting request content");
 
@@ -99,7 +99,7 @@ namespace Create_Review.Review
             }
 
             // Inject the working copy into the requests if we've been asked to do it
-            modifiedContent = InjectWorkingDirectory(modifiedContent, injectRequest, logger);
+            modifiedContent = InjectWorkingDirectory(modifiedContent, injectPaths, logger);
 
             // Check to see if we have a review with a single patch file
             Content reviewContent = CreatePatchOnlyReview(modifiedContent, logger);
@@ -146,7 +146,6 @@ namespace Create_Review.Review
 
         // Private Properties
         private static readonly string[]    ValidPatchExtensions = { ".patch", ".diff" };
-        private static readonly string      InjectDirectoryRequest = "inject_test_path";
 
         //
         // Reads in and checks the content
@@ -185,18 +184,10 @@ namespace Create_Review.Review
         //
         // Returns if we want to inject our working directory into the file requests
         //
-        private static string[] InjectWorkingDirectory(string[] reviewContent, string injectRequest, Logging logger)
+        private static string[] InjectWorkingDirectory(string[] reviewContent, bool injectPaths, Logging logger)
         {
-            // Do we want to inject the path of the files because we're running a test
-            bool injectTestPath = false;
-            if (string.IsNullOrWhiteSpace(injectRequest) == false)
-            {
-                if (injectRequest.Equals(InjectDirectoryRequest, StringComparison.InvariantCultureIgnoreCase) == true)
-                    injectTestPath = true;
-            }
-
             // If we need to, inject the test path
-            if (injectTestPath == true)
+            if (injectPaths == true)
             {
                 // Get the path we need to inject into the test documents
                 string runningPath = Directory.GetCurrentDirectory();

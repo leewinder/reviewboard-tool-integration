@@ -18,28 +18,25 @@ namespace Create_Review
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // Check we have some arguments
-            if (args == null || args.Length == 0)
+            RB_Tools.Shared.Cli.Options commandLineOptions = new RB_Tools.Shared.Cli.Options();
+            if (CommandLine.Parser.Default.ParseArguments(args, commandLineOptions))
             {
-                // Show an error dialog
-                MessageBox.Show("No arguments have been passed to the review dialog so no review can be raised", "Unable to raise review", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                // Create our logger
+                Logging.Type loggingType = (commandLineOptions.Logging == true ? Logging.Type.File : Logging.Type.Null);
+                Logging logger = Logging.Create("Create Review", loggingType, Logging.Threading.MultiThread);
+
+                // Copy user settings from previous version if necessary
+                UpdateVersionSettings();
+
+                // Build up the content we've been asked to review
+                // If we don't have any, we've already complained
+                Review.Review.Content requestContent = Review.Review.ExtractContent(commandLineOptions.FileList, commandLineOptions.InjectPaths, logger);
+                if (requestContent == null)
+                    return;
+
+                // Run the dialog
+                Application.Run(new CreateReview(commandLineOptions.FileList, requestContent, logger));
             }
-
-            // Create our logger
-            Logging logger = Logging.Create("Create Review", Logging.Type.File, Logging.Threading.MultiThread);
-
-            // Copy user settings from previous version if necessary
-            UpdateVersionSettings();
-            
-            // Build up the content we've been asked to review
-            // If we don't have any, we've already complained
-            Review.Review.Content requestContent = Review.Review.ExtractContent(args[0], args.Length < 2 ? null : args[1], logger);
-            if (requestContent == null)
-                return;
-
-            // Run the dialog
-            Application.Run(new CreateReview(args[0], requestContent, logger));
         }
 
         //
