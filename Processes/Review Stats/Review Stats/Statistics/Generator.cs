@@ -176,7 +176,7 @@ namespace Review_Stats.Statistics
                 {
                     DialogResult dialogResult = MessageBox.Show(owner, "You must be authenticated with the Reviewboard server before generating review statistics.\n\nDo you want to authenticate now?", "Authentication Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                     if (dialogResult == DialogResult.Yes)
-                        RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
+                        RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate(s_logger);
                 });
 
                 // Check if we're still unauthenticated
@@ -190,7 +190,7 @@ namespace Review_Stats.Statistics
 
             // We're good
             s_logger.Log(@"Creating credentials object for {0}", reviewboardServer);
-            return Credentials.Create(reviewboardServer) as Simple;
+            return Credentials.Create(reviewboardServer, s_logger) as Simple;
         }
 
         //

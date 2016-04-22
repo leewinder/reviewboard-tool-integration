@@ -294,7 +294,7 @@ namespace Create_Review
                 
                 // Get our credentials
                 string serverName = Names.Url[(int)Names.Type.Reviewboard];
-                Simple credentials = Credentials.Create(serverName) as Simple;
+                Simple credentials = Credentials.Create(serverName, m_logger) as Simple;
                 if (credentials == null)
                 {
                     m_logger.Log("Unable to create credentials for '{0}'", serverName);
@@ -489,7 +489,7 @@ namespace Create_Review
 
                 DialogResult dialogResult = MessageBox.Show(this, "You must be authenticated with the Reviewboard server before generating a review.\n\nDo you want to authenticate now?", "Authentication Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (dialogResult == DialogResult.Yes)
-                    RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
+                    RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate(m_logger);
 
                 // Check if we're still unauthenticated
                 if (Credentials.Available(reviewboardServer) == false)
@@ -545,7 +545,7 @@ namespace Create_Review
         private void reviewboardAuthenticationToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Show the authentication dialog
-            RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
+            RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate(m_logger);
         }
 
         private void button_RefreshGroups_Click(object sender, EventArgs e)
@@ -558,7 +558,7 @@ namespace Create_Review
 
                 DialogResult dialogResult = MessageBox.Show(this, "You must be authenticated with the Reviewboard server before refreshing the review groups.\n\nDo you want to authenticate now?", "Authentication Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (dialogResult == DialogResult.Yes)
-                    RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
+                    RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate(m_logger);
 
                 // Check if we're still unauthenticated
                 if (Credentials.Available(reviewboardServer) == false)
@@ -587,7 +587,7 @@ namespace Create_Review
                 m_logger.Log("Starting group refresh");
 
                 // Get our credentials
-                Simple credentials = Credentials.Create(reviewboardServer) as Simple;
+                Simple credentials = Credentials.Create(reviewboardServer, m_logger) as Simple;
                 if (credentials == null)
                     throw new FileNotFoundException(@"Unable to find the credentials for " + reviewboardServer);
 
