@@ -83,16 +83,26 @@ namespace RB_Tools.Shared.Utilities
         //
         // Returns the log for a specific revision
         //
-        public static string GetLog(string workingDirectory, string revision, bool xml)
+        public static string GetLog(string workingDirectory, string revision, bool xml, Logging.Logging logger)
         {
             // Generate the info
             string infoPath = string.Format(@"log ""{0}"" --revision {1} {2}", workingDirectory, revision, xml == true ? "--xml" : "");
+            logger.Log("Running SVN command '{0}'", infoPath);
+
+            // Run the process
             Process.Output infoOutput = Process.Start(null, "svn", infoPath);
             if (string.IsNullOrWhiteSpace(infoOutput.StdOut) == true)
+            {
+                logger.Log("Log command generated no output");
                 return null;
+            }
 
             // Sanitise it
-            return infoOutput.StdOut.Replace("\r\n", "\n");
+            string sanitisedOutput = infoOutput.StdOut.Replace("\r\n", "\n");
+            logger.Log("Command returned\n{0}\n", sanitisedOutput);
+
+            // Done
+            return sanitisedOutput;
         }
 
         //

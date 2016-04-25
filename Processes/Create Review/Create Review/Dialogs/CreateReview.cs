@@ -10,6 +10,7 @@ using RB_Tools.Shared.Server;
 using RB_Tools.Shared.Authentication.Credentials;
 using RB_Tools.Shared.Utilities;
 using RB_Tools.Shared.Extensions;
+using RB_Tools.Shared.Logging;
 
 namespace Create_Review
 {
@@ -18,8 +19,11 @@ namespace Create_Review
         //
         // Constructor
         //
-        public CreateReview(string originalRequest, Review.Review.Content reviewSource)
+        public CreateReview(string originalRequest, Review.Review.Content reviewSource, Logging logger)
         {
+            // Save our log
+            m_logger = logger;
+
             // Save our properties
             m_reviewSource = reviewSource;
             m_requestDirectory = ExtractSourceDirectory(m_reviewSource.Patch);
@@ -72,10 +76,12 @@ namespace Create_Review
         };
 
         // Private properties
-        private readonly Review.Review.Content   m_reviewSource;
+        private readonly Review.Review.Content      m_reviewSource;
         private readonly string                     m_requestDirectory;
 
         private readonly string                     m_originalRequest;
+
+        private readonly Logging                    m_logger;
 
         private Reviewboard.ReviewGroup[]           m_reviewGroups = new Reviewboard.ReviewGroup[0];
 
@@ -84,6 +90,8 @@ namespace Create_Review
         //
         private void InitialiseDialogElements()
         {
+            m_logger.Log("Initialising dialog elements");
+
             // Start with a clean combo
             comboBox_ReviewLevel.Items.Clear();
 
@@ -93,6 +101,8 @@ namespace Create_Review
             {
                 var thisLevel = (RB_Tools.Shared.Review.Properties.Level)i;
                 comboBox_ReviewLevel.Items.Add(thisLevel.GetDescription());
+
+                m_logger.Log("* Adding level {0}", thisLevel);
             }
 
             // Set the first option by default
@@ -104,6 +114,8 @@ namespace Create_Review
         //
         private void InitialiseReviewGroups()
         {
+            m_logger.Log("Initialising review groups");
+
             // If we have nothing, bail
             if (string.IsNullOrWhiteSpace(Settings.Settings.Default.Groups) == true)
                 return;
@@ -138,7 +150,10 @@ namespace Create_Review
         {
             // Spin through and update the combo box
             for (int i = 0; i < m_reviewGroups.Length; ++i)
+            {
                 checkedListBox_ReviewGroups.Items.Add(m_reviewGroups[i].DisplayName);
+                m_logger.Log("* Added {0}", m_reviewGroups[i].DisplayName);
+            }
 
             // Update the checked items
             if (selectedGroups != null)
@@ -147,7 +162,10 @@ namespace Create_Review
                 {
                     // Set the state of this entry
                     if (index < checkedListBox_ReviewGroups.Items.Count)
+                    {
                         checkedListBox_ReviewGroups.SetItemCheckState(index, CheckState.Checked);
+                        m_logger.Log("* Selected group {0}", index);
+                    }
                 }
             }
         }
@@ -157,8 +175,10 @@ namespace Create_Review
         //
         private void SaveSelectedReviewGroups()
         {
+            m_logger.Log("Saving the currently selected review groups");
+
             // Spin through and pull out the indices that are selected
-            List<int> selectedIndices = new List<int>();
+            List <int> selectedIndices = new List<int>();
             foreach (int thisIndex in checkedListBox_ReviewGroups.CheckedIndices)
                 selectedIndices.Add(thisIndex);           
 
@@ -177,10 +197,14 @@ namespace Create_Review
         // 
         private void UpdateCreateReviewDialogState(State expectedState)
         {
+            m_logger.Log("Dialog state requested - {0}", expectedState);
+
             // If we need to terminate, just do it
             if (expectedState == State.Terminate)
             {
+                m_logger.Log("Closing dialog as requested");
                 this.Close();
+
                 return;
             }
 
@@ -256,6 +280,8 @@ namespace Create_Review
         //
         private void TriggerReviewRequest(Review.Review.Properties reviewProperties)
         {
+            m_logger.Log("Triggering review request");
+
             // Build up the background work
             BackgroundWorker updateThread = new BackgroundWorker();
 
@@ -264,22 +290,29 @@ namespace Create_Review
             {
                 // Pull out the properties of the request
                 ReviewRequestProperties thisRequest = args.Argument as ReviewRequestProperties;
-
+                OutputRequestProperties(thisRequest);
+                
                 // Get our credentials
                 string serverName = Names.Url[(int)Names.Type.Reviewboard];
-                Simple credentials = Credentials.Create(serverName) as Simple;
+                Simple credentials = Credentials.Create(serverName, m_logger) as Simple;
                 if (credentials == null)
+                {
+                    m_logger.Log("Unable to create credentials for '{0}'", serverName);
                     throw new FileNotFoundException(@"Unable to find the credentials for " + serverName);
+                }
 
                 // Request the review
+                m_logger.Log("Requesting review");
                 Reviewboard.ReviewRequestResult result = Reviewboard.RequestReview(
                     thisRequest.WorkingCopy,
                     credentials.Server,
                     credentials.User,
                     credentials.Password,
-                    thisRequest.ReviewProperties);
+                    thisRequest.ReviewProperties,
+                    m_logger);
 
                 // Save the result
+                m_logger.Log("Review request finished");
                 args.Result = result;
             };
             // Called when the thread is complete
@@ -288,6 +321,8 @@ namespace Create_Review
                 // Check if we had an error
                 if (args.Error != null)
                 {
+                    m_logger.Log("Error raised during review request - {0}", args.Error.Message);
+
                     string body = string.Format("Exception thrown when trying to raise a new review\n\nException: {0}\n\nDescription: {1}", args.Error.GetType().Name, args.Error.Message);
                     MessageBox.Show(this, body, @"Unable to raise review", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
@@ -301,12 +336,16 @@ namespace Create_Review
                     // If we don't have a review URL, we failed
                     if (string.IsNullOrWhiteSpace(requestResult.Error) == false)
                     {
+                        m_logger.Log("Error raised during review request - {0}", requestResult.Error);
+
                         // Raise the error and we're done
                         MessageBox.Show(this, requestResult.Error, @"Unable to raise review", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         OnReviewFinished(FinishReason.Error);
                     }
                     else
                     {
+                        m_logger.Log("Review posted successful - {0}", requestResult.Url);
+
                         // Open the browser, doing this manually so we can open on the diff
                         if (string.IsNullOrWhiteSpace(requestResult.Url) == false)
                             System.Diagnostics.Process.Start(requestResult.Url);
@@ -314,10 +353,13 @@ namespace Create_Review
                         // If it's just a patch file, we don't need to do anything else
                         if (m_reviewSource.Source == Review.Review.Source.Patch)
                         {
+                            m_logger.Log("Patch review completed, process finished");
                             OnReviewFinished(FinishReason.Success);
                         }
                         else
                         {
+                            m_logger.Log("File review finished, moving onto next stage");
+
                             // Flag the actual review as done so we lose the path file 
                             // and then it doesn't show up in TortoiseSVN
                             OnReviewFinished(FinishReason.Interim);
@@ -333,10 +375,52 @@ namespace Create_Review
         }
 
         //
+        // Outputs what properties we are using
+        //
+        private void OutputRequestProperties(ReviewRequestProperties thisRequest)
+        {
+            m_logger.Log("Starting review request on '{0}'", thisRequest.WorkingCopy);
+            m_logger.Log(" * Path: {0}", thisRequest.ReviewProperties.Path);
+            m_logger.Log(" * Review ID: {0}", thisRequest.ReviewProperties.ReviewId);
+            m_logger.Log(" * Summary: {0}", thisRequest.ReviewProperties.Summary);
+            m_logger.Log(" * Description:\n{0}", thisRequest.ReviewProperties.Description);
+            m_logger.Log(" * Testing:\n{0}", thisRequest.ReviewProperties.Testing);
+            m_logger.Log(" * Jira ID: {0}", thisRequest.ReviewProperties.JiraId);
+            m_logger.Log(" * Review Level: {0}", thisRequest.ReviewProperties.ReviewLevel);
+            m_logger.Log(" * Copies As Adds: {0}", thisRequest.ReviewProperties.CopiesAsAdds);
+            m_logger.Log(" * Source Type: {0}", thisRequest.ReviewProperties.Contents.Source);
+
+            // Groups
+            if (thisRequest.ReviewProperties.Groups != null && thisRequest.ReviewProperties.Groups.Count > 0)
+            {
+                m_logger.Log("Posting to groups:");
+                foreach (string thisGroup in thisRequest.ReviewProperties.Groups)
+                    m_logger.Log(" * {0}", thisGroup);
+            }
+
+            // Content files
+            if (thisRequest.ReviewProperties.Contents.Files != null && thisRequest.ReviewProperties.Contents.Files.Length > 0)
+            {
+                m_logger.Log("Reviewing files:");
+                foreach (string thisFile in thisRequest.ReviewProperties.Contents.Files)
+                    m_logger.Log(" * {0}", thisFile);
+            }
+
+            // Content patch
+            if (string.IsNullOrEmpty(thisRequest.ReviewProperties.Contents.Patch) == false)
+            {
+                m_logger.Log("Review patch:");
+                m_logger.Log(" * {0}:", thisRequest.ReviewProperties.Contents.Patch);
+            }
+        }
+
+        //
         // Runs the review request
         //
         private void TriggerTortoiseRequest(Reviewboard.ReviewRequestResult requestResults)
         {
+            m_logger.Log("Triggering TortoiseSVN dialog");
+
             // Build up the background work
             BackgroundWorker updateThread = new BackgroundWorker();
 
@@ -345,7 +429,7 @@ namespace Create_Review
             {
                 // Pull out the properties of the request
                 Reviewboard.ReviewRequestResult originalResults = args.Argument as Reviewboard.ReviewRequestResult;
-                TortoiseSvn.OpenCommitDialog(originalResults.Properties, originalResults.Url);
+                TortoiseSvn.OpenCommitDialog(originalResults.Properties, originalResults.Url, m_logger);
             };
             // Called when the thread is complete
             updateThread.RunWorkerCompleted += (object objectSender, RunWorkerCompletedEventArgs args) =>
@@ -353,6 +437,8 @@ namespace Create_Review
                 // Check if we had an error
                 if (args.Error != null)
                 {
+                    m_logger.Log("Error using TortoiseSVN - {0}", args.Error.Message);
+
                     string body = string.Format("Exception thrown when trying to commit to SVN\n\nException: {0}\n\nDescription: {1}", args.Error.GetType().Name, args.Error.Message);
                     MessageBox.Show(this, body, @"Unable to commit", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
@@ -375,8 +461,10 @@ namespace Create_Review
         //
         private void OnReviewFinished(FinishReason finishReason)
         {
+            m_logger.Log("Review state finished - {0}", finishReason);
+
             // Keep the patch file, delete the original if we created it
-            Utilities.Storage.Keep(m_reviewSource.Patch, "Changes.patch", m_reviewSource.Source == Review.Review.Source.Files);
+            Utilities.Storage.Keep(m_reviewSource.Patch, "Changes.patch", m_reviewSource.Source == Review.Review.Source.Files, m_logger);
 
             // Go back to the final state
             if (finishReason == FinishReason.Success)
@@ -397,13 +485,18 @@ namespace Create_Review
             string reviewboardServer = Names.Url[(int)Names.Type.Reviewboard];
             if (Credentials.Available(reviewboardServer) == false)
             {
+                m_logger.Log("Requesting Reviewboard credentials");
+
                 DialogResult dialogResult = MessageBox.Show(this, "You must be authenticated with the Reviewboard server before generating a review.\n\nDo you want to authenticate now?", "Authentication Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (dialogResult == DialogResult.Yes)
-                    RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
+                    RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate(m_logger);
 
                 // Check if we're still unauthenticated
                 if (Credentials.Available(reviewboardServer) == false)
+                {
+                    m_logger.Log("Credentials still unavailable");
                     return;
+                }
             }
 
             // Save the state of our review groups
@@ -414,8 +507,8 @@ namespace Create_Review
 
             // Do we need to keep our artifacts?
             if (checkBox_KeepArtifacts.Checked == true)
-                Utilities.Storage.KeepAssets(textBox_Summary.Text);
-            Utilities.Storage.Keep(m_originalRequest, "Original File List.txt", false);
+                Utilities.Storage.KeepAssets(textBox_Summary.Text, m_logger);
+            Utilities.Storage.Keep(m_originalRequest, "Original File List.txt", false, m_logger);
 
             // Build up the list of review groups
             List<string> selectedReviewGroups = new List<string>();
@@ -452,7 +545,7 @@ namespace Create_Review
         private void reviewboardAuthenticationToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Show the authentication dialog
-            RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
+            RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate(m_logger);
         }
 
         private void button_RefreshGroups_Click(object sender, EventArgs e)
@@ -461,13 +554,18 @@ namespace Create_Review
             string reviewboardServer = Names.Url[(int)Names.Type.Reviewboard];
             if (Credentials.Available(reviewboardServer) == false)
             {
+                m_logger.Log("Requesting Reviewboard credentials");
+
                 DialogResult dialogResult = MessageBox.Show(this, "You must be authenticated with the Reviewboard server before refreshing the review groups.\n\nDo you want to authenticate now?", "Authentication Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (dialogResult == DialogResult.Yes)
-                    RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate();
-                
+                    RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate(m_logger);
+
                 // Check if we're still unauthenticated
                 if (Credentials.Available(reviewboardServer) == false)
+                {
+                    m_logger.Log("Credentials still unavailable");
                     return;
+                }
             }
 
             // Turn off the buttons and lock the settings
@@ -486,13 +584,15 @@ namespace Create_Review
             // Called when we need to trigger the request
             updateThread.DoWork += (object objectSender, DoWorkEventArgs args) =>
             {
+                m_logger.Log("Starting group refresh");
+
                 // Get our credentials
-                Simple credentials = Credentials.Create(reviewboardServer) as Simple;
+                Simple credentials = Credentials.Create(reviewboardServer, m_logger) as Simple;
                 if (credentials == null)
                     throw new FileNotFoundException(@"Unable to find the credentials for " + reviewboardServer);
 
                 // Get the groups
-                Reviewboard.ReviewGroup[] result = Reviewboard.GetReviewGroups(m_requestDirectory, credentials.Server, credentials.User, credentials.Password);
+                Reviewboard.ReviewGroup[] result = Reviewboard.GetReviewGroups(m_requestDirectory, credentials.Server, credentials.User, credentials.Password, m_logger);
 
                 // Save the result
                 args.Result = result;
@@ -503,11 +603,15 @@ namespace Create_Review
                 // Check if we had an error
                 if (args.Error != null)
                 {
+                    m_logger.Log("Error raised when updating review groups - {0}", args.Error.Message);
+
                     string body = string.Format("Exception thrown when trying to retrive the review groups\n\nException: {0}\n\nDescription: {1}", args.Error.GetType().Name, args.Error.Message);
                     MessageBox.Show(this, body, @"Unable to update group list", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else
                 {
+                    m_logger.Log("Review groups successfully updated");
+
                     // Update the list
                     m_reviewGroups = args.Result as Reviewboard.ReviewGroup[];
                     UpdateSelectedReviewGroups(null);
@@ -529,22 +633,28 @@ namespace Create_Review
         private void CreateReview_FormClosing(object sender, FormClosingEventArgs e)
         {
             // If we're closing, make sure we've cleaned up
+            m_logger.Log("Review dialog closing");
             OnReviewFinished(FinishReason.Closing);
         }
 
         private void reviewDiffToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            m_logger.Log("Displaying current patch - {0}", m_reviewSource.Patch);
             System.Diagnostics.Process.Start(m_reviewSource.Patch);
         }
 
         private void filesForReviewToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            m_logger.Log("Listing all files in review");
+
             // Truncate the files and keep track of them
             StringBuilder filesToReview = new StringBuilder("The following files and folder have been included in this review\n\n");
             for (int i = 0; i < m_reviewSource.Files.Length; ++i)
             {
                 string truncatedFile = Paths.TruncateLongPath(m_reviewSource.Files[i]);
                 filesToReview.Append("- " + truncatedFile + '\n');
+
+                m_logger.Log(" * {0}", m_reviewSource.Files[i]);
             }
 
             // Just show the list

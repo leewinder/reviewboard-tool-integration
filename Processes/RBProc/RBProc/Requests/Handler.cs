@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RB_Tools.Shared.Settings;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -81,7 +82,7 @@ namespace RBProc.Requests
         private static readonly Dictionary<string, string> ProcessApplications = new Dictionary<string, string>()
         {
             {@"create_new_review", @"Create Review.exe"},
-            {@"authenticate", @"Authentication.exe"},
+            {@"settings", @"Settings.exe"},
             {@"review_svn_repo", @"Review Stats.exe"},
             {@"open_about_dialog", @"About.exe"},
             {@"open_rb_portal", @"open_browser.bat"},
@@ -179,8 +180,16 @@ namespace RBProc.Requests
         //
         // Starts a process and reads out the std output and error
         //
-        public static void RunProcess(string command, string options)
+        public static void RunProcess(string command, string commandLineProperties)
         {
+            // Load our settings
+            Options settings = Settings.Load();
+
+            // Build up the command line options
+            string options = string.Format(@"--file-list {0}", commandLineProperties);
+            if (settings.EnableLogging == true)
+                options += @" --enable-logging";
+
             // Build up the process
             ProcessStartInfo processInfo = new ProcessStartInfo(command, options);
 
