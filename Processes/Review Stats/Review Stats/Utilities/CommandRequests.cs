@@ -83,10 +83,7 @@ namespace Review_Stats.Utilities
             // Return our paths
             return new Result(validPaths.ToArray(), invalidPaths.ToArray());
         }
-
-        // Properties
-        private static readonly string InjectDirectoryRequest = "inject_test_path";
-
+        
         //
         // Updates the data based on the debug options
         //
