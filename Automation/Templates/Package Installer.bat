@@ -7,6 +7,7 @@ set INSTALLER_TEMP=%DESTINATION_FOLDER%\Install Reviewboard
 set BIN_FOLDER=%INSTALLER_TEMP%\bin
 set EXTERNALS_FOLDER=%~dp0..\..\External
 set VERSION_NUMBER=%1
+set BUILD_STAMP=%2
 
 rem Create the release folder
 rmdir "%DESTINATION_FOLDER%" /S /Q  >nul 2>&1
@@ -42,17 +43,9 @@ rem Update the version number
 set VERSION_FOLDER=%INSTALLER_TEMP%\version
 mkdir "%VERSION_FOLDER%"
 
-rem Pull out the date and time for the build number
-SET HOUR=%time:~0,2%
-SET DT_STAMP_9=%date:~-4%%date:~3,2%%date:~0,2%0%time:~1,1%%time:~3,2%%time:~6,2% 
-SET DT_STAMP_24=%date:~-4%%date:~3,2%%date:~0,2%%time:~0,2%%time:~3,2%%time:~6,2%
-if "%HOUR:~0,1%" == " " (SET DT_FINAL_STAMP=%DT_STAMP_9%) else (SET DT_FINAL_STAMP=%DT_STAMP_24%)
-set DT_FINAL_STAMP=%DT_FINAL_STAMP:~2%
-
-rem Push it out
+rem Update the build information
 echo %VERSION_NUMBER% > "%VERSION_FOLDER%\version"
-echo %DT_FINAL_STAMP% >> "%VERSION_FOLDER%\version"
-
+echo %BUILD_STAMP% >> "%VERSION_FOLDER%\version"
 
 
 rem Zip up the install package
