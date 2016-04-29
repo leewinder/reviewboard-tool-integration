@@ -42,7 +42,7 @@ set DEFAULT_JIRA_SERVER=http://localhost/jira
 if [%JIRA_SERVER%] == [] set JIRA_SERVER=%DEFAULT_JIRA_SERVER%
 
 rem Get the version number
-set /p VERSION_NUMBER=< %~dp0..\version.txt
+set /p VERSION_NUMBER=< "%~dp0..\version.txt"
 set DEFAULT_VERSION_NUMBER=9.9.9.9
 
 rem Update the files with the server we are interested in using
