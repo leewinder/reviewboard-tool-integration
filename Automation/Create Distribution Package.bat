@@ -103,7 +103,7 @@ if %errorlevel% neq 0 goto :error_building_process
 echo %BUILD_STAMP%
 
 rem Build the installer
-"%~dp0.\Templates\Package Installer.bat" %VERSION_NUMBER% %BUILD_STAMP%
+call "%~dp0.\Templates\Package Installer.bat" %VERSION_NUMBER% %BUILD_STAMP%
 
 rem Done
 exit /b 0
