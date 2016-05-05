@@ -52,8 +52,5 @@ rem Zip up the install package
 set ZIP_EXE=%EXTERNALS_FOLDER%\7-zip\7z.exe
 "%ZIP_EXE%" a "%DESTINATION_FOLDER%\Install Reviewboard %VERSION_NUMBER%.zip" "%INSTALLER_TEMP%" -r -mx9
 
-rem 7-zip leaves temp destination folders
-rmdir "%RELEASE_FOLDER%" /S /Q
-
 rem Lose the installer temp folder
 rmdir "%INSTALLER_TEMP%" /S /Q
