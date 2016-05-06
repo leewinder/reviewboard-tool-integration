@@ -118,7 +118,7 @@ namespace Create_Review
                 string jiraServer = Names.Url[(int)Names.Type.Jira];
                 for (int i = 0; i < jiras.Length; ++i)
                 {
-                    string thisJiraLink = string.Format(@"{0}\browse\{1}\n", jiraServer, jiras[i]);
+                    string thisJiraLink = string.Format("{0}/browse/{1}\n", jiraServer, jiras[i]);
                     jiraTag += thisJiraLink;
                 }
             }
