@@ -322,10 +322,24 @@ namespace Create_Review
                 if (args.Error != null)
                 {
                     m_logger.Log("Error raised during review request - {0}", args.Error.Message);
-
                     string body = string.Format("Exception thrown when trying to raise a new review\n\nException: {0}\n\nDescription: {1}", args.Error.GetType().Name, args.Error.Message);
-                    MessageBox.Show(this, body, @"Unable to raise review", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
+                    // Was it an authentication error?
+                    bool authenticationRequired = false;
+                    if (args.Error.Message.Contains("username or password was not correct") == true)
+                    {
+                        authenticationRequired = true;
+                        body += "\n\nDo you want to attempt to reauthenticate with the server?";
+                    }
+
+                    // Show the options
+                    MessageBoxButtons buttonTypes = (authenticationRequired == true ? MessageBoxButtons.YesNo : MessageBoxButtons.OK);
+                    DialogResult result = MessageBox.Show(this, body, @"Unable to raise review", buttonTypes, MessageBoxIcon.Error);
+
+                    // Continue?
+                    if (result == DialogResult.Yes && authenticationRequired == true)
+                        RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate(m_logger);
+                    
                     OnReviewFinished(FinishReason.Error);
                 }
                 else
@@ -604,9 +618,23 @@ namespace Create_Review
                 if (args.Error != null)
                 {
                     m_logger.Log("Error raised when updating review groups - {0}", args.Error.Message);
-
                     string body = string.Format("Exception thrown when trying to retrive the review groups\n\nException: {0}\n\nDescription: {1}", args.Error.GetType().Name, args.Error.Message);
-                    MessageBox.Show(this, body, @"Unable to update group list", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                    // Was it an authentication error?
+                    bool authenticationRequired = false;
+                    if (args.Error.Message.Contains("username or password was not correct") == true)
+                    {
+                        authenticationRequired = true;
+                        body += "\n\nDo you want to attempt to reauthenticate with the server?";
+                    }
+
+                    // Show the options
+                    MessageBoxButtons buttonTypes = (authenticationRequired == true ? MessageBoxButtons.YesNo : MessageBoxButtons.OK);
+                    DialogResult result = MessageBox.Show(this, body, @"Unable to update group list", buttonTypes, MessageBoxIcon.Error);
+
+                    // Continue?
+                    if (result == DialogResult.Yes && authenticationRequired == true)
+                        RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate(m_logger);
                 }
                 else
                 {
