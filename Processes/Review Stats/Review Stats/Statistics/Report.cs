@@ -122,6 +122,11 @@ namespace Review_Stats.Statistics
             outputContent = outputContent.Replace(@"___COMMIT_COUNT_NONE___", unknownCount.First);
             outputContent = outputContent.Replace(@"___COMMIT_COUNT_NONE_PERCENTAGE___", unknownCount.Second);
 
+            int ignoredCommitCount = commitStats.CommitCount[(int)RB_Tools.Shared.Review.Properties.Level.PreviouslyReviewed] + commitStats.CommitCount[(int)RB_Tools.Shared.Review.Properties.Level.VersionChange];
+            var ignoredCount = GetPercentageBreakdown(ignoredCommitCount, totalCommits);
+            outputContent = outputContent.Replace(@"___COMMIT_COUNT_IGNORED___", ignoredCount.First);
+            outputContent = outputContent.Replace(@"___COMMIT_COUNT_IGNORED_PERCENTAGE___", ignoredCount.Second);
+
             // Return our new report
             return outputContent;
         }

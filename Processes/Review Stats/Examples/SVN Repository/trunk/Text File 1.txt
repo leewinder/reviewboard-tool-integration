@@ -14,3 +14,5 @@ Change 6 - Discarded (again)
 Change 7 - Not found
 Change 8 - Replies
 Change 9 - Another user
+Change 10 - Version change
+Change 11 - Previously reviewed

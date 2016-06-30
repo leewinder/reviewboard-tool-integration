@@ -93,6 +93,7 @@
 				<li>Number of commits (No Review): ___COMMIT_COUNT_NO_REVIEW___ (___COMMIT_COUNT_NO_REVIEW_PERCENTAGE___%)</li>
 				<li>Number of commits (Assets Only): ___COMMIT_COUNT_ASSET_ONLY___ (___COMMIT_COUNT_ASSET_ONLY_PERCENTAGE___%)</li>
 				<li>Number of commits (Unreviewed): ___COMMIT_COUNT_NONE___ (___COMMIT_COUNT_NONE_PERCENTAGE___%)</li>
+				<li>Number of commits (Ignored): ___COMMIT_COUNT_IGNORED___ (___COMMIT_COUNT_IGNORED_PERCENTAGE___%)</li>
 			</ul>
 		</td>
 		<td valign="top" align="left">

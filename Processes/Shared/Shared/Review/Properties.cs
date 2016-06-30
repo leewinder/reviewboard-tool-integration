@@ -16,11 +16,17 @@ namespace RB_Tools.Shared.Review
             [Description("Raise code review")]
             FullReview,
 
-            [Description("Commit will be reviewed later")]
+            [Description("To be reviewed")]
             PendingReview,
 
-            [Description("No review as commit only includes assets")]
+            [Description("Assets only commit")]
             AssetCommit,
+
+            [Description("Version change only")]
+            VersionChange,
+
+            [Description("Previously reviewed")]
+            PreviouslyReviewed,
 
             [Description("Skip code review")]
             NoReview
