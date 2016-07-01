@@ -53,6 +53,9 @@ namespace RBProc.Requests
                 string requiredApplication = GetRequestProcessApplication(m_processRequest);
                 if (string.IsNullOrWhiteSpace(requiredApplication) == true)
                     return;
+                string requiredOptions = GetRequestProcessOptions(m_processRequest);
+                if (requiredOptions == null)
+                    return;
 
                 // Since this is the main app, we now wait to make sure we've caught them all
                 string commandLineProperties = string.Empty;
@@ -74,7 +77,7 @@ namespace RBProc.Requests
                 string finalExecutable = string.Format("{0}\\{1}", applicationPath, requiredApplication);
 
                 // Run the executable and bail
-                RunProcess(finalExecutable, commandLineProperties);
+                RunProcess(finalExecutable, requiredOptions, commandLineProperties);
             }
         }
 
@@ -82,10 +85,22 @@ namespace RBProc.Requests
         private static readonly Dictionary<string, string> ProcessApplications = new Dictionary<string, string>()
         {
             {@"create_new_review", @"Create Review.exe"},
+            {@"create_new_commit", @"Create Review.exe"},
             {@"settings", @"Settings.exe"},
             {@"review_svn_repo", @"Review Stats.exe"},
             {@"open_about_dialog", @"About.exe"},
             {@"open_rb_portal", @"open_browser.bat"},
+        };
+
+        // Request applications options
+        private static readonly Dictionary<string, string> ProcessOptions = new Dictionary<string, string>()
+        {
+            {@"create_new_review", @""},
+            {@"create_new_commit", @"--skip-review"},
+            {@"settings", @""},
+            {@"review_svn_repo", @""},
+            {@"open_about_dialog", @""},
+            {@"open_rb_portal", @""},
         };
 
         // Time check properties
@@ -148,6 +163,24 @@ namespace RBProc.Requests
         }
 
         //
+        // Returns the application options we need to process this request
+        //
+        private static string GetRequestProcessOptions(string requestedProcess)
+        {
+            // Get the application to deal with this command
+            try
+            {
+                string requiredApplication = ProcessOptions[requestedProcess];
+                return requiredApplication;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Unable to find the options to handle the process request '" + requestedProcess + "'\n" + e.Message, @"Unable to run RBProc");
+                return null;
+            }
+        }
+
+        //
         // Creates the command line properties file we'll use
         //
         private static string GetCommandLinePropertiesFile(Utilities.Cache rbRequests)
@@ -180,15 +213,17 @@ namespace RBProc.Requests
         //
         // Starts a process and reads out the std output and error
         //
-        public static void RunProcess(string command, string commandLineProperties)
+        public static void RunProcess(string command, string requiredOptions, string commandLineProperties)
         {
             // Load our settings
             Options settings = Settings.Load();
 
             // Build up the command line options
-            string options = string.Format(@"--file-list {0}", commandLineProperties);
+            string options = string.Format(@"--file-list ""{0}""", commandLineProperties);
             if (settings.EnableLogging == true)
                 options += @" --enable-logging";
+            if (string.IsNullOrEmpty(requiredOptions) == false)
+                options += @" " + requiredOptions;
 
             // Build up the process
             ProcessStartInfo processInfo = new ProcessStartInfo(command, options);
