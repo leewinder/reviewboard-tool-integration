@@ -30,7 +30,7 @@ namespace Create_Review
 
                 // Build up the content we've been asked to review
                 // If we don't have any, we've already complained
-                Review.Review.Content requestContent = Review.Review.ExtractContent(commandLineOptions.FileList, commandLineOptions.InjectPaths, logger);
+                Review.Review.Content requestContent = Review.Review.ExtractContent(commandLineOptions.SkipReviews, commandLineOptions.FileList, commandLineOptions.InjectPaths, logger);
                 if (requestContent == null)
                     return;
 

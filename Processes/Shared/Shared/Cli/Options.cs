@@ -15,6 +15,9 @@ namespace RB_Tools.Shared.Cli
         [Option('i', "inject-paths", HelpText = "Injects the current working copy into paths listed in the file list")]
         public bool InjectPaths { get; set; }
 
+        [Option('i', "skip-review", HelpText = "Skips a review process (Create Review process only)")]
+        public bool SkipReviews { get; set; }
+
         [ParserState]
         public IParserState LastParserState { get; set; }
 

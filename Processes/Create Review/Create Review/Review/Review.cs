@@ -86,8 +86,12 @@ namespace Create_Review.Review
         //
         // Extracts the content of the review from the file passed to the tool
         //
-        public static Content ExtractContent(string requestSource, bool injectPaths, Logging logger)
+        public static Content ExtractContent(bool skipReviews, string requestSource, bool injectPaths, Logging logger)
         {
+            // If we want to skip this, bail
+            if (skipReviews == true)
+                return new Content(Source.None, null, null);
+
             logger.Log("Extracting request content");
 
             // Read in the request source

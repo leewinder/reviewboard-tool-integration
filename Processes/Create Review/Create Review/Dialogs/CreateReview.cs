@@ -26,7 +26,7 @@ namespace Create_Review
 
             // Save our properties
             m_reviewSource = reviewSource;
-            m_requestDirectory = ExtractSourceDirectory(m_reviewSource.Patch);
+            m_requestDirectory = ExtractSourceDirectory();
             m_originalRequest = originalRequest;
 
             InitializeComponent();
@@ -99,14 +99,19 @@ namespace Create_Review
             int reviewTypeCount = Enum.GetNames(typeof(RB_Tools.Shared.Review.Properties.Level)).Length;
             for (int i = 0; i < reviewTypeCount; ++i)
             {
+                // Get the level
                 var thisLevel = (RB_Tools.Shared.Review.Properties.Level)i;
+
+                // Don't include it if we don't want a review
+                if (m_reviewSource.Source == Review.Review.Source.None && thisLevel == RB_Tools.Shared.Review.Properties.Level.FullReview)
+                    continue;
                 comboBox_ReviewLevel.Items.Add(thisLevel.GetDescription());
 
                 m_logger.Log("* Adding level {0}", thisLevel);
             }
 
             // Set the first option by default
-            comboBox_ReviewLevel.SelectedIndex = (int)RB_Tools.Shared.Review.Properties.Level.FullReview;
+            comboBox_ReviewLevel.SelectedIndex = 0;
         }
 
         //
@@ -133,14 +138,18 @@ namespace Create_Review
         //
         // Extracts the directory of the source
         //
-        private string ExtractSourceDirectory(string requestSource)
+        private string ExtractSourceDirectory()
         {
+            // Do we have a source
+            if (m_reviewSource.Source == Review.Review.Source.None)
+                return null;
+
             // Get the properties of this source
-            FileAttributes attr = File.GetAttributes(requestSource);
+            FileAttributes attr = File.GetAttributes(m_reviewSource.Patch);
             if (attr.HasFlag(FileAttributes.Directory))
-                return new FileInfo(requestSource + @"\").Directory.FullName;
+                return new FileInfo(m_reviewSource.Patch + @"\").Directory.FullName;
             else
-                return new FileInfo(requestSource).Directory.FullName;
+                return new FileInfo(m_reviewSource.Patch).Directory.FullName;
         }
 
         //
