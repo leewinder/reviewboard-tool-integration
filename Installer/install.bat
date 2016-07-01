@@ -218,6 +218,7 @@ xcopy "%~dp0\version\*" "C:\Program Files\Reviewboard" >nul 2>&1
 rem Install the registry entries
 regedit /s "%~dp0\registry\open_review_board.reg"
 regedit /s "%~dp0\registry\create_review.reg"
+regedit /s "%~dp0\registry\create_commit.reg"
 regedit /s "%~dp0\registry\generate_review_stats.reg"
 regedit /s "%~dp0\registry\open_settings.reg"
 regedit /s "%~dp0\registry\open_about_box.reg"
