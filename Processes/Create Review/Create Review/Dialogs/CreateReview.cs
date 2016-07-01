@@ -41,6 +41,14 @@ namespace Create_Review
                 filesForReviewToolStripMenuItem.Enabled = false;
                 filesForReviewToolStripMenuItem.ToolTipText = "Unable to view the individual files of a review\nwhen reviewing a manually created patch file";
             }
+            else if (reviewSource.Source == Review.Review.Source.None)
+            {
+                filesForReviewToolStripMenuItem.Enabled = false;
+                filesForReviewToolStripMenuItem.ToolTipText = "Unable to review the individual files of a review\nwhen skipping the review process";
+
+                reviewDiffToolStripMenuItem.Enabled = false;
+                reviewDiffToolStripMenuItem.ToolTipText = "Unable to view the diff content\nwhen skipping the review process";
+            }
         }
 
         // State of the dialog
