@@ -314,29 +314,39 @@ namespace Create_Review
                 // Pull out the properties of the request
                 ReviewRequestProperties thisRequest = args.Argument as ReviewRequestProperties;
                 OutputRequestProperties(thisRequest);
-                
-                // Get our credentials
-                string serverName = Names.Url[(int)Names.Type.Reviewboard];
-                Simple credentials = Credentials.Create(serverName, m_logger) as Simple;
-                if (credentials == null)
+
+                if (thisRequest.ReviewProperties.ReviewLevel == RB_Tools.Shared.Review.Properties.Level.FullReview)
                 {
-                    m_logger.Log("Unable to create credentials for '{0}'", serverName);
-                    throw new FileNotFoundException(@"Unable to find the credentials for " + serverName);
+
+                    // Get our credentials
+                    string serverName = Names.Url[(int)Names.Type.Reviewboard];
+                    Simple credentials = Credentials.Create(serverName, m_logger) as Simple;
+                    if (credentials == null)
+                    {
+                        m_logger.Log("Unable to create credentials for '{0}'", serverName);
+                        throw new FileNotFoundException(@"Unable to find the credentials for " + serverName);
+                    }
+
+                    // Request the review
+                    m_logger.Log("Requesting review");
+                    Reviewboard.ReviewRequestResult result = Reviewboard.RequestReview(
+                        thisRequest.WorkingCopy,
+                        credentials.Server,
+                        credentials.User,
+                        credentials.Password,
+                        thisRequest.ReviewProperties,
+                        m_logger);
+
+                    // Save the result
+                    m_logger.Log("Review request finished");
+                    args.Result = result;
                 }
-
-                // Request the review
-                m_logger.Log("Requesting review");
-                Reviewboard.ReviewRequestResult result = Reviewboard.RequestReview(
-                    thisRequest.WorkingCopy,
-                    credentials.Server,
-                    credentials.User,
-                    credentials.Password,
-                    thisRequest.ReviewProperties,
-                    m_logger);
-
-                // Save the result
-                m_logger.Log("Review request finished");
-                args.Result = result;
+                else
+                {
+                    // Save the result
+                    m_logger.Log("Review request skipped as a review is not being carried out");
+                    args.Result = new Reviewboard.ReviewRequestResult(null, null, thisRequest.ReviewProperties);
+                }
             };
             // Called when the thread is complete
             updateThread.RunWorkerCompleted += (object objectSender, RunWorkerCompletedEventArgs args) =>
@@ -381,7 +391,8 @@ namespace Create_Review
                     }
                     else
                     {
-                        m_logger.Log("Review posted successful - {0}", requestResult.Url);
+                        if (requestResult.Properties.ReviewLevel == RB_Tools.Shared.Review.Properties.Level.FullReview)
+                            m_logger.Log("Review posted successful - {0}", requestResult.Url);
 
                         // Open the browser, doing this manually so we can open on the diff
                         if (string.IsNullOrWhiteSpace(requestResult.Url) == false)
@@ -416,38 +427,45 @@ namespace Create_Review
         //
         private void OutputRequestProperties(ReviewRequestProperties thisRequest)
         {
-            m_logger.Log("Starting review request on '{0}'", thisRequest.WorkingCopy);
-            m_logger.Log(" * Path: {0}", thisRequest.ReviewProperties.Path);
-            m_logger.Log(" * Review ID: {0}", thisRequest.ReviewProperties.ReviewId);
-            m_logger.Log(" * Summary: {0}", thisRequest.ReviewProperties.Summary);
-            m_logger.Log(" * Description:\n{0}", thisRequest.ReviewProperties.Description);
-            m_logger.Log(" * Testing:\n{0}", thisRequest.ReviewProperties.Testing);
-            m_logger.Log(" * Jira ID: {0}", thisRequest.ReviewProperties.JiraId);
-            m_logger.Log(" * Review Level: {0}", thisRequest.ReviewProperties.ReviewLevel);
-            m_logger.Log(" * Copies As Adds: {0}", thisRequest.ReviewProperties.CopiesAsAdds);
-            m_logger.Log(" * Source Type: {0}", thisRequest.ReviewProperties.Contents.Source);
-
-            // Groups
-            if (thisRequest.ReviewProperties.Groups != null && thisRequest.ReviewProperties.Groups.Count > 0)
+            if (thisRequest.ReviewProperties.ReviewLevel == RB_Tools.Shared.Review.Properties.Level.FullReview)
             {
-                m_logger.Log("Posting to groups:");
-                foreach (string thisGroup in thisRequest.ReviewProperties.Groups)
-                    m_logger.Log(" * {0}", thisGroup);
+                m_logger.Log("Starting review request on '{0}'", thisRequest.WorkingCopy);
+                m_logger.Log(" * Path: {0}", thisRequest.ReviewProperties.Path);
+                m_logger.Log(" * Review ID: {0}", thisRequest.ReviewProperties.ReviewId);
+                m_logger.Log(" * Summary: {0}", thisRequest.ReviewProperties.Summary);
+                m_logger.Log(" * Description:\n{0}", thisRequest.ReviewProperties.Description);
+                m_logger.Log(" * Testing:\n{0}", thisRequest.ReviewProperties.Testing);
+                m_logger.Log(" * Jira ID: {0}", thisRequest.ReviewProperties.JiraId);
+                m_logger.Log(" * Review Level: {0}", thisRequest.ReviewProperties.ReviewLevel);
+                m_logger.Log(" * Copies As Adds: {0}", thisRequest.ReviewProperties.CopiesAsAdds);
+                m_logger.Log(" * Source Type: {0}", thisRequest.ReviewProperties.Contents.Source);
+
+                // Groups
+                if (thisRequest.ReviewProperties.Groups != null && thisRequest.ReviewProperties.Groups.Count > 0)
+                {
+                    m_logger.Log("Posting to groups:");
+                    foreach (string thisGroup in thisRequest.ReviewProperties.Groups)
+                        m_logger.Log(" * {0}", thisGroup);
+                }
+
+                // Content files
+                if (thisRequest.ReviewProperties.Contents.Files != null && thisRequest.ReviewProperties.Contents.Files.Length > 0)
+                {
+                    m_logger.Log("Reviewing files:");
+                    foreach (string thisFile in thisRequest.ReviewProperties.Contents.Files)
+                        m_logger.Log(" * {0}", thisFile);
+                }
+
+                // Content patch
+                if (string.IsNullOrEmpty(thisRequest.ReviewProperties.Contents.Patch) == false)
+                {
+                    m_logger.Log("Review patch:");
+                    m_logger.Log(" * {0}:", thisRequest.ReviewProperties.Contents.Patch);
+                }
             }
-
-            // Content files
-            if (thisRequest.ReviewProperties.Contents.Files != null && thisRequest.ReviewProperties.Contents.Files.Length > 0)
+            else
             {
-                m_logger.Log("Reviewing files:");
-                foreach (string thisFile in thisRequest.ReviewProperties.Contents.Files)
-                    m_logger.Log(" * {0}", thisFile);
-            }
-
-            // Content patch
-            if (string.IsNullOrEmpty(thisRequest.ReviewProperties.Contents.Patch) == false)
-            {
-                m_logger.Log("Review patch:");
-                m_logger.Log(" * {0}:", thisRequest.ReviewProperties.Contents.Patch);
+                m_logger.Log("Skipping review request");
             }
         }
 
@@ -536,20 +554,25 @@ namespace Create_Review
                 return;
             }
 
-            string reviewboardServer = Names.Url[(int)Names.Type.Reviewboard];
-            if (Credentials.Available(reviewboardServer) == false)
+            // Only bother checking against the reviewboard server if we are doing a review
+            RB_Tools.Shared.Review.Properties.Level reviewLevel = (RB_Tools.Shared.Review.Properties.Level)comboBox_ReviewLevel.SelectedIndex;
+            if (reviewLevel == RB_Tools.Shared.Review.Properties.Level.FullReview)
             {
-                m_logger.Log("Requesting Reviewboard credentials");
-
-                DialogResult dialogResult = MessageBox.Show(this, "You must be authenticated with the Reviewboard server before generating a review.\n\nDo you want to authenticate now?", "Authentication Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (dialogResult == DialogResult.Yes)
-                    RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate(m_logger);
-
-                // Check if we're still unauthenticated
+                string reviewboardServer = Names.Url[(int)Names.Type.Reviewboard];
                 if (Credentials.Available(reviewboardServer) == false)
                 {
-                    m_logger.Log("Credentials still unavailable");
-                    return;
+                    m_logger.Log("Requesting Reviewboard credentials");
+
+                    DialogResult dialogResult = MessageBox.Show(this, "You must be authenticated with the Reviewboard server before generating a review.\n\nDo you want to authenticate now?", "Authentication Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (dialogResult == DialogResult.Yes)
+                        RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate(m_logger);
+
+                    // Check if we're still unauthenticated
+                    if (Credentials.Available(reviewboardServer) == false)
+                    {
+                        m_logger.Log("Credentials still unavailable");
+                        return;
+                    }
                 }
             }
 
@@ -588,7 +611,7 @@ namespace Create_Review
 
                 selectedReviewGroups,
 
-                (RB_Tools.Shared.Review.Properties.Level)comboBox_ReviewLevel.SelectedIndex,
+                reviewLevel,
                 checkBox_CopiesAsAdds.Checked
             );
 

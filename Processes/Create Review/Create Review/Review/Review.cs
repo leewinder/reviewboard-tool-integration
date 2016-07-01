@@ -88,10 +88,6 @@ namespace Create_Review.Review
         //
         public static Content ExtractContent(bool skipReviews, string requestSource, bool injectPaths, Logging logger)
         {
-            // If we want to skip this, bail
-            if (skipReviews == true)
-                return new Content(Source.None, null, null);
-
             logger.Log("Extracting request content");
 
             // Read in the request source
@@ -104,6 +100,10 @@ namespace Create_Review.Review
 
             // Inject the working copy into the requests if we've been asked to do it
             modifiedContent = InjectWorkingDirectory(modifiedContent, injectPaths, logger);
+
+            // If we want to skip this, bail now we have the file list
+            if (skipReviews == true)
+                return new Content(Source.None, null, modifiedContent);
 
             // Check to see if we have a review with a single patch file
             Content reviewContent = CreatePatchOnlyReview(modifiedContent, logger);
