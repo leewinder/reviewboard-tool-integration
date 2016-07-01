@@ -218,6 +218,7 @@
             // comboBox_ReviewLevel
             // 
             this.comboBox_ReviewLevel.AllowDrop = true;
+            this.comboBox_ReviewLevel.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.comboBox_ReviewLevel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_ReviewLevel.FormattingEnabled = true;
             this.comboBox_ReviewLevel.Location = new System.Drawing.Point(60, 18);
@@ -225,6 +226,8 @@
             this.comboBox_ReviewLevel.Size = new System.Drawing.Size(255, 21);
             this.comboBox_ReviewLevel.TabIndex = 1;
             this.toolTipDefault.SetToolTip(this.comboBox_ReviewLevel, "What level of code review is this commit going to raise");
+            this.comboBox_ReviewLevel.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.comboBox_ReviewLevel_DrawItem);
+            this.comboBox_ReviewLevel.SelectedIndexChanged += new System.EventHandler(this.comboBox_ReviewLevel_SelectedIndexChanged);
             // 
             // checkBox_CopiesAsAdds
             // 

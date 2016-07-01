@@ -11,6 +11,7 @@ using RB_Tools.Shared.Authentication.Credentials;
 using RB_Tools.Shared.Utilities;
 using RB_Tools.Shared.Extensions;
 using RB_Tools.Shared.Logging;
+using System.Drawing;
 
 namespace Create_Review
 {
@@ -117,17 +118,14 @@ namespace Create_Review
             {
                 // Get the level
                 var thisLevel = (RB_Tools.Shared.Review.Properties.Level)i;
-
-                // Don't include it if we don't want a review
-                if (m_reviewSource.Source == Review.Review.Source.None && thisLevel == RB_Tools.Shared.Review.Properties.Level.FullReview)
-                    continue;
                 comboBox_ReviewLevel.Items.Add(thisLevel.GetDescription());
 
                 m_logger.Log("* Adding level {0}", thisLevel);
             }
 
             // Set the first option by default
-            comboBox_ReviewLevel.SelectedIndex = 0;
+            int defaultOption = (m_reviewSource.Source == Review.Review.Source.None ? 1 : 0);
+            comboBox_ReviewLevel.SelectedIndex = defaultOption;
         }
 
         //
@@ -512,6 +510,23 @@ namespace Create_Review
                 UpdateCreateReviewDialogState(State.Idle);
         }
 
+        //
+        // Checks if the review option should be selected
+        //
+        private bool IsReviewOptionValid(int index)
+        {
+            var reviewOption = (RB_Tools.Shared.Review.Properties.Level)index;
+
+            if (m_reviewSource.Source == Review.Review.Source.None && reviewOption == RB_Tools.Shared.Review.Properties.Level.FullReview)
+                return false;
+
+            // It's fine
+            return true;
+        }
+
+        //
+        // Starts a review
+        //
         private void button_CreateReview_Click(object sender, EventArgs e)
         {
             // We need a sumary before we raise the review
@@ -713,5 +728,41 @@ namespace Create_Review
             // Just show the list
             MessageBox.Show(this, filesToReview.ToString(), "Files in Review", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+
+        //
+        // Called to manually render the review level combo box so we can disable entries
+        //
+        private void comboBox_ReviewLevel_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            ComboBox comboBox = (ComboBox)sender;
+            if (e.Index >= 0)
+            {
+                if (IsReviewOptionValid(e.Index) == false)
+                {
+                    e.Graphics.FillRectangle(SystemBrushes.Window, e.Bounds);
+                    e.Graphics.DrawString(comboBox.Items[e.Index].ToString(), comboBox.Font, Brushes.LightSlateGray, e.Bounds);
+                }
+                else
+                {
+                    e.DrawBackground();
+
+                    // Set the brush according to whether the item is selected or not
+                    Brush br = ((e.State & DrawItemState.Selected) > 0) ? SystemBrushes.HighlightText : SystemBrushes.ControlText;
+
+                    e.Graphics.DrawString(comboBox.Items[e.Index].ToString(), comboBox.Font, br, e.Bounds);
+                    e.DrawFocusRectangle();
+                }
+            }
+        }
+
+        //
+        // Checks we don't select a disabled option 
+        //
+        private void comboBox_ReviewLevel_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (IsReviewOptionValid(comboBox_ReviewLevel.SelectedIndex) == false)
+                comboBox_ReviewLevel.SelectedIndex = 1;
+        }
     }
+
 }
