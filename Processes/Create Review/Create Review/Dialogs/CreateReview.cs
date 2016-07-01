@@ -48,6 +48,14 @@ namespace Create_Review
 
                 reviewDiffToolStripMenuItem.Enabled = false;
                 reviewDiffToolStripMenuItem.ToolTipText = "Unable to view the diff content\nwhen skipping the review process";
+
+                // Disable a few other options
+                button_RefreshGroups.Enabled = false;
+                checkedListBox_ReviewGroups.Enabled = false;
+                textBox_ReviewId.Enabled = false;
+
+                checkBox_CopiesAsAdds.Enabled = false;
+                checkBox_KeepArtifacts.Enabled = false;
             }
         }
 
