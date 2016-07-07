@@ -652,7 +652,9 @@ namespace Create_Review
             checkedListBox_ReviewGroups.Items.Clear();
             m_reviewGroups = new Reviewboard.ReviewGroup[0];
 
-            Settings.Settings.Default.Reset();
+            Settings.Settings.Default.Selected = string.Empty;
+            Settings.Settings.Default.Groups = string.Empty;
+
             Settings.Settings.Default.Save();
 
             // Build up the background work
