@@ -27,6 +27,7 @@ namespace RB_Tools.Shared.Authentication.Targets
             return rbCredentials;
 
         }
+
         //
         // Authenticates against the given RB server
         //

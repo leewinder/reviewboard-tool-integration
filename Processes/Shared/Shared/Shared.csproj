@@ -61,6 +61,7 @@
       <DependentUpon>SimpleAuthentication.cs</DependentUpon>
     </Compile>
     <Compile Include="Authentication\Result.cs" />
+    <Compile Include="Authentication\Targets\Jira.cs" />
     <Compile Include="Authentication\Targets\Reviewboard.cs" />
     <Compile Include="Cli\Options.cs" />
     <Compile Include="Extensions\EnumExtensions.cs" />

@@ -70,5 +70,11 @@ namespace Settings.Dialogs
             m_settings.EnableLogging = checkBox_Logging.Checked;
             RB_Tools.Shared.Settings.Settings.Save(m_settings);
         }
+
+        private void button_JiraAuthentication_Click(object sender, EventArgs e)
+        {
+            // Just authenticate
+            Jira.Authenticate(m_logger);
+        }
     }
 }
