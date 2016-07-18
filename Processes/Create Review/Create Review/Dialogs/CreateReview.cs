@@ -554,6 +554,16 @@ namespace Create_Review
                 return;
             }
 
+            // Do we need a Jira ticket?
+            if (Settings.Settings.Default.JiraRequired == true)
+            {
+                if (string.IsNullOrWhiteSpace(textBox_JiraId.Text) == true)
+                {
+                    MessageBox.Show(this, "You need to provide a Jira ticket before you can continue", "Unable to post review", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
             // Only bother checking against the reviewboard server if we are doing a review
             RB_Tools.Shared.Review.Properties.Level reviewLevel = (RB_Tools.Shared.Review.Properties.Level)comboBox_ReviewLevel.SelectedIndex;
             if (reviewLevel == RB_Tools.Shared.Review.Properties.Level.FullReview)

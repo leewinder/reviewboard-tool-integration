@@ -58,5 +58,17 @@ namespace Create_Review.Settings {
                 this["UpdateNeeded"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool JiraRequired {
+            get {
+                return ((bool)(this["JiraRequired"]));
+            }
+            set {
+                this["JiraRequired"] = value;
+            }
+        }
     }
 }
