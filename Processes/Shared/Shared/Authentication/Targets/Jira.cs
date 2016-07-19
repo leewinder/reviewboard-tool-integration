@@ -49,7 +49,39 @@ namespace RB_Tools.Shared.Authentication.Targets
                 throw new ArgumentException("Invalid server, username or password requested");
             }
 
-            return new Result(false, "Jira authentication not supported");
+            // Create our rest client
+            Atlassian.Jira.Jira jiraInstance = null;
+            try
+            {
+                jiraInstance = Atlassian.Jira.Jira.CreateRestClient(server, username, password);
+            }
+            catch (Exception e)
+            {
+                string message = string.Format("Unable to generate Jira instance for user '{0}'\n\n{1}", username, e.InnerException.Message);
+
+                logger.Log(message);
+                throw new InvalidOperationException(message);
+            }
+
+            // Check we can access this user
+            try
+            {
+                // Pull out the user
+                Task<Atlassian.Jira.JiraUser> thisUser = jiraInstance.Users.GetUserAsync(username);
+                thisUser.Wait();
+
+                // If we get here, the user exists and is fine
+            }
+            catch (Exception e)
+            {
+                string message = string.Format("Unable to access Jira user '{0}'\n\nIf your username and password is correct, it is likely you have been locked out of your account and you will need to log in manually before continuing", username);
+
+                logger.Log(message);
+                throw new InvalidOperationException(message);
+            }
+
+            // Return the result
+            return new Result(true, "Authentication succeeded");
         }
     }
 }

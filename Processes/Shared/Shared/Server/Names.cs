@@ -19,7 +19,7 @@ namespace RB_Tools.Shared.Server
         public static readonly string[] Url =
         {
             @"http://localhost/reviewboard",
-            @"http://localhost/jira",
+            @"http://localhost:8080",
         };
     }
 }
