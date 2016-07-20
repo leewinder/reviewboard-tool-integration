@@ -81,7 +81,7 @@ namespace RB_Tools.Shared.Authentication.Targets
             }
 
             // Return the result
-            return new Result(true, "Authentication succeeded");
+            return new Result(true, "Successfully authenticated against the Jira server");
         }
     }
 }
