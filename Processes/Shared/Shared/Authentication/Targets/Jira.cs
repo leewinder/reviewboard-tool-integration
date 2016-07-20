@@ -72,9 +72,9 @@ namespace RB_Tools.Shared.Authentication.Targets
 
                 // If we get here, the user exists and is fine
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                string message = string.Format("Unable to access Jira user '{0}'\n\nIf your username and password is correct, it is likely you have been locked out of your account and you will need to log in manually before continuing", username);
+                string message = string.Format("Unable to access Jira user '{0}'\n\nIf your username and password is correct, it is likely you have been locked out of your account.\n\nPlease visit {1} to unlock your account and then try again", username, server);
 
                 logger.Log(message);
                 throw new InvalidOperationException(message);
