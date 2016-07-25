@@ -85,6 +85,7 @@
     <Compile Include="Settings\Options.cs" />
     <Compile Include="Settings\Settings.cs" />
     <Compile Include="Structures\Pair.cs" />
+    <Compile Include="Targets\Jira.cs" />
     <Compile Include="Targets\Reviewboard.cs" />
     <Compile Include="Utilities\Cipher.cs" />
     <Compile Include="Utilities\Identifiers.cs" />

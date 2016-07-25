@@ -315,38 +315,16 @@ namespace Create_Review
                 ReviewRequestProperties thisRequest = args.Argument as ReviewRequestProperties;
                 OutputRequestProperties(thisRequest);
 
-                if (thisRequest.ReviewProperties.ReviewLevel == RB_Tools.Shared.Review.Properties.Level.FullReview)
+                // Do we need to validate the Jira ticket?
+                bool ticketValid = ValidateJiraTicket(thisRequest.ReviewProperties.JiraId);
+                if (ticketValid == false)
                 {
-
-                    // Get our credentials
-                    string serverName = Names.Url[(int)Names.Type.Reviewboard];
-                    Simple credentials = Credentials.Create(serverName, m_logger) as Simple;
-                    if (credentials == null)
-                    {
-                        m_logger.Log("Unable to create credentials for '{0}'", serverName);
-                        throw new FileNotFoundException(@"Unable to find the credentials for " + serverName);
-                    }
-
-                    // Request the review
-                    m_logger.Log("Requesting review");
-                    Reviewboard.ReviewRequestResult result = Reviewboard.RequestReview(
-                        thisRequest.WorkingCopy,
-                        credentials.Server,
-                        credentials.User,
-                        credentials.Password,
-                        thisRequest.ReviewProperties,
-                        m_logger);
-
-                    // Save the result
-                    m_logger.Log("Review request finished");
-                    args.Result = result;
+                    args.Result = new Reviewboard.ReviewRequestResult(null, "Unable to validate the given Jira ticket", thisRequest.ReviewProperties);
+                    return;
                 }
-                else
-                {
-                    // Save the result
-                    m_logger.Log("Review request skipped as a review is not being carried out");
-                    args.Result = new Reviewboard.ReviewRequestResult(null, null, thisRequest.ReviewProperties);
-                }
+
+                // Carry out the review
+                args.Result = RequestReview(thisRequest);
             };
             // Called when the thread is complete
             updateThread.RunWorkerCompleted += (object objectSender, RunWorkerCompletedEventArgs args) =>
@@ -470,6 +448,77 @@ namespace Create_Review
         }
 
         //
+        // Validates the Jira ticket if needed
+        //
+        bool ValidateJiraTicket(string jiraId)
+        {
+            // If we have no ticker, we're fine
+            if (string.IsNullOrEmpty(jiraId) == true)
+                return true;
+
+            // Get our credentials
+            string serverName = Names.Url[(int)Names.Type.Jira];
+            Simple credentials = Credentials.Create(serverName, m_logger) as Simple;
+            if (credentials == null)
+            {
+                m_logger.Log("Unable to create credentials for '{0}'", serverName);
+                throw new FileNotFoundException(@"Unable to find the credentials for " + serverName);
+            }
+
+            // Validate the ticker
+            bool tickerValid = RB_Tools.Shared.Targets.Jira.ValidateJiraTicker(credentials, jiraId);
+            if (tickerValid == false)
+            {
+                string message = string.Format("Unable to find ticket '{0}' on {1}", jiraId, serverName);
+
+                m_logger.Log(message);
+                throw new InvalidOperationException(message);
+            }
+
+            // We're done
+            return true;
+        }
+
+        //
+        // Requests a new review
+        //
+        object RequestReview(ReviewRequestProperties thisRequest)
+        {
+            if (thisRequest.ReviewProperties.ReviewLevel == RB_Tools.Shared.Review.Properties.Level.FullReview)
+            {
+
+                // Get our credentials
+                string serverName = Names.Url[(int)Names.Type.Reviewboard];
+                Simple credentials = Credentials.Create(serverName, m_logger) as Simple;
+                if (credentials == null)
+                {
+                    m_logger.Log("Unable to create credentials for '{0}'", serverName);
+                    throw new FileNotFoundException(@"Unable to find the credentials for " + serverName);
+                }
+
+                // Request the review
+                m_logger.Log("Requesting review");
+                Reviewboard.ReviewRequestResult result = Reviewboard.RequestReview(
+                    thisRequest.WorkingCopy,
+                    credentials.Server,
+                    credentials.User,
+                    credentials.Password,
+                    thisRequest.ReviewProperties,
+                    m_logger);
+
+                // Save the result
+                m_logger.Log("Review request finished");
+                return result;
+            }
+            else
+            {
+                // Save the result
+                m_logger.Log("Review request skipped as a review is not being carried out");
+                return new Reviewboard.ReviewRequestResult(null, null, thisRequest.ReviewProperties);
+            }
+        }
+
+        //
         // Runs the review request
         //
         private void TriggerTortoiseRequest(Reviewboard.ReviewRequestResult requestResults)
@@ -586,6 +635,27 @@ namespace Create_Review
                 }
             }
 
+            // Check Jira authentication if needed
+            if (string.IsNullOrWhiteSpace(textBox_JiraId.Text) == false)
+            {
+                string jiraServer = Names.Url[(int)Names.Type.Jira];
+                if (Credentials.Available(jiraServer) == false)
+                {
+                    m_logger.Log("Requesting Jira credentials");
+
+                    DialogResult dialogResult = MessageBox.Show(this, "You must be authenticated with the Jira server before continuing.\n\nDo you want to authenticate now?", "Authentication Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (dialogResult == DialogResult.Yes)
+                        RB_Tools.Shared.Authentication.Targets.Jira.Authenticate(m_logger);
+
+                    // Check if we're still unauthenticated
+                    if (Credentials.Available(jiraServer) == false)
+                    {
+                        m_logger.Log("Credentials still unavailable");
+                        return;
+                    }
+                }
+            }
+
             // Save the state of our review groups
             SaveSelectedReviewGroups();
 
@@ -627,12 +697,6 @@ namespace Create_Review
 
             // Trigger the correct state depending on whether we are reviewing
             TriggerReviewRequest(reviewProperties);
-        }
-
-        private void reviewboardAuthenticationToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // Show the authentication dialog
-            RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate(m_logger);
         }
 
         private void button_RefreshGroups_Click(object sender, EventArgs e)
@@ -797,6 +861,17 @@ namespace Create_Review
         {
             if (IsReviewOptionValid(comboBox_ReviewLevel.SelectedIndex) == false)
                 comboBox_ReviewLevel.SelectedIndex = 1;
+        }
+
+        private void jiraAuthenticationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RB_Tools.Shared.Authentication.Targets.Jira.Authenticate(m_logger);
+        }
+
+        private void reviewboardAuthenticationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Show the authentication dialog
+            RB_Tools.Shared.Authentication.Targets.Reviewboard.Authenticate(m_logger);
         }
     }
 

@@ -52,6 +52,7 @@
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reviewboardAuthenticationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.jiraAuthenticationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reviewDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filesForReviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -267,7 +268,8 @@
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.reviewboardAuthenticationToolStripMenuItem});
+            this.reviewboardAuthenticationToolStripMenuItem,
+            this.jiraAuthenticationToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
             this.editToolStripMenuItem.Text = "Edit";
@@ -278,6 +280,13 @@
             this.reviewboardAuthenticationToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
             this.reviewboardAuthenticationToolStripMenuItem.Text = "Reviewboard Authentication";
             this.reviewboardAuthenticationToolStripMenuItem.Click += new System.EventHandler(this.reviewboardAuthenticationToolStripMenuItem_Click);
+            // 
+            // jiraAuthenticationToolStripMenuItem
+            // 
+            this.jiraAuthenticationToolStripMenuItem.Name = "jiraAuthenticationToolStripMenuItem";
+            this.jiraAuthenticationToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.jiraAuthenticationToolStripMenuItem.Text = "Jira Authentication";
+            this.jiraAuthenticationToolStripMenuItem.Click += new System.EventHandler(this.jiraAuthenticationToolStripMenuItem_Click);
             // 
             // viewToolStripMenuItem
             // 
@@ -409,6 +418,7 @@
         private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reviewDiffToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem filesForReviewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem jiraAuthenticationToolStripMenuItem;
     }
 }
 
