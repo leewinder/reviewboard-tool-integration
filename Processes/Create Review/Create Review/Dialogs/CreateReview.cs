@@ -465,14 +465,23 @@ namespace Create_Review
                 throw new FileNotFoundException(@"Unable to find the credentials for " + serverName);
             }
 
-            // Validate the ticker
-            bool tickerValid = RB_Tools.Shared.Targets.Jira.ValidateJiraTicker(credentials, jiraId);
-            if (tickerValid == false)
-            {
-                string message = string.Format("Unable to find ticket '{0}' on {1}", jiraId, serverName);
+            // Split out ticket IDs so we validate them all
+            string[] jiras = jiraId.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+            if (jiras == null || jiras.Length == 0)
+                jiras = new string[] { jiraId };
 
-                m_logger.Log(message);
-                throw new InvalidOperationException(message);
+            // Validate the ticker
+            foreach (string thisTicket in jiras)
+            {
+                string ticketToCheck = thisTicket.Trim();
+                bool tickerValid = RB_Tools.Shared.Targets.Jira.ValidateJiraTicker(credentials, ticketToCheck);
+                if (tickerValid == false)
+                {
+                    string message = string.Format("Unable to find ticket '{0}' on {1}", jiraId, serverName);
+
+                    m_logger.Log(message);
+                    throw new InvalidOperationException(message);
+                }
             }
 
             // We're done
