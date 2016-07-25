@@ -106,8 +106,9 @@ namespace Create_Review
             // Build up the tag up if we need to
             if (string.IsNullOrWhiteSpace(jiraId) == false)
             {
-                // Get the header
-                jiraTag = string.Format(JiraState_Tag, jiraId);
+                // Get the header and bracket them all
+                string bracketJiras = string.Format(@"[{0}]", jiraId.Replace(",", "], ["));
+                jiraTag = string.Format(JiraState_Tag, bracketJiras);
                 
                 // Build up the IDs we needs
                 string[] jiras = jiraId.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
@@ -118,7 +119,7 @@ namespace Create_Review
                 string jiraServer = Names.Url[(int)Names.Type.Jira];
                 for (int i = 0; i < jiras.Length; ++i)
                 {
-                    string thisJiraLink = string.Format("{0}/browse/{1}\n", jiraServer, jiras[i]);
+                    string thisJiraLink = string.Format("{0}/browse/{1}\n", jiraServer, jiras[i].Trim());
                     jiraTag += thisJiraLink;
                 }
             }
