@@ -38,7 +38,7 @@ rem Get the expected servers
 set DEFAULT_REVIEWBOARD_SERVER=http://localhost/reviewboard
 if [%REVIEWBOARD_SERVER%] == [] set REVIEWBOARD_SERVER=%DEFAULT_REVIEWBOARD_SERVER%
 
-set DEFAULT_JIRA_SERVER=http://localhost/jira
+set DEFAULT_JIRA_SERVER=http://localhost:8080
 if [%JIRA_SERVER%] == [] set JIRA_SERVER=%DEFAULT_JIRA_SERVER%
 
 rem Get the version number
