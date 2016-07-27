@@ -75,6 +75,7 @@
     <Compile Include="Statistics\Generator.cs" />
     <Compile Include="Statistics\Report.cs" />
     <Compile Include="Utilities\CommandRequests.cs" />
+    <Compile Include="Utilities\JiraState.cs" />
     <Compile Include="Utilities\ReviewState.cs" />
     <Compile Include="Utilities\RevisionList.cs" />
     <Compile Include="Utilities\SvnLogs.cs" />

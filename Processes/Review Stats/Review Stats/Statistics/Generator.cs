@@ -38,8 +38,11 @@ namespace Review_Stats.Statistics
                 try
                 {
                     // Check if we're authenticated
-                    Simple credentials = CheckServerAuthentication(owner);
-                    if (credentials == null)
+                    Simple reviewBoardCredentials = CheckRBServerAuthentication(owner);
+                    if (reviewBoardCredentials == null)
+                        return;
+                    Simple jiraCredentials = CheckJiraServerAuthentication(owner);
+                    if (reviewBoardCredentials == null)
                         return;
 
                     // Get the list of paths to review
@@ -76,13 +79,18 @@ namespace Review_Stats.Statistics
                         if (reviewInformationValid == false)
                             return;
 
-                        // Now generate unformation about the reviews
-                        ReviewState.ReviewStatistics[] reviewStats = GetReviewStats(commitStats.Reviews, thisRevisionList.Path, credentials);
+                        // Now generate information about the reviews
+                        ReviewState.ReviewStatistics[] reviewStats = GetReviewStats(commitStats.Reviews, thisRevisionList.Path, reviewBoardCredentials);
                         if (reviewStats == null)
                             return;
 
+                        // Get the Jira information from the commits
+                        JiraState.JiraStatistics jiraStats = GetJiraStats(revisionLogs, jiraCredentials);
+                        if (jiraStats == null)
+                            return;
+
                         // Create the review
-                        bool reportGenerated = CreateReviewReport(thisRevisionList, revisionLogs, commitStats, reviewStats, stopWatch);
+                        bool reportGenerated = CreateReviewReport(thisRevisionList, revisionLogs, commitStats, reviewStats, jiraStats, stopWatch);
                         if (reportGenerated == false)
                             return;
                     }
@@ -159,19 +167,19 @@ namespace Review_Stats.Statistics
         }
 
         //
-        // Returns if we're authenticated against our servers
+        // Returns if we're authenticated against our RB server
         //
-        private static Simple CheckServerAuthentication(Form owner)
+        private static Simple CheckRBServerAuthentication(Form owner)
         {
             // Get our server
             string reviewboardServer = Names.Url[(int)Names.Type.Reviewboard];
 
             // Check our credentials
-            s_logger.Log(@"Checking credentials against {0}", reviewboardServer);
+            s_logger.Log(@"Checking Reviewboard credentials against {0}", reviewboardServer);
             if (Credentials.Available(reviewboardServer) == false)
             {
                 // Kick off the request
-                s_logger.Log(@"Credentials not found for {0}", reviewboardServer);
+                s_logger.Log(@"Reviewboard credentials not found for {0}", reviewboardServer);
                 owner.Invoke((MethodInvoker)delegate
                 {
                     DialogResult dialogResult = MessageBox.Show(owner, "You must be authenticated with the Reviewboard server before generating review statistics.\n\nDo you want to authenticate now?", "Authentication Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -180,18 +188,54 @@ namespace Review_Stats.Statistics
                 });
 
                 // Check if we're still unauthenticated
-                s_logger.Log(@"Authentication completed");
+                s_logger.Log(@"Reviewboard authentication completed");
                 if (Credentials.Available(reviewboardServer) == false)
                 {
-                    s_logger.Log(@"Authentication still not present");
+                    s_logger.Log(@"Reviewboard authentication still not present");
                     return null;
                 }
             }
 
             // We're good
-            s_logger.Log(@"Creating credentials object for {0}", reviewboardServer);
+            s_logger.Log(@"Creating Reviewboard credentials object for {0}", reviewboardServer);
             return Credentials.Create(reviewboardServer, s_logger) as Simple;
         }
+
+        //
+        // Checks we're authenticated against the Jira server
+        //
+        private static Simple CheckJiraServerAuthentication(Form owner)
+        {
+            // Get our server
+            string jiraServer = Names.Url[(int)Names.Type.Jira];
+
+            // Check our credentials
+            s_logger.Log(@"Checking Jira credentials against {0}", jiraServer);
+            if (Credentials.Available(jiraServer) == false)
+            {
+                // Kick off the request
+                s_logger.Log(@"Jira credentials not found for {0}", jiraServer);
+                owner.Invoke((MethodInvoker)delegate
+                {
+                    DialogResult dialogResult = MessageBox.Show(owner, "You must be authenticated with the Jira server before generating review statistics.\n\nDo you want to authenticate now?", "Authentication Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (dialogResult == DialogResult.Yes)
+                        RB_Tools.Shared.Authentication.Targets.Jira.Authenticate(s_logger);
+                });
+
+                // Check if we're still unauthenticated
+                s_logger.Log(@"Jira authentication completed");
+                if (Credentials.Available(jiraServer) == false)
+                {
+                    s_logger.Log(@"Jira authentication still not present");
+                    return null;
+                }
+            }
+
+            // We're good
+            s_logger.Log(@"Creating Jira credentials object for {0}", jiraServer);
+            return Credentials.Create(jiraServer, s_logger) as Simple;
+        }
+        
 
         //
         // Gets the list of revisions to review
@@ -318,16 +362,52 @@ namespace Review_Stats.Statistics
         }
 
         //
+        // Returns stats about the jira use in this repository
+        //
+        private static JiraState.JiraStatistics GetJiraStats(SvnLogs.Log[] revisionLogs, Simple credentials)
+        {
+            // Starting to review logs
+            s_logger.Log("Starting to extract the Jira stats");
+            Display.Start(Display.State.QueryingReviewboard, revisionLogs.Length);
+
+            // Try to query the server for our review state
+            try
+            {
+                JiraState.JiraStatistics results = JiraState.GetJiraStatistics(revisionLogs, credentials, (currentCount) =>
+                {
+                    Display.Update(currentCount, revisionLogs.Length);
+                });
+
+                // Did we fail
+                if (results == null)
+                {
+                    s_errorMessage = @"Unable to generate the Jira stats against the Jira server";
+                    return null;
+                }
+
+                // Return what we have
+                s_logger.Log("Jira stats generated");
+                return results;
+            }
+            catch (Exception generalException)
+            {
+                String exceptionMessage = (generalException.InnerException == null ? generalException.Message : generalException.InnerException.Message);
+                s_errorMessage = "Unable to generate the Jira stats against the Jira server\n\n" + exceptionMessage;
+                return null;
+            }
+        }
+
+        //
         // Generates the report
         //
-        private static bool CreateReviewReport(RevisionList.Revisions revisions, SvnLogs.Log[] revisionLogs, ReviewState.GetCommitStatsResult commitStats, ReviewState.ReviewStatistics[] reviewStats, Stopwatch reviewTimer)
+        private static bool CreateReviewReport(RevisionList.Revisions revisions, SvnLogs.Log[] revisionLogs, ReviewState.GetCommitStatsResult commitStats, ReviewState.ReviewStatistics[] reviewStats, JiraState.JiraStatistics jiraStats, Stopwatch reviewTimer)
         {
             // We're now generating
             s_logger.Log("Starting to generate review report");
             Display.Start(Display.State.CreatingResults);
             
             // Try and generate the report
-            bool generated = Report.Generate(revisions, revisionLogs, commitStats, reviewStats, s_logger, reviewTimer.Elapsed);
+            bool generated = Report.Generate(revisions, revisionLogs, commitStats, reviewStats, jiraStats, s_logger, reviewTimer.Elapsed);
             if (generated == false)
                 s_errorMessage = @"Unable to generate the Review Report";
 

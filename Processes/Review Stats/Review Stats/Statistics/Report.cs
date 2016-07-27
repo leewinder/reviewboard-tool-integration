@@ -21,7 +21,7 @@ namespace Review_Stats.Statistics
         //
         // Generates the final report
         //
-        public static bool Generate(RevisionList.Revisions revisions, SvnLogs.Log[] revisionLogs, ReviewState.GetCommitStatsResult commitStats, ReviewState.ReviewStatistics[] reviewStats, Logging logger, TimeSpan reviewTime)
+        public static bool Generate(RevisionList.Revisions revisions, SvnLogs.Log[] revisionLogs, ReviewState.GetCommitStatsResult commitStats, ReviewState.ReviewStatistics[] reviewStats, JiraState.JiraStatistics jiraStats, Logging logger, TimeSpan reviewTime)
         {
             // Start with the clean template
             string outputContent = Properties.Resources.ReportTemplate;
