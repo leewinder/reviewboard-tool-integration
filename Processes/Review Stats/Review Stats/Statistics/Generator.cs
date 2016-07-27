@@ -373,7 +373,7 @@ namespace Review_Stats.Statistics
             // Try to query the server for our review state
             try
             {
-                JiraState.JiraStatistics results = JiraState.GetJiraStatistics(revisionLogs, credentials, (currentCount) =>
+                JiraState.JiraStatistics results = JiraState.GetJiraStatistics(revisionLogs, credentials, s_logger, (currentCount) =>
                 {
                     Display.Update(currentCount, revisionLogs.Length);
                 });
