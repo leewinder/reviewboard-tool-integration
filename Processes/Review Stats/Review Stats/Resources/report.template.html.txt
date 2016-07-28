@@ -120,8 +120,8 @@
 		</td>
 		<td valign="top" align="left">
 			<ul>
-				<li>Commits without Jiras: ???</li>
-				<li>Average Jiras per commit: ???</li>
+				<li>Commits without Jiras: ___COMMITS_WITHOUT_JIRAS___ (___COMMITS_WITHOUT_JIRAS_PERCENTAGE___%)</li>
+				<li>Average Jiras per commit: ___AVERAGE_JIRAS_PER_COMMIT___</li>
 			</ul>
 		</td>
 	</tr>

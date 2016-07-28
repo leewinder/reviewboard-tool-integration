@@ -33,6 +33,7 @@ namespace Review_Stats.Statistics
                 outputContent = UpdateCommitStatistics(outputContent, commitStats);
                 outputContent = UpdateReviewStatistics(outputContent, reviewStats);
                 outputContent = UpdateAverageResults(outputContent, reviewStats);
+                outputContent = UpdateJiraStatistics(outputContent, jiraStats);
                 outputContent = UpdateReviewLists(outputContent, reviewStats);
                 outputContent = UpdateCopyrightSection(outputContent);
 
@@ -198,6 +199,28 @@ namespace Review_Stats.Statistics
 
             float shipItsPerReview = (reviewStats.Length == 0 ? 0 : numberOfShipIts / (float)reviewStats.Length);
             outputContent = outputContent.Replace(@"___SHIP_ITS_PER_REVIEW___", shipItsPerReview.ToString(RatioFormat));
+
+            // Return our updated report
+            return outputContent;
+        }
+
+        //
+        // Displays information about the Jiras in the commit logs
+        //
+        private static string UpdateJiraStatistics(string outputContent, JiraState.JiraStatistics jiraStats)
+        {
+            // Update our values
+            outputContent = outputContent.Replace(@"___COMMITS_WITHOUT_JIRAS___", jiraStats.m_commitsWithoutJiras.ToString());
+
+            int commitCount = jiraStats.m_commitsWithoutJiras + jiraStats.m_commitsWithJiras;
+            float percentageNoJiras = ((float)jiraStats.m_commitsWithoutJiras / (float)commitCount) * 100.0f;
+            outputContent = outputContent.Replace(@"___COMMITS_WITHOUT_JIRAS_PERCENTAGE___", percentageNoJiras.ToString(PercentageFormat));
+
+            // How many Jira's per review
+            int jiraCount = jiraStats.m_invalidJiras.Count + jiraStats.m_validJiras.Count;
+            float jiraPerCommit = (jiraCount == 0 ? 0 : jiraStats.m_commitsWithJiras / (float)jiraCount);
+
+            outputContent = outputContent.Replace(@"___AVERAGE_JIRAS_PER_COMMIT___", jiraPerCommit.ToString(RatioFormat));
 
             // Return our updated report
             return outputContent;

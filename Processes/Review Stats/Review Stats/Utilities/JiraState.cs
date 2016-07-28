@@ -20,11 +20,11 @@ namespace Review_Stats.Utilities
         // Stats regarding Jira usage in this period
         public class JiraStatistics
         {
-            int                         m_commitsWithoutJiras;
-            int                         m_commitsWithJiras;
+            public int                          m_commitsWithoutJiras;
+            public int                          m_commitsWithJiras;
 
-            Dictionary<string, UInt64>  m_validJiras;
-            Dictionary<string, UInt64>  m_invalidJiras;
+            public Dictionary<string, UInt64>   m_validJiras;
+            public Dictionary<string, UInt64>   m_invalidJiras;
 
             public JiraStatistics(int noJiraCount, int withJiraCount, ConcurrentDictionary<string, UInt64> validJiras, ConcurrentDictionary<string, UInt64> invalidJiras)
             {
