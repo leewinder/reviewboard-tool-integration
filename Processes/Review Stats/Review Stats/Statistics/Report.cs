@@ -331,10 +331,10 @@ namespace Review_Stats.Statistics
 
                     // Add the entry
                     string rowFormat = @"<tr>
-		                                   <td>{0}</td>
-		                                   <td>{1}</td>
+		                                   <td><a href=""{2}/browse/{0}"">{0}</a></td>
+                                           <td>{1}</td>
                                          </tr>";
-                    string completedRow = string.Format(rowFormat, thisTicket.Key, thisTicket.Value.ToString());
+                    string completedRow = string.Format(rowFormat, thisTicket.Key, thisTicket.Value.ToString(), Names.Url[(int)Names.Type.Jira]);
                     tableHeader.Append(completedRow);
                 }
 
