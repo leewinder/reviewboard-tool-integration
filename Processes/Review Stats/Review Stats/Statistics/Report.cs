@@ -35,6 +35,7 @@ namespace Review_Stats.Statistics
                 outputContent = UpdateAverageResults(outputContent, reviewStats);
                 outputContent = UpdateJiraStatistics(outputContent, jiraStats);
                 outputContent = UpdateReviewLists(outputContent, reviewStats);
+                outputContent = UpdateJiraLists(outputContent, jiraStats);
                 outputContent = UpdateCopyrightSection(outputContent);
 
                 // Display the content
@@ -249,6 +250,18 @@ namespace Review_Stats.Statistics
         }
 
         //
+        // Updates the list of invalid and excessive Jira logs
+        //
+        private static string UpdateJiraLists(string outputContent, JiraState.JiraStatistics jiraStats)
+        {
+            outputContent = CreateJiraTable(outputContent, "___EXCESSIVE_JIRA_LOGS___", "Excessive Jira Logs", jiraStats.m_validJiras, 4);
+            outputContent = CreateJiraTable(outputContent, "___INVALID_JIRA_LOGS___", "Invalid Jira Tickets", jiraStats.m_invalidJiras, 0);
+
+            // Return our output
+            return outputContent;
+        }
+
+        //
         // Updates the copyright section
         //
         private static string UpdateCopyrightSection(string outputContent)
@@ -280,6 +293,62 @@ namespace Review_Stats.Statistics
             // Return our output
             return outputContent;
         }
+
+        //
+        // Creates a table of Jiras
+        //
+        private static string CreateJiraTable(string outputContent, string identifier, string title, Dictionary<string, ulong> m_invalidJiras, ulong minimumLogCount)
+        {
+            // First check we have anything to show
+            bool somethingToShow = false;
+            foreach (ulong jiraCount in m_invalidJiras.Values)
+            {
+                if (jiraCount >= minimumLogCount)
+                {
+                    somethingToShow = true;
+                    break;
+                }
+            }
+
+            // Only bother if we have something to show
+            if (somethingToShow == true)
+            {
+                string titleSection = string.Format(@"<br><heading_3>{0}</heading_3><br><br>", title);
+
+                StringBuilder tableHeader = new StringBuilder();
+                tableHeader.Append(@"<table>
+	                                   <tr>
+		                                 <td width=""100px""><heading_table>Jira Ticket</heading_table></td>
+                                         <td width=""400px""><heading_table>Reference Count</heading_table></td>
+                                       </tr>");
+
+                // Add them all
+                foreach (KeyValuePair<string, ulong> thisTicket in m_invalidJiras)
+                {
+                    // Only if it hits the boundary
+                    if (thisTicket.Value <= minimumLogCount)
+                        continue;
+
+                    // Add the entry
+                    string rowFormat = @"<tr>
+		                                   <td>{0}</td>
+		                                   <td>{1}</td>
+                                         </tr>";
+                    string completedRow = string.Format(rowFormat, thisTicket.Key, thisTicket.Value.ToString());
+                    tableHeader.Append(completedRow);
+                }
+
+                // Done
+                tableHeader.Append(@"</table><br><br>");
+
+                // Replace the content
+                outputContent = outputContent.Replace(identifier, tableHeader.ToString());
+            }
+
+            // Return what we have
+            return outputContent;
+        }
+
 
         //
         // Creates a single table of reviews

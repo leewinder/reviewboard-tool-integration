@@ -140,11 +140,15 @@ ___INVALID_REVIEWS_TABLE_ENTRY___
 <br>
 <heading_2>Jira Breakdown</heading_2>
 <br>
-___OPEN_REVIEWS_TABLE_ENTRY___
-___CLOSED_REVIEWS_TABLE_ENTRY___
-___PENDING_REVIEWS_TABLE_ENTRY___
-___DISCARDED_REVIEWS_TABLE_ENTRY___
-___INVALID_REVIEWS_TABLE_ENTRY___
+<br>
+<heading_4>Excessive Jira References</heading_4>
+<br>
+<br>
+___EXCESSIVE_JIRA_LOGS___
+<heading_4>Invalid Jira References</heading_4>
+<br>
+<br>
+___INVALID_JIRA_LOGS___
 <br>
 <br>
 <br>
