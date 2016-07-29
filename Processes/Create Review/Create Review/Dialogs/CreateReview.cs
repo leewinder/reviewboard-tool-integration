@@ -576,8 +576,11 @@ namespace Create_Review
         {
             m_logger.Log("Review state finished - {0}", finishReason);
 
+            // Only delete the file in certain situations
+
             // Keep the patch file, delete the original if we created it
-            Utilities.Storage.Keep(m_reviewSource.Patch, "Changes.patch", m_reviewSource.Source == Review.Review.Source.Files, m_logger);
+            if (finishReason == FinishReason.Success || finishReason == FinishReason.Closing)
+                Utilities.Storage.Keep(m_reviewSource.Patch, "Changes.patch", m_reviewSource.Source == Review.Review.Source.Files, m_logger);
 
             // Go back to the final state
             if (finishReason == FinishReason.Success)
