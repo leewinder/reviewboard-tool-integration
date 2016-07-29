@@ -23,7 +23,7 @@ namespace Review_Stats.Statistics
         //
         // Start the process of generating the stats
         //
-        public static void Start(Form owner, string fileList, Logging logger, bool injectPaths, GenerationFinished generationFinished)
+        public static void Start(Form owner, string fileList, string reportName, Logging logger, bool injectPaths, GenerationFinished generationFinished)
         {
             // Track our properties
             s_logger = logger;
@@ -90,7 +90,7 @@ namespace Review_Stats.Statistics
                             return;
 
                         // Create the review
-                        bool reportGenerated = CreateReviewReport(thisRevisionList, revisionLogs, commitStats, reviewStats, jiraStats, stopWatch);
+                        bool reportGenerated = CreateReviewReport(reportName, thisRevisionList, revisionLogs, commitStats, reviewStats, jiraStats, stopWatch);
                         if (reportGenerated == false)
                             return;
                     }
@@ -400,14 +400,14 @@ namespace Review_Stats.Statistics
         //
         // Generates the report
         //
-        private static bool CreateReviewReport(RevisionList.Revisions revisions, SvnLogs.Log[] revisionLogs, ReviewState.GetCommitStatsResult commitStats, ReviewState.ReviewStatistics[] reviewStats, JiraState.JiraStatistics jiraStats, Stopwatch reviewTimer)
+        private static bool CreateReviewReport(string reportName, RevisionList.Revisions revisions, SvnLogs.Log[] revisionLogs, ReviewState.GetCommitStatsResult commitStats, ReviewState.ReviewStatistics[] reviewStats, JiraState.JiraStatistics jiraStats, Stopwatch reviewTimer)
         {
             // We're now generating
             s_logger.Log("Starting to generate review report");
             Display.Start(Display.State.CreatingResults);
             
             // Try and generate the report
-            bool generated = Report.Generate(revisions, revisionLogs, commitStats, reviewStats, jiraStats, s_logger, reviewTimer.Elapsed);
+            bool generated = Report.Generate(reportName, revisions, revisionLogs, commitStats, reviewStats, jiraStats, s_logger, reviewTimer.Elapsed);
             if (generated == false)
                 s_errorMessage = @"Unable to generate the Review Report";
 

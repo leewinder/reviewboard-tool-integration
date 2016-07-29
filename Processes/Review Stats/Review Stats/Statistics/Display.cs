@@ -23,13 +23,19 @@ namespace Review_Stats.Statistics
         //
         // Set our properties
         //
-        public static void SetDisplayProperties(Form owner, Label progressLabel, ProgressBar progressBar, Logging logger)
+        public static void SetDisplayProperties(Form owner, Label progressLabel, ProgressBar progressBar, Button startButton, Logging logger)
         {
             // Save our properties
             s_owner = owner;
 
             s_progressLabel = progressLabel;
             s_progressBar = progressBar;
+
+            // Show/hide
+            startButton.Visible = false;
+
+            progressBar.Visible = true;
+            progressLabel.Visible = true;
 
             s_logger = logger;
 
