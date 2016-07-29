@@ -40,7 +40,16 @@ namespace RB_Tools.Shared.Utilities
                 processInfo.WorkingDirectory = workingDirectory;
 
             // Start the process
-            System.Diagnostics.Process process = System.Diagnostics.Process.Start(processInfo);
+            System.Diagnostics.Process process = null;
+            try
+            {
+                process = System.Diagnostics.Process.Start(processInfo);
+            }
+            catch (Exception e)
+            {
+                string errorMessage = string.Format("Unable to run {0} with {1}\n\n{2}", command, options, e.Message);
+                return new Output(string.Empty, errorMessage);
+            }
 
             // Read the output
             string output, error;

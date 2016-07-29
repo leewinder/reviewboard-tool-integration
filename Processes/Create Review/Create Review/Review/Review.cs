@@ -275,8 +275,8 @@ namespace Create_Review.Review
             }
 
             // If we got here, no root
-            logger.Log("Unable to calculate the root path for the review");
-            MessageBox.Show("Unable to find a working SVN root directly", "Unable to raise review", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            logger.Log("Unable to calculate the root path for the review - is SVN installed");
+            MessageBox.Show("Unable to find a working SVN root directly, are the SVN command line tools installed?", "Unable to raise review", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
             // Return nothing
             return null;
