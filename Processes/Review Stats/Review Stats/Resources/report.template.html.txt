@@ -141,11 +141,11 @@ ___INVALID_REVIEWS_TABLE_ENTRY___
 <heading_2>Jira Breakdown</heading_2>
 <br>
 <br>
-<heading_4>Excessive Jira References</heading_4>
+<heading_3>Excessive Jira References</heading_3>
 <br>
 <br>
 ___EXCESSIVE_JIRA_LOGS___
-<heading_4>Invalid Jira References</heading_4>
+<heading_3>Invalid Jira References</heading_3>
 <br>
 <br>
 ___INVALID_JIRA_LOGS___
