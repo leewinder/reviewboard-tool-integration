@@ -80,8 +80,6 @@ namespace Review_Stats.Utilities
         //
         private static string GetRevisionList(string path, Logging logger)
         {
-            return "22-29";
-
             // Get the path we'll write our revisions to
             string tempPath = Path.GetTempFileName();
 
