@@ -10,6 +10,13 @@
 <subtitle>Version __VERSION__NUMBER__</subtitle>
 <br>
 <br>
+<version>v5.0.0</version>
+<ul>
+  <li><major>[Major]</major>: Reviews must now have a valid Jira reference before they are raised otherwise the review will not be started</li>
+  <li><major>[Major]</major>: When generating statistics from reviews it will now show how many commits have no Jira references and if there are any Jira's that have been logged against excessively</li>
+  <li>A report name must now be specified when creating a stats report rather than it automatically using the repository name</li>
+</ul>
+<br>
 <version>v4.0.1</version>
 <ul>
   <li><bug>[Bug Fix]</bug>: Review groups were not being saved correctly due to the settings files being reset</li>
@@ -22,13 +29,13 @@
 <br>
 <version>v3.2.1</version>
 <ul>
-  <li><minor>[Minor]</minor>: If the user is unable to connect to the Reviewboard server due to an auth error, they are now prompted to reauthenticate</li>
+  <li>If the user is unable to connect to the Reviewboard server due to an auth error, they are now prompted to reauthenticate</li>
   <li><bug>[Bug Fix]</bug>: The Jira link in the SVN comment was malformed but the format is now correct</li>
 </ul>
 <br>
 <version>v3.2.0</version>
 <ul>
-  <li><minor>[Minor]</minor>: Modified the build process and version tools to pull information from the repository to generate automatic builds</li>
+  <li>Modified the build process and version tools to pull information from the repository to generate automatic builds</li>
 </ul>
 <br>
 <version>v3.1.0</version>
