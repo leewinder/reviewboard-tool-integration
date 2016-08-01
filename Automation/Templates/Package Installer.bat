@@ -30,6 +30,7 @@ rem Shared libraries
 xcopy "%PROCESS_BUILD_FOLDER%\RB_Tools.Shared.dll" "%BIN_FOLDER%" /Q /I >nul 2>&1
 xcopy "%PROCESS_BUILD_FOLDER%\Newtonsoft.Json.dll" "%BIN_FOLDER%" /Q /I >nul 2>&1
 xcopy "%PROCESS_BUILD_FOLDER%\CommandLine.dll" "%BIN_FOLDER%" /Q /I >nul 2>&1
+xcopy "%PROCESS_BUILD_FOLDER%\Atlassian.Jira.dll" "%BIN_FOLDER%" /Q /I >nul 2>&1
 
 rem Copy over the install properties
 set INSTALLER_FILES_FOLDER=%~dp0..\..\Installer
