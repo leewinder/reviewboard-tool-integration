@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using System.IO;
 using RB_Tools.Shared.Utilities;
 using RB_Tools.Shared.Logging;
+using RB_Tools.Shared.Server;
 
 namespace Create_Review
 {
@@ -125,7 +126,10 @@ namespace Create_Review
             if (string.IsNullOrWhiteSpace(testingFile) == false)
                 commandProperties += string.Format("--testing-done-file \"{0}\" ", testingFile);
             if (string.IsNullOrWhiteSpace(reviewProperties.JiraId) == false)
-                commandProperties += string.Format("--bugs-closed \"{0}\" ", reviewProperties.JiraId);
+            {
+                string formattedJiraIds = BuildJiraLinks(reviewProperties.JiraId);
+                commandProperties += string.Format("--bugs-closed \"{0}\" ", formattedJiraIds);
+            }
 
             // Options
             commandProperties += string.Format("--svn-show-copies-as-adds={0} ", reviewProperties.CopiesAsAdds == true ? "y":"n");
@@ -213,6 +217,30 @@ namespace Create_Review
         {
             Utilities.Storage.Keep(descriptionFile, "Review Description.txt", true, logger);
             Utilities.Storage.Keep(testingFile, "Review Testing.txt", true, logger);
+        }
+
+        //
+        // Builds up the Jira links
+        //
+        private static string BuildJiraLinks(string jiraIds)
+        {
+            string jiraLinks = string.Empty;
+
+            // Build up the IDs we needs
+            string[] jiras = jiraIds.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+            if (jiras == null || jiras.Length == 0)
+                jiras = new string[] { jiraIds };
+
+            // Add the links
+            string jiraServer = Names.Url[(int)Names.Type.Jira];
+            for (int i = 0; i < jiras.Length; ++i)
+            {
+                string thisJiraLink = string.Format("{0}/browse/{1} ", jiraServer, jiras[i].Trim());
+                jiraLinks += thisJiraLink;
+            }
+            
+            // Send the tag back
+            return jiraLinks;
         }
     }
 }
