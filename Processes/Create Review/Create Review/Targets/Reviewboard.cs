@@ -51,7 +51,7 @@ namespace Create_Review
         public static ReviewGroup[] GetReviewGroups(string workingDirectory, string server, string username, string password, Logging logger)
         {
             // Build up the command
-            string commandOptions = string.Format(@"api-get --server {0} --username {1} --password {2} /groups/", server, username, password);
+            string commandOptions = string.Format(@"api-get --server {0} /groups/", server);
             string rbtPath = RB_Tools.Shared.Targets.Reviewboard.Path();
 
             // Update process
