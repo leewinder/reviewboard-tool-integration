@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using RB_Tools.Shared.Server;
 using RB_Tools.Shared.Extensions;
 using RB_Tools.Shared.Logging;
+using RB_Tools.Shared.Authentication.Credentials;
 
 namespace Create_Review
 {
@@ -20,7 +21,7 @@ namespace Create_Review
         {
             string logFile = GenerateLogMessage(properties, reviewUrl, logger);
             OpenTortoiseSVN(properties.Contents.Files, properties.Path, logFile, logger);
-
+            AddLogMessageToJiraTicket(properties.JiraId, logFile, logger);
             // Clean up
             CleanUpTemporaryFiles(logFile, logger);
         }
@@ -93,6 +94,31 @@ namespace Create_Review
             // Start the process
             ExternalProcess.Start();
             ExternalProcess.WaitForExit();
+        }
+
+        private static void AddLogMessageToJiraTicket(string jiraId, string logFile, Logging logger)
+        {
+            string serverName = Names.Url[(int)Names.Type.Jira];
+            Simple credentials = Credentials.Create(serverName, logger) as Simple;
+            if (credentials == null)
+            {
+                logger.Log("Unable to create credentials for '{0}'", serverName);
+                throw new FileNotFoundException(@"Unable to find the credentials for " + serverName);
+            }
+
+            string comment;
+            using(StreamReader sr = new StreamReader(logFile))
+            {
+                comment = sr.ReadToEnd();
+            }
+
+            bool postedComment = RB_Tools.Shared.Targets.Jira.PostMessageToJiraTicket(credentials, comment, jiraId);
+            if (postedComment == false)
+            {
+                string message = string.Format("Failed to post log message to jira id '{0}'", jiraId);
+                logger.Log(message);
+                throw new InvalidOperationException(message);
+            }
         }
 
         //
