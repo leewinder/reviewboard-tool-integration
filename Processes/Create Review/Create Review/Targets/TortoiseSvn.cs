@@ -112,7 +112,7 @@ namespace Create_Review
                 comment = sr.ReadToEnd();
             }
 
-            bool postedComment = RB_Tools.Shared.Targets.Jira.PostMessageToJiraTicket(credentials, comment, jiraId);
+            bool postedComment = RB_Tools.Shared.Targets.Jira.PostMessageToJiraTicket(credentials, comment, jiraId).Result;
             if (postedComment == false)
             {
                 string message = string.Format("Failed to post log message to jira id '{0}'", jiraId);
