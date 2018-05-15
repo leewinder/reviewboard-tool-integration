@@ -474,7 +474,7 @@ namespace Create_Review
             foreach (string thisTicket in jiras)
             {
                 string ticketToCheck = thisTicket.Trim();
-                bool tickerValid = RB_Tools.Shared.Targets.Jira.ValidateJiraTicker(credentials, ticketToCheck);
+                bool tickerValid = RB_Tools.Shared.Targets.Jira.ValidateJiraTicker(credentials, ticketToCheck).Result;
                 if (tickerValid == false)
                 {
                     string message = string.Format("Unable to find ticket '{0}' on {1}", jiraId, serverName);
